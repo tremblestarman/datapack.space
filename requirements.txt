@@ -1,0 +1,6 @@
+cryptography
+jieba
+textrank4zh
+lxml
+bs4
+googletrans

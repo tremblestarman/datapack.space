@@ -1,0 +1,333 @@
+{
+    "domain": "https://www.mcbbs.net/",
+    "id": "mcbbs",
+    "name": "Minecraft中文论坛",
+    "lang": "zh_cn",
+    "entrance": "https://www.mcbbs.net/forum.php?mod=forumdisplay&fid=39&filter=author&orderby=dateline&sortid=38&page=$p",
+    "page_start": 1,
+    "post_path": {
+        "table": {
+            "id": "threadlisttableid",
+            "tbody.": {
+                "id": "normalthread_\\d+",
+                "tr": {
+                    "th": {
+                        "a": {
+                            "class": "s xst",
+                            "__entrance__": "href"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "path_type": "url",
+    "info_collect": {
+        "title_zh_cn": {
+            "div": {
+                "class": "typeoption",
+                "table": {
+                    "class": "cgtl mbm",
+                    "tbody": {
+                        "tr.0": {
+                            "td": {
+                                "__title_zh__": "."
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "title_en": {
+            "div": {
+                "class": "typeoption",
+                "table": {
+                    "class": "cgtl mbm",
+                    "tbody": {
+                        "tr.1": {
+                            "td": {
+                                "__title__": "."
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "author_uid": {
+            "div": {
+                "class": "pls favatar",
+                "div": {
+                    "class": "pi",
+                    "div": {
+                        "class": "authi",
+                        "a": {
+                            "__uid__": "href"
+                        }
+                    }
+                }
+            }
+        },
+        "author_name": {
+            "div": {
+                "class": "pls favatar",
+                "div": {
+                    "class": "pi",
+                    "div": {
+                        "class": "authi",
+                        "a": {
+                            "__author_name__": "."
+                        }
+                    }
+                }
+            }
+        },
+        "author_avatar": {
+            "div": {
+                "class": "pls favatar",
+                "div": {
+                    "class": "avatar",
+                    "img": {
+                        "__author_avatar__": "src"
+                    }
+                }
+            }
+        },
+        "version": {
+            "div": {
+                "class": "typeoption",
+                "table": {
+                    "class": "cgtl mbm",
+                    "tbody": {
+                        "tr.4": {
+                            "td": {
+                                "__version__": "."
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "game_version": {
+            "div": {
+                "class": "typeoption",
+                "table": {
+                    "class": "cgtl mbm",
+                    "tbody": {
+                        "tr.5": {
+                            "td": {
+                                "__game_version__": "."
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "tag": {
+            "div": {
+                "class": "typeoption",
+                "table": {
+                    "class": "cgtl mbm",
+                    "tbody": {
+                        "tr.8": {
+                            "td": {
+                                "__brief_intro__": "."
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "content_raw": {
+            "div": {
+                "class": "pcb",
+                "td": {
+                    "class": "t_f",
+                    "id": "postmessage_\\d+",
+                    "__content__": "."
+                }
+            }
+        },
+        "content_filtered": "auto",
+        "cover_img": {
+            "div": {
+                "class": "pcb",
+                "td": {
+                    "class": "t_f",
+                    "id": "postmessage_\\d+",
+                    "img": {
+                        "id" : "aimg_\\S+",
+                        "__content__": "."
+                    }
+                }
+            }
+        },
+        "post_time": {
+            "div": {
+                "class": "pti",
+                "div": {
+                    "class": "authi",
+                    "em": {
+                        "id": "authorposton\\d+",
+                        "__post_time__": "."                        
+                    }
+                }
+            }
+        },
+        "update_time": {
+            "div": {
+                "class": "pcb",
+                "td": {
+                    "class": "t_f",
+                    "id": "postmessage_\\d+",
+                    "i": {
+                        "class": "pstatus",
+                        "__update_time__": "."
+                    }
+                }
+            }
+        }
+    },
+    "info_refine": {
+        "link": {
+            "remove": "&extra=.*"
+        },
+        "author_uid": {
+            "regex": {
+                "from": "uid=(\\d+)",
+                "to": "%s"
+            }
+        },
+        "game_version": {
+            "regex": {
+                "from": "1\\.(\\d+)",
+                "to": "1.%s"
+            }
+        },
+        "tag": {
+            "regex": {
+                "from": "([^\\,\\|\\s、，\\/]+)",
+                "to": "%s"
+            }
+        },
+        "content_filtered": {
+            "remove": [
+                {
+                    "p": {
+                       "class": "xg1 y"
+                    }
+                },
+                {
+                    "img": {
+                        "id": "aimg_\\d+"
+                    }
+                },
+                {
+                    "div": {
+                        "class": "xs0"
+                    }
+                },
+                {
+                    "div": {
+                        "class": "attach_nopermission attach_tips"
+                    }
+                },
+                {
+                    "iframe": {
+                        "src": ".*"
+                    }
+                },
+                {
+                    "script": {
+                        "type": ".*"
+                    }
+                },
+                {
+                    "pre": {
+                        "id": ".*"
+                    }
+                },
+                {
+                    "span": {
+                        "id": "attach_\\d+"
+                    }
+                },
+                {
+                    "div": {
+                        "id": "attach_\\d+_.*"
+                    }
+                },
+                {
+                    "div": {
+                        "class": "quote"
+                    }
+                },
+                "本帖最后由 .* 于 .* 编辑",
+                "(http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*,]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)|([a-zA-Z]+.\\w+\\.+[a-zA-Z0-9\/_]+)",
+                "\\xa0"
+            ]
+        },
+        "content_raw": {
+            "remove": [
+                {
+                    "p": {
+                        "class": "xg1 y"
+                    }
+                },
+                {
+                    "div": {
+                        "class": "xs0"
+                    }
+                },
+                {
+                    "div": {
+                        "class": "attach_nopermission attach_tips"
+                    }
+                },
+                {
+                    "br": {
+
+                    }
+                },
+                "本帖最后由 .* 于 .* 编辑",
+                "\\xa0"
+            ],
+            "hide": [
+                {
+                    "script": {
+                        "type": ".*"
+                    }
+                },
+                {
+                    "div": {
+                        "id": "attach_\\d+_.*"
+                    }
+                },
+                {
+                    "div": {
+                        "class": "quote"
+                    }
+                }
+            ]
+        },
+        "content_adapter": "html = '<link rel=\"stylesheet\" href=\"\/bin\/css\/mcbbs.css\" type=\"text\/css\"\/><div id=\"postlist\" class=\"pl\">\\n' + html + '<\/div>'",
+        "cover_img": {
+            "regex": {
+                "from": "=\\\"(http\\S+.[png|jpg])\\\"",
+                "to": "%s"
+            }
+        },
+        "post_time": {
+            "remove" : [
+                "发表于 ",
+                "\\<em id=.*title=\\\"",
+                "\\\">.*\\</em\\>"
+            ]
+        },
+        "update_time": {
+            "regex": {
+                "from": "于 (.*) 编辑\\s+$",
+                "to": "%s:00"
+            }
+        }
+    }
+}

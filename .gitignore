@@ -1,0 +1,12 @@
+# cache
+/.idea/
+/util/__pycache__/
+
+# test
+/test.py
+/util/auth.json
+
+# resource
+/bin/img/author/*
+/bin/img/cover/*
+/bin/playground/

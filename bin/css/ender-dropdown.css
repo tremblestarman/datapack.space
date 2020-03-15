@@ -1,0 +1,188 @@
+/*Copyright (c) 2020 by Aaron Iker (https://codepen.io/aaroniker/pen/MWgjERQ)
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
+/*Made some changes in style.*/
+.select-menu {
+    --background: rgb(172,123,172);
+    --text: rgba(240,240,240,0.6);
+    --icon: rgba(255,255,255,0.75);;
+    --icon-active: rgba(124,92,124,0.4);
+    --list: rgba(124,92,124,0.75);
+    --list-text: rgba(240,240,240,0.5);
+    --list-text-hover: rgba(240,240,240,0.7);
+    margin: 0 8px;
+    position: relative;
+    font-weight: 500;
+    font-size: 12px;
+    width: 124px;
+    line-height: 28px;
+    display: inline-block;
+    z-index: 10000;
+    transition: opacity 0.5s;
+    pointer-events: none;
+    opacity: 0;
+}
+.options.unfolded .combo-list .select-menu {
+    animation: select-enable 0.75s forwards;
+}
+.options.folded .combo-list .select-menu {
+    animation: select-disable 0.25s forwards;
+}
+@keyframes select-enable {
+    25% {
+        pointer-events: none;
+        opacity: 0;
+    }
+    100% {
+        pointer-events: all;
+        opacity: 1;
+    }
+}
+@keyframes select-disable {
+    0% {
+        pointer-events: all;
+        opacity: 1;
+    }
+    100% {
+        pointer-events: none;
+        opacity: 0;
+    }
+}
+.select-menu select,
+.select-menu .button {
+    font-family: inherit;
+    margin: 0 8px;
+    border: 0;
+    text-align: left;
+    text-transform: none;
+    -webkit-appearance: none;
+    transition: all 0.5s;
+    box-shadow: 0 0 5px 2px rgba(124,92,124,0.4);
+}
+.select-menu .button:hover {
+    background: rgb(164,116,164);
+    box-shadow: 0 0 10px 4px rgba(124,92,124,0.75);
+}
+.select-menu select {
+    pointer-events: none;
+    user-select: none;
+    opacity: 0;
+    padding: 2px 36px 6px 12px;
+    visibility: hidden;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 28px;
+}
+.select-menu ul {
+    width: 124px;
+    margin: 0 8px;
+    padding: 0;
+    list-style: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    transform: translateY(var(--t));
+    transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+.select-menu ul li {
+    width: 124px;
+    padding: 0 36px 8px 12px;
+    cursor: pointer;
+}
+.select-menu > ul {
+    background: var(--list);
+    color: var(--list-text);
+}
+.select-menu > ul li {
+    transition: color 0.3s ease;
+}
+.select-menu > ul li:hover {
+    color: var(--list-text-hover);
+}
+.select-menu .button {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0;
+    z-index: 1;
+    width: 124px;
+    height: 28px;
+    display: block;
+    overflow: hidden;
+    color: var(--text);
+    background: var(--background);
+}
+.select-menu .button em {
+    --r: 45deg;
+    display: block;
+    position: absolute;
+    right: 12px;
+    top: 0;
+    width: 7px;
+    height: 7px;
+    margin-top: 6px;
+    -webkit-backface-visibility: hidden;
+}
+.select-menu .button em:before, .select-menu .button em:after {
+    --o: .4;
+    content: "";
+    width: 7px;
+    height: 7px;
+    opacity: var(--o);
+    display: block;
+    position: relative;
+    transition: opacity 0.2s ease;
+    transform: rotate(var(--r)) scale(0.75);
+}
+.select-menu .button em:before {
+    border-left: 2px solid var(--icon);
+    border-top: 2px solid var(--icon);
+    top: 1px;
+}
+.select-menu .button em:after {
+    border-right: 2px solid var(--icon);
+    border-bottom: 2px solid var(--icon);
+    bottom: 1px;
+}
+.select-menu:not(.open) > ul {
+    opacity: 0;
+    pointer-events: none;
+}
+.select-menu.open.tilt-up {
+    animation: tilt-up 0.4s linear forwards;
+}
+.select-menu.open.tilt-up .button em:before {
+    --o: 1;
+}
+.select-menu.open.tilt-down {
+    animation: tilt-down 0.4s linear forwards;
+}
+.select-menu.open.tilt-down .button em:after {
+    --o: 1;
+}
+
+@keyframes tilt-up {
+    40%, 60% {
+        transform: perspective(1000px) rotateX(8deg);
+    }
+}
+@keyframes tilt-down {
+    40%, 60% {
+        transform: perspective(1000px) rotateX(-8deg);
+    }
+}/*
+html {
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+}
+
+* {
+    box-sizing: inherit;
+}
+*:before, *:after {
+    box-sizing: inherit;
+}*/
