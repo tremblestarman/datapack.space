@@ -273,12 +273,15 @@ func ListTags(page int, tag string) (*[]Tag, int) {
 	}
 	return &tags, total
 }
-func GetTag(id string) *Tag {
+func GetTag(language string, id string) *Tag {
 	var tags []Tag
 	var sql = db
 	sql.Where("tags.id = '" + id + "'").Limit(1).Find(&tags)
 	if len(tags) > 0 {
 		tags[0].Relate()
+		for i := 0; i < len(tags[0].Datapacks); i++ {
+			tags[0].Datapacks[i].Relate(language)
+		}
 		return &(tags[0])
 	}
 	return nil
@@ -319,12 +322,15 @@ func ListAuthors(page int, author string) (*[]Author, int) {
 	}
 	return &authors, total
 }
-func GetAuthor(id string) *Author {
+func GetAuthor(language string, id string) *Author {
 	var authors []Author
 	var sql = db
 	sql.Where("authors.id = '" + id + "'").Limit(1).Find(&authors)
 	if len(authors) > 0 {
 		authors[0].Relate()
+		for i := 0; i < len(authors[0].Datapacks); i++ {
+			authors[0].Datapacks[i].Relate(language)
+		}
 		return &(authors[0])
 	}
 	return nil
@@ -393,8 +399,9 @@ func SearchDatapacks(language string, page int, content string, source string, v
 	for _, v := range cols {
 		regexps = append(regexps, strings.ReplaceAll(*sqlReg, "$?", v))
 	}
-	sql = sql.Select("distinct datapacks.*").Joins("JOIN authors AS a ON datapacks.author_id = a.id JOIN datapack_tags AS dt ON datapacks.id = dt.datapack_id JOIN tags AS t ON dt.tag_id = t.id").Where(strings.Join(regexps, " OR ") + " AND (t.type = 1 OR t.type = 3 OR t.type = 4)").Find(&datapacks)
+	sql = sql.Select("distinct datapacks.*").Joins("JOIN authors AS a ON datapacks.author_id = a.id JOIN datapack_tags AS dt ON datapacks.id = dt.datapack_id JOIN tags AS t ON dt.tag_id = t.id").Where(strings.Join(regexps, " OR ") + " AND (t.type = 1 OR t.type = 3 OR t.type = 4)")
 	sql = datapackFilter(sql, source, version, postTimeRange, updateTimeRange)
+	sql.Find(&datapacks)
 	for i := 0; i < len(datapacks); i++ { // Count and mark keywords
 		datapacks[i].CountKeyWords(language, *keywordsReg)
 	}

@@ -165,13 +165,40 @@ func author(c *gin.Context) {
 	if err != nil {
 		p = 1
 	}
-	author := GetAuthor(id)
+	lang := c.Query("language")
+	if lang == "" {
+		lang = "default"
+	}
+	author := GetAuthor(lang, id)
 	// html render
 	if author == nil { // No Result
 		authors, total := ListAuthors(p, id)
-		fmt.Println(authors, total)
+		c.HTML(http.StatusOK, lang + "/authors.html", gin.H {
+			//domain
+			"Domain": "authors",
+			//result-related
+			"Authors": authors,
+			"NoResult": len(*authors) == 0,
+			//page-related
+			"PageNotEnd": p * authorPageCount < total,
+			"OffsetCount": (p - 1) * authorPageCount + 1,
+			"EndCount": (p - 1) * authorPageCount + len(*authors),
+			"TotalCount": total,
+			"Page": p,
+		})
 	} else {
-		fmt.Println(author)
+		var source Tag
+		if len(author.Datapacks) > 0 {
+			source = author.Datapacks[0].Tags[0]
+		}
+		c.HTML(http.StatusOK, lang + "/author.html", gin.H {
+			//domain
+			"Domain": author.AuthorName,
+			//result-related
+			"Author": author,
+			"TotalCount": len(author.Datapacks),
+			"Source": source,
+		})
 	}
 }
 func tagList(c *gin.Context) {
@@ -192,7 +219,11 @@ func tag(c *gin.Context) {
 	if err != nil {
 		p = 1
 	}
-	tag := GetTag(id)
+	lang := c.Query("language")
+	if lang == "" {
+		lang = "default"
+	}
+	tag := GetTag(lang, id)
 	// html render
 	if tag == nil { // No Result
 		tags, total := ListAuthors(p, id)

@@ -5,8 +5,8 @@
         <div class="pillar left"></div>
         <div class="pillar right"></div>
         <div class="search-bar folded">
-            <div class="line" style="height: 52px;"><input class="search normal" id="normal-search" type="text" value="" onkeypress="search_author_keyboard()"/>
-                {{template "icon/magnify"}}
+            <div class="line" style="height: 52px;"><input class="search normal" id="normal-search" type="text" value="" onkeypress="search_authors_keyboard()"/>
+                {{template "icon/magnify" .}}
             </div>
         </div>
     </div>
@@ -18,8 +18,7 @@
                 <div class="pillar left"></div>
                 <div class="pillar right"></div>
             </div>
-            {{if .NoResult}}
-            {{else}}
+            {{if ne .NoResult true}}
             <div style="display:flex; position: relative; justify-content: center; height: 160px;">
                 <em id="end_crystal" style="position: absolute; left: 400px; top: 80px; height: 0; width: 0;"></em>
                 <img src="/bin/img/css/end_crystal_slateless.gif" style="height: 236px;"/>
@@ -88,6 +87,8 @@
         }
     </style>
     <script>
+        option_authors_default();
+
         let end_crystal = document.getElementById("end_crystal");
         let line = document.createElement("div"),
             bg = document.createElement("div");

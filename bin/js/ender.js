@@ -48,13 +48,7 @@ function back_to_top() {
 
 function navigation(goal) {
     target = event.currentTarget;
-    if (goal == "datapack") {
-
-    } else if (goal == "author") {
-
-    } else if (goal == "tag") {
-
-    } else if (goal == "more") {
+    if (goal == "more") {
         if (target.parentNode.classList.contains("sub")) { // fold it
             target.classList.remove("sub");
             target.parentNode.classList.remove("sub");
@@ -64,10 +58,13 @@ function navigation(goal) {
             target.parentNode.classList.add("sub");
             target.classList.add("sub");
         }
+    } else {
+        if (goal == 'datapack') goal = '';
+        location.href = window.location.protocol + "//" + window.location.host + "/" + goal;
     }
 }
 
-function option_default() {
+function option_datapacks_default() {
     let normal_search = document.getElementById("normal-search"),
         datapack_name = document.getElementById("datapack-name"),
         datapack_author = document.getElementById("datapack-author"),
@@ -112,23 +109,32 @@ function search_datapacks() {
     setTimeout(function(){
         loading();
     },500);
-    let params = [], search = false;
-    if (order > 0) params.push("order=" + order);
-    if (source_el.selectedIndex > 0) params.push("source=" + source);
-    if (version_el.selectedIndex > 0) params.push("version=" + version);
-    if (post_time > 0) params.push("p_time=" + post_time);
-    if (update_time > 0) params.push("u_time=" + update_time);
+    let params = getQueryObject(), search = false;
+    delete params['p'];
+    if (order > 0) params["order"] = order; else delete params['order'];
+    if (source_el.selectedIndex > 0) params["source"] = source; else delete params['source'];
+    if (version_el.selectedIndex > 0) params["version"] = version; else delete params['version'];
+    if (post_time > 0) params["p_time"] = post_time; else delete params['p_time'];
+    if (update_time > 0) params["u_time"] = update_time; else delete params['u_time'];
     if (normal_search.value !== '' && !normal_search.classList.contains('hide')) { //Search
+        delete params['name'];
+        delete params['author'];
+        delete params['intro'];
         search = true;
-        params.push("search=" + normal_search.value);
+        params["search"] = normal_search.value;
     } else if ((datapack_name !== '' || datapack_author !== '' || datapack_intro !== '') && normal_search.classList.contains('hide')) {// Accurate Search
+        delete params['search'];
         search = true;
-        if (datapack_name !== '') params.push("name=" + datapack_name);
-        if (datapack_author !== '') params.push("author=" + datapack_author);
-        if (datapack_intro !== '') params.push("intro=" + datapack_intro);
+        if (datapack_name !== '') params["name"] = datapack_name;
+        if (datapack_author !== '') params["author"] = datapack_author;
+        if (datapack_intro !== '') params["intro"] = datapack_intro;
     }
     setTimeout(function(){
-        nUrl = ((params.length > 0) ? "?" : "") + params.join("&");
+        let p = [];
+        for (var key in params) {
+            p.push(key + "=" + params[key]);
+        }
+        nUrl = ((p.length > 0) ? "?" : "") + p.join("&");
         if (search) {
             nUrl = "search/" + nUrl;
         }
@@ -137,37 +143,39 @@ function search_datapacks() {
         window.location.href = nUrl;
     },500);
 }
-
-function GetQueryString(name) {
-    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
-    var r = window.location.search.substr(1).match(reg);
-    if (r != null) {
-        return unescape(r[2]);
+function option_authors_default() {
+    let normal_search = document.getElementById("normal-search");
+    if (normal_search != null && GetQueryStringDecode("author") != null) {
+        normal_search.value = GetQueryStringDecode("author");
     }
-    return null;
 }
-function GetQueryStringDecode(name) {
-    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
-    var r = window.location.search.substr(1).match(reg);
-    if (r != null) {
-        return decodeURI(r[2]);
+function search_authors_keyboard() {
+    if(event.keyCode != "13") {
+        return;
     }
-    return null;
+    search_authors();
 }
-function replaceParamVal(paramName, replaceWith) {
-    var oUrl = this.location.href.toString();
-    var re = eval('/('+ paramName+'=)([^&]*)/gi');
-    var nUrl = oUrl.replace(re,paramName+'='+replaceWith);
-    if (oUrl == nUrl) {
-        if (nUrl.indexOf("?") != -1) {
-            nUrl += "&" + paramName + "=" + replaceWith;
-        } else {
-            nUrl += "?" + paramName + "=" + replaceWith;
+function search_authors() {
+    let normal_search = document.getElementById("normal-search");
+    page_rotate(90);
+    let params = getQueryObject();
+    delete params['p'];
+    params['author'] = normal_search.value;
+    setTimeout(function(){
+        loading();
+    },500);
+    setTimeout(function(){
+        let p = [];
+        for (var key in params) {
+            p.push(key + "=" + params[key]);
         }
-    }
-    this.location = nUrl;
-    window.location.href = nUrl;
+        nUrl = 'author' + ((p.length > 0) ? "?" : "") + p.join("&");
+        nUrl = window.location.protocol + "//" + window.location.host + "/" + nUrl;
+        this.location = nUrl;
+        window.location.href = nUrl;
+    },500);
 }
+
 function next_page() {
     page = 1;
     if (GetQueryString("p") != null)
@@ -206,6 +214,51 @@ function to_page() {
     setTimeout(function(){
         replaceParamVal("p", num)
     },500);
+}
+
+function GetQueryString(name) {
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+    var r = window.location.search.substr(1).match(reg);
+    if (r != null) {
+        return unescape(r[2]);
+    }
+    return null;
+}
+function GetQueryStringDecode(name) {
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+    var r = window.location.search.substr(1).match(reg);
+    if (r != null) {
+        return decodeURI(r[2]);
+    }
+    return null;
+}
+function getQueryObject(url) {
+    url = url == null ? window.location.href : url;
+    var search = url.substring(url.lastIndexOf("?") + 1);
+    var obj = {};
+    var reg = /([^?&=]+)=([^?&=]*)/g;
+    search.replace(reg, function (rs, $1, $2) {
+        var name = decodeURIComponent($1);
+        var val = decodeURIComponent($2);
+        val = String(val);
+        obj[name] = val;
+        return rs;
+    });
+    return obj;
+}
+function replaceParamVal(paramName, replaceWith) {
+    var oUrl = this.location.href.toString();
+    var re = eval('/('+ paramName+'=)([^&]*)/gi');
+    var nUrl = oUrl.replace(re,paramName+'='+replaceWith);
+    if (oUrl == nUrl) {
+        if (nUrl.indexOf("?") != -1) {
+            nUrl += "&" + paramName + "=" + replaceWith;
+        } else {
+            nUrl += "?" + paramName + "=" + replaceWith;
+        }
+    }
+    this.location = nUrl;
+    window.location.href = nUrl;
 }
 
 function page_rotate(deg) {

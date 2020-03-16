@@ -10,16 +10,19 @@ function combo_default() {
         version_el = document.getElementById("filter-version"),
         post_time = document.getElementById("filter-post-time"),
         update_time = document.getElementById("filter-update-time");
+    function clear_options(obj) {
+        while(obj.firstChild)
+            obj.removeChild(obj.firstChild);
+        let option = document.createElement('option');
+        option.value = '0';
+        option.innerText = '-';
+        obj.appendChild(option);
+    }
     if (GetQueryStringDecode("search") != null ||
         GetQueryStringDecode("name") != null ||
         GetQueryStringDecode("author") != null ||
         GetQueryStringDecode("intro") != null) {
-        while(order.firstChild)
-            order.removeChild(order.firstChild);
-        let option = document.createElement('option');
-        option.value = '0';
-        option.innerText = '-';
-        order.appendChild(option);
+        clear_options(order);
     } else {
         if (order != null && GetQueryString("order") != null) {
             order.children[order.selectedIndex].selected = false;

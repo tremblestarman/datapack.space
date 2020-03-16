@@ -835,7 +835,7 @@ input.search:focus {
 .mask.open {
     left: -95%;
 }
-.cover .mask-attach {
+.mask-attach {
     opacity: 0.4;
     position: absolute;
     left: calc(100% - 36px);
@@ -955,7 +955,7 @@ input.search:focus {
 }
 .datapack .avatar img {
     height: 32px;
-    width: 32px;
+    width: auto;
 }
 .avatar img:hover {
     cursor: pointer;
@@ -981,7 +981,7 @@ input.search:focus {
     width: 276px;
     height: 40px;
 }
-.attachments .tags .tag {
+.tags .tag {
     float: left;
     line-height: 8px;
     height: 8px;
@@ -1045,11 +1045,15 @@ input.search:focus {
 .shulker-shell .shell-part {
     width: 400px;
     height: 64px;
-    display: flex;
     position: absolute;
     left: 248px;
     text-align: center;
+    line-height: 64px;
+    font-weight: bold;
+    font-size: 24px;
+    color: rgb(144,101,144);
     background: rgb(144,101,144);
+    text-shadow: 0 0 5px rgb(64,64,64,0.6);
     box-shadow: 0 0 6px 3px rgba(48,48,48,0.1);
     z-index: 60;
     transition: all 0.5s;
@@ -1153,7 +1157,7 @@ hide_a:hover {
 }
 .author-container .avatar img {
     height: 48px;
-    width: 48px;
+    width: auto;
     transition: box-shadow 0.5s;
     box-shadow: 0 0 5px 5px rgba(110,114,82,0.18);
 }
@@ -1185,4 +1189,131 @@ hide_a:hover {
     transition: left 3s ease-out;
     left: 0;
     opacity: 1;
+}
+.author-unique {
+    margin: 0 auto;
+    justify-content: center;
+    align-items: center;
+    background-image: linear-gradient(to right, rgb(64, 64, 96), rgb(72, 72, 108), rgb(64, 64, 96));
+    box-shadow: 0 0 20px 10px rgba(72, 72, 108, 0.6);
+    position: relative;
+    overflow: hidden;
+}
+.dragon {
+    margin: 20px auto 0;
+    width: 400px;
+    height: 120px;
+    background: transparent url("../img/css/ender_dragon.png") no-repeat center top;
+    background-size: 100% auto;
+}
+.dragon-bottom {
+    width: 800px;
+    height: 24px;
+    position: relative;
+}
+.author.element {
+    width: 656px;
+    background: rgb(221,228,165);
+    padding: 2px;
+    box-shadow: 0 0 20px 10px rgba(40,40,64,0.6) inset;
+}
+.author-unique .info {
+    position: relative;
+    width: 100%;
+    height: 128px;
+}
+.author-unique .avatar {
+    width: 124px;
+    height: 124px;
+    position: absolute;
+    padding: 4px;
+}
+.author-unique .avatar img {
+    width: auto;
+    height: 120px;
+}
+.author-unique .info .name {
+    position: absolute;
+    left: 128px;
+    width: auto;
+    height: 36px;
+    text-align: left;
+    padding: 4px 8px;
+}
+.author-unique .info .counter {
+    position: absolute;
+    left: 128px;
+    width: auto;
+    top: 38px;
+    height: 20px;
+    font-size: 12px;
+    color: rgba(64,64,64,0.75);
+    text-shadow: 0 0 3px rgba(32,32,32,0.2);
+    text-align: left;
+    padding: 4px 8px;
+}
+.author-unique .thumb {
+    position: absolute;
+    height: 32px;
+    width: 32px;
+    margin: 2px 4px;
+    right: 0;
+    bottom: 0;
+}
+.author-unique .info .tag {
+    position: absolute;
+    bottom: 4px;
+    left: 128px;
+    float: left;
+    line-height: 8px;
+    height: 8px;
+    width: auto;
+    padding: 4px;
+    font-size: 12px;
+}
+.author-unique .datapacks {
+    display: flex;
+    flex-wrap: wrap;
+}
+.datapack-short {
+    border-top-color: rgba(128,128,128,0.3);
+    border-top-style: solid;
+    border-top-width: 1px;
+    display: flex;
+    justify-content: space-between;
+    height: 36px;
+    width: 100%;
+    transition: box-shadow 0.5s;
+}
+.datapack-short:hover {
+    box-shadow: 0 0 6px 3px rgba(40,40,64,0.12);
+}
+.datapack-short .name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 40%;
+    height: 100%;
+    line-height: 36px;
+    margin-left: 8px;
+    text-align: left;
+    font-size: 14px;
+    color: rgba(32,32,32,0.68);
+}
+.datapack-short .tags {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 55%;
+    height: 100%;
+}
+.datapack-short .tag {
+    margin-top: 8px;
+}
+.datapack-short ._goto {
+    position: relative;
+    background-image: url("../img/css/ender_pearl.png");
+    width: 32px;
+    height: 32px;
+    left: 0;
 }

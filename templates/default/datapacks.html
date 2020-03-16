@@ -6,7 +6,7 @@
         <div class="pillar right"></div>
         <div class="search-bar folded">
             <div class="line" style="height: 52px;"><input class="search normal" id="normal-search" type="text" value="" onkeypress="search_datapacks_keyboard()"/>
-            {{template "icon/magnify"}}
+            {{template "icon/magnify" .}}
             {{template "icon/triangle-arrow"}}
             </div>
             <div class="line hide" style="margin-left: 62px; width: 720px; height:28px;">
@@ -27,7 +27,7 @@
         </div>
         <script type="text/javascript" src="/bin/js/ender-dropdown.js"></script>
         <script type="text/javascript">
-            option_default();
+            option_datapacks_default();
         </script>
     </div>
     <div class="menu">

@@ -1,6 +1,6 @@
 {{define "default/datapack.html"}}
 {{template "default/header" .}}
-    <div class="shulker-shell"><div class="shell-part" onclick="copy_url()" title="{{template "default/copy_url_msg"}}"></div></div>
+    <div class="shulker-shell"><div class="shell-part" onclick="jump('{{.Datapack.Link}}', '_blank')" title="{{template "default/goto_link_msg"}}">{{template "default/goto_link_msg"}}</div></div>
     <div class="datapack-unique">
         <div class="pillar left"></div>
         <div class="pillar right"></div>
@@ -116,18 +116,6 @@
                         setTimeout(re_height, 500); //call re_height function
                     }
                 });
-            }
-        }
-        function copy_url() {
-            if(document.execCommand('Copy')) {
-                let inputZ = document.createElement('input');
-                inputZ.setAttribute('id', 'inputCopy');
-                inputZ.value = window.location.href;
-                document.body.appendChild(inputZ);
-                document.getElementById('inputCopy').select();
-                document.execCommand('Copy');
-                alert('{{template "default/copy_url_success_msg"}}');
-                document.body.removeChild(inputZ);
             }
         }
     </script>
