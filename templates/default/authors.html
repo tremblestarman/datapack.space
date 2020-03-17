@@ -113,15 +113,24 @@
             return modifyLineElement(sx, y, c, alpha);
         }
         function updateLine(target) {
+            function getElementTop(element) {
+                var actTop = element.offsetTop;
+                var current = element.offsetParent;
+                while(current !== null){
+                    actTop += current.offsetTop;
+                    current = current.offsetParent;
+                }
+                return actTop;
+            }
             if (event != null) target = event.currentTarget.children[0];
             event.currentTarget.children[1].classList.add('show');
             event.currentTarget.children[2].classList.add('show');
             cancelAnimationFrame(timer);
             timer = requestAnimationFrame(function fn(){
-                setLine(end_crystal.getBoundingClientRect().left,
-                    end_crystal.getBoundingClientRect().top,
-                    target.getBoundingClientRect().left,
-                    target.getBoundingClientRect().top);
+                setLine(end_crystal.getBoundingClientRect().left + document.body.scrollLeft,
+                    186,
+                    target.getBoundingClientRect().left + document.body.scrollLeft,
+                    getElementTop(target));
                 timer = requestAnimationFrame(fn);
             });
         }

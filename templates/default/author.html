@@ -1,5 +1,9 @@
 {{define "default/author.html"}}
     {{template "default/header" .}}
+    <div class="bottom author-bottom" style="--pillar: rgb(78, 78, 118); --pillar-shadow: rgba(62, 62, 98, 0.83);">
+        <div class="pillar left"></div>
+        <div class="pillar right"></div>
+    </div>
     <div class="author-unique">
         <div class="pillar left"></div>
         <div class="pillar right"></div>
@@ -28,4 +32,14 @@
         </div>
         <div class="dragon-bottom"></div>
     </div>
+    <div class="bottom author-bottom" style="--pillar: rgb(78, 78, 118); --pillar-shadow: rgba(62, 62, 98, 0.83);">
+        <div class="pillar left"></div>
+        <div class="pillar right"></div>
+    </div>
+    <script src="/bin/js/particles.js"></script>
+    <script>
+        particlesJS.load('background', '/bin/js/mist-dragon.json', function() {
+            console.log('particles.js config loaded');
+        });
+    </script>
 {{end}}

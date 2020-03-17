@@ -142,6 +142,13 @@ span.highlight {
     --search-shadow-focus: rgba(72, 72, 108, 0.75);
     --magnify-background: rgba(69, 69, 106, 0.7);
 }
+.avatar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+}
 .button {
     transition: filter 0.35s, transform 0.35s;
     -moz-transition: filter 0.35s, transform 0.35s;
@@ -387,7 +394,7 @@ svg.button:active {
     background: rgb(144,101,144);
     box-shadow: 0 0 10px 5px rgba(160,118,160,0.6);
 }
-.author-panel .bottom {
+.author-panel .bottom, .author-bottom.bottom {
     background: rgb(48, 48, 80);
     box-shadow: 0 0 10px 5px rgba(72, 72, 108, 0.6);
 }
@@ -1154,16 +1161,16 @@ hide_a:hover {
     margin: 2px;
     width: 48px;
     height: 48px;
+    transition: box-shadow 0.5s;
+    box-shadow: 0 0 5px 5px rgba(110,114,82,0.18);
+}
+.author-container .avatar.show {
+    transition: box-shadow 3s;
+    box-shadow: 0 0 2px 2px rgba(64,64,64,0.45);
 }
 .author-container .avatar img {
     height: 48px;
     width: auto;
-    transition: box-shadow 0.5s;
-    box-shadow: 0 0 5px 5px rgba(110,114,82,0.18);
-}
-.author-container .avatar.show img {
-    transition: box-shadow 3s;
-    box-shadow: 0 0 2px 2px rgba(64,64,64,0.45);
 }
 .author-container .name {
     white-space: nowrap;
@@ -1229,7 +1236,7 @@ hide_a:hover {
     padding: 4px;
 }
 .author-unique .avatar img {
-    width: auto;
+    width: 120px;
     height: 120px;
 }
 .author-unique .info .name {
