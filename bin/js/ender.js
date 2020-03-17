@@ -175,6 +175,38 @@ function search_authors() {
         window.location.href = nUrl;
     },500);
 }
+function option_tags_default() {
+    let normal_search = document.getElementById("normal-search");
+    if (normal_search != null && GetQueryStringDecode("tag") != null) {
+        normal_search.value = GetQueryStringDecode("tag");
+    }
+}
+function search_tags_keyboard() {
+    if(event.keyCode != "13") {
+        return;
+    }
+    search_tags();
+}
+function search_tags() {
+    let normal_search = document.getElementById("normal-search");
+    page_rotate(90);
+    let params = getQueryObject();
+    delete params['p'];
+    params['tag'] = normal_search.value;
+    setTimeout(function(){
+        loading();
+    },500);
+    setTimeout(function(){
+        let p = [];
+        for (var key in params) {
+            p.push(key + "=" + params[key]);
+        }
+        nUrl = 'tag' + ((p.length > 0) ? "?" : "") + p.join("&");
+        nUrl = window.location.protocol + "//" + window.location.host + "/" + nUrl;
+        this.location = nUrl;
+        window.location.href = nUrl;
+    },500);
+}
 
 function next_page() {
     page = 1;

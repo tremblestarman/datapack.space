@@ -4,7 +4,7 @@
         <div class="pillar left"></div>
         <div class="pillar right"></div>
     </div>
-    <div class="author-unique">
+    <div class="author-unique" style="--pillar: rgb(78, 78, 118); --pillar-shadow: rgba(62, 62, 98, 0.74);">
         <div class="pillar left"></div>
         <div class="pillar right"></div>
         <div class="dragon"></div>
@@ -13,7 +13,12 @@
                 <div class="avatar"><img src="/bin/img/author/{{.Author.ID}}.png" alt=""/></div>
                 <span class="name">{{.Author.AuthorName | unescaped}}</span>
                 <span class="counter">{{template "default/counter_msg"}} : {{.TotalCount}}</span>
-                <div class="tag tag-0" onclick="jump_tag({{.Source.ID}})">{{.Source.Tag | unescaped}}</div>
+                <span class="last-update">{{template "default/last_update_msg"}} : {{.LastUpdateTime}}</span>
+                <div class="tags">
+                    {{range .Sources}}
+                        <div class="tag tag-0" onclick="jump_tag({{.ID}})">{{.Tag | unescaped}}</div>
+                    {{end}}
+                </div>
                 <div class="thumb mask-attach" onclick="function thumb(uid) {return null;}thumb('{{.Author.ID}}');" title="{{template "default/end_crystal_msg"}} : {{.Author.Thumb}}"></div>
             </div>
             <div class="datapacks result">

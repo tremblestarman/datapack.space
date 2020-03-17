@@ -1,6 +1,6 @@
 {
     "zh_cn": {
-        "name": "zh",
+        "name": "zh_cn",
         "translator": {
             "youdao": {
                 "from": "zh-CHS",
@@ -11,7 +11,7 @@
         }
     },
     "en": {
-        "name": "English",
+        "name": "en",
         "translator": {
             "youdao": {
                 "from": "en",

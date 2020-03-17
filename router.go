@@ -187,9 +187,17 @@ func author(c *gin.Context) {
 			"Page": p,
 		})
 	} else {
-		var source Tag
-		if len(author.Datapacks) > 0 {
-			source = author.Datapacks[0].Tags[0]
+		sourcesMap := map[string]Tag{} //Source / Last Update Time Analysis
+		var sources []Tag
+		lastUpdateTime := ""
+		for i := 0; i < len(author.Datapacks); i++ {
+			sourcesMap[author.Datapacks[i].Source] = author.Datapacks[i].Tags[0]
+			if author.Datapacks[i].UpdateTimeString > lastUpdateTime {
+				lastUpdateTime = author.Datapacks[i].UpdateTimeString
+			}
+		}
+		for _, tag := range sourcesMap {
+			sources = append(sources, tag)
 		}
 		c.HTML(http.StatusOK, lang + "/author.html", gin.H {
 			//domain
@@ -197,20 +205,38 @@ func author(c *gin.Context) {
 			//result-related
 			"Author": author,
 			"TotalCount": len(author.Datapacks),
-			"Source": source,
+			"Sources": sources,
+			"LastUpdateTime": lastUpdateTime,
 		})
 	}
 }
 func tagList(c *gin.Context) {
 	page := c.Query("p")
 	name := c.Query("tag")
+	lang := c.Query("language")
 	p, err := strconv.Atoi(page)
 	if err != nil {
 		p = 1
 	}
 	tags, total := ListTags(p, name)
 	// html render
-	fmt.Println(tags, total)
+	// html render
+	if lang == "" {
+		lang = "default"
+	}
+	c.HTML(http.StatusOK, lang + "/tags.html", gin.H {
+		//domain
+		"Domain": "tags",
+		//result-related
+		"Tags": tags,
+		"NoResult": len(*tags) == 0,
+		//page-related
+		"PageNotEnd": p * tagPageCount < total,
+		"OffsetCount": (p - 1) * tagPageCount + 1,
+		"EndCount": (p - 1) * tagPageCount + len(*tags),
+		"TotalCount": total,
+		"Page": p,
+	})
 }
 func tag(c *gin.Context) {
 	id := c.Param("id")

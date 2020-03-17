@@ -77,6 +77,7 @@ type Datapack struct {
 	AuthorID string
 	DefaultLang string
 	DefaultName string
+	Source string
 	Intro string
 	FullContent string
 	PostTime time.Time
@@ -97,6 +98,9 @@ func (a *Author) Relate() {
 func (d *Datapack) Relate(language string) {
 	db.Model(&d).Related(&d.Author)
 	db.Model(&d).Related(&d.Tags, "Tags")
+	sort.Slice(d.Tags, func(i, j int) bool { // Sort
+		return d.Tags[i].Type < d.Tags[j].Type
+	})
 	d.PostTimeString = d.PostTime.Format("2006-01-02 15:04:05")
 	d.UpdateTimeString = d.UpdateTime.Format("2006-01-02 15:04:05")
 	d.Intro = "    " + strings.ReplaceAll(d.Intro, "\n", ".\n    ") + "."
@@ -245,7 +249,7 @@ func ListTags(page int, tag string) (*[]Tag, int) {
 	var offset, limit = (page - 1) * tagPageCount,tagPageCount
 	var sql = db
 	if tag == "" { // Return All
-		sql.Select("distinct tags.*").Limit(limit).Offset(offset).Find(&tags)
+		sql.Select("distinct tags.*").Find(&tags)
 	} else {
 		sql.Where("tags.tag REG '" + tag + "'").Find(&tags) // Find via Reg
 		keywordsReg, sqlReg := &tag, &tag

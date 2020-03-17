@@ -1,0 +1,41 @@
+{{define "default/tags.html"}}
+    {{template "default/header" .}}
+    {{template "default/page_turner_top" .}}
+    <div class="options folded" id="tag">
+        <div class="pillar left"></div>
+        <div class="pillar right"></div>
+        <div class="search-bar folded">
+            <div class="line" style="height: 52px;"><input class="search normal" id="normal-search" type="text" value="" onkeypress="search_tags_keyboard()"/>
+                {{template "icon/magnify" .}}
+            </div>
+        </div>
+    </div>
+    <div class="menu">
+        <div class="tag-panel tag-palette" style="--pillar: rgb(78, 78, 118); --pillar-shadow: rgba(62, 62, 98, 0.74);">
+            <div class="pillar left"></div>
+            <div class="pillar right"></div>
+            {{if ne .NoResult true}}
+            <div class="tag-container">
+                {{range .Tags}}
+                    <div class="tag tag-{{.Type}}" id="{{.ID}}" onclick="jump_tag({{.ID}})">{{.Tag}}</div>
+                {{end}}
+            </div>
+            <div class="bottom" style="--pillar: rgb(78, 78, 118); --pillar-shadow: rgba(62, 62, 98, 0.83);">
+                <div class="pillar left"></div>
+                <div class="pillar right"></div>
+            </div>
+            {{end}}
+        </div>
+    </div>
+    {{template "default/page_turner_bottom" .}}
+    <div class="footer-bar">
+        {{if .NoResult}}
+            <div id="no-result">???</div>
+        {{end}}
+    </div>
+    <link rel="stylesheet" href="/bin/css/noise.css" type="text/css"/>
+    {{template "default/footer"}}
+    <script>
+        option_tags_default();
+    </script>
+{{end}}
