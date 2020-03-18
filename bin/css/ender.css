@@ -147,25 +147,25 @@ span.highlight {
     --background-1: rgba(91, 52, 91, 0.9);
     --background-2: rgba(91, 52, 91, 0.8);
     --background-3: rgba(91, 52, 91, 0.75);
-    --input-hover: rgba(82, 82, 112, 0.3);
-    --input-focus: rgba(23, 23, 48, 0.75);
-    --shadow: rgba(39, 30, 61, 0.6);
+    --input-hover: rgba(124, 91, 124, 0.3);
+    --input-focus: rgba(108, 86, 108, 0.5);
+    --shadow: rgba(58, 20, 58, 0.6);
     --pillar: rgb(71, 33, 71);
     --pillar-shadow: rgba(86, 46, 86, 0.74);
-    --arrow-shadow: rgba(72, 72, 108, 0.74);
-    --word: rgb(68, 68, 104);
+    --arrow-shadow: rgba(86, 46, 86, 0.74);
+    --word: rgb(124, 91, 124);
 }
 .tag-palette .options {
     --background: rgb(91, 52, 91);
     --option-background: rgb(124, 91, 124);
     --option-shadow: rgba(71, 33, 71, 0.6);
-    --pillar: rgb(78, 78, 118);
-    --pillar-shadow: rgba(62, 62, 98, 0.74);
-    --search-shadow: rgba(74, 74, 107, 0.8);
-    --search-shadow-hover: rgba(82, 82, 112, 0.6);
-    --search-background-focus: rgba(82, 82, 124, 0.5);
-    --search-shadow-focus: rgba(72, 72, 108, 0.75);
-    --magnify-background: rgba(69, 69, 106, 0.7);
+    --pillar: rgb(118, 78, 118);
+    --pillar-shadow: rgba(108, 82, 108, 0.74);
+    --search-shadow: rgba(107, 74, 107, 0.8);
+    --search-shadow-hover: rgba(112, 82, 112, 0.6);
+    --search-background-focus: rgba(124, 82, 124, 0.5);
+    --search-shadow-focus: rgba(108, 72, 108, 0.75);
+    --magnify-background: rgba(106, 89, 106, 0.7);
 }
 .avatar {
     display: flex;
@@ -388,6 +388,12 @@ svg.button:active {
     margin: 0 auto;
     background: rgb(64, 64, 96);
     box-shadow: 0 0 20px 10px rgba(72, 72, 108, 0.6);
+    position: relative;
+}
+.utter .tag-panel {
+    margin: 0 auto;
+    background: rgb(118, 78, 118);
+    box-shadow: 0 0 20px 10px rgba(71, 33, 71, 0.6);
     position: relative;
 }
 .pillar {
@@ -1371,7 +1377,7 @@ hide_a:hover {
     display: flex;
     justify-content: space-around;
     flex-wrap: wrap-reverse;
-    margin: 1px auto 16px;
+    margin: 0 auto;
 }
 .tag-container .tag {
     float: left;

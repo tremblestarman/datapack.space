@@ -1,24 +1,8 @@
 {
-    "zh_cn": {
-        "name": "zh_cn",
-        "translator": {
-            "youdao": {
-                "from": "zh-CHS",
-                "to": {
-                    "en": "en"
-                }
-            }
-        }
+    "zh-CN": {
+        "name": "中文简体"
     },
     "en": {
-        "name": "en",
-        "translator": {
-            "youdao": {
-                "from": "en",
-                "to": {
-                    "zh-cn": "zh-CHS"
-                }
-            }
-        }
+        "name": "English"
     }
 }

@@ -2,7 +2,7 @@
     "domain": "https://www.mcbbs.net/",
     "id": "mcbbs",
     "name": "Minecraft中文论坛",
-    "lang": "zh_cn",
+    "lang": "zh-CN",
     "entrance": "https://www.mcbbs.net/forum.php?mod=forumdisplay&fid=39&filter=author&orderby=dateline&sortid=38&page=$p",
     "page_start": 1,
     "post_path": {
@@ -23,7 +23,7 @@
     },
     "path_type": "url",
     "info_collect": {
-        "title_zh_cn": {
+        "name": {
             "div": {
                 "class": "typeoption",
                 "table": {
@@ -31,14 +31,14 @@
                     "tbody": {
                         "tr.0": {
                             "td": {
-                                "__title_zh__": "."
+                                "__name__": "."
                             }
                         }
                     }
                 }
             }
         },
-        "title_en": {
+        "name_en": {
             "div": {
                 "class": "typeoption",
                 "table": {
@@ -46,7 +46,7 @@
                     "tbody": {
                         "tr.1": {
                             "td": {
-                                "__title__": "."
+                                "__name__": "."
                             }
                         }
                     }

@@ -11,18 +11,22 @@
         </div>
     </div>
     <div class="menu">
-        <div class="tag-panel tag-palette" style="--pillar: rgb(78, 78, 118); --pillar-shadow: rgba(62, 62, 98, 0.74);">
+        <div class="tag-panel tag-palette" style="--pillar: rgb(91, 63, 91);--pillar-shadow: rgba(106, 66, 106, 0.74);">
             <div class="pillar left"></div>
             <div class="pillar right"></div>
+            <div class="bottom" style="--pillar: rgb(71, 33, 71);--pillar-shadow: rgba(86, 46, 86, 0.74);">
+                <div class="pillar left" style="left:42px;"></div>
+                <div class="pillar right" style="left:842px;"></div>
+            </div>
             {{if ne .NoResult true}}
             <div class="tag-container">
                 {{range .Tags}}
                     <div class="tag tag-{{.Type}}" id="{{.ID}}" onclick="jump_tag({{.ID}})">{{.Tag}}</div>
                 {{end}}
             </div>
-            <div class="bottom" style="--pillar: rgb(78, 78, 118); --pillar-shadow: rgba(62, 62, 98, 0.83);">
-                <div class="pillar left"></div>
-                <div class="pillar right"></div>
+            <div class="bottom" style="--pillar: rgb(71, 33, 71);--pillar-shadow: rgba(86, 46, 86, 0.74);">
+                <div class="pillar left" style="left:42px;"></div>
+                <div class="pillar right" style="left:842px;"></div>
             </div>
             {{end}}
         </div>

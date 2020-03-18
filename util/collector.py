@@ -40,8 +40,8 @@ class datapack_collector:
             {
                 "link":         # url or domain#xx if embedded in the webpage,
                 "source":       # id of the source website,
-                "title":        # title of the datapack, (can be  translated)
-                "title_zh":     # title in Chinese, (can be  translated)
+                "name":         # name of the datapack in default lang
+                "name_xx":      # name in xx language,
                 "author_uid"    # uid of the author (equals author_name if auto),
                 "author_name"   # name of the author,
                 "author_avatar" # avator (can be none or auto) (stored locally),
@@ -249,7 +249,7 @@ class datapack_collector:
         '''
         post = {}
         if domain == None:
-            post['link'] = domain + '#' + post['title'].replace(' ', '_')
+            post['link'] = domain + '#' + post['name'].replace(' ', '_')
             bs = BeautifulSoup(content, 'lxml')
         else:
             _url = urlparse.urljoin(domain, content)
@@ -345,8 +345,10 @@ class datapack_collector:
             post['update_time'] = post['post_time']
         if post['summrization'].__len__() == 0:
             post['summrization'] = ['']
-        post['source'] = self.schema['id']
-        post['default_lang'] = self.schema['lang']
-        post['default_name'] = post['title_' + self.schema['lang']]
-        self.__content_adapt(post)
+        post['source'] = self.schema['id'] # set source
+        post['default_lang'] = self.schema['lang'] # lang
+        post['default_name'] = post['name']
+        post['default_tag'] = post['tag']
+        post['name_' + self.schema['lang']] = post['name']
+        self.__content_adapt(post) # adapt raw html
         self.versions = self.versions | set(post['game_version'])

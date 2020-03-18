@@ -55,6 +55,8 @@ type Tag struct {
 	SearchResult
 	ID string `gorm:"primary_key:true"`
 	Tag string
+	DefaultLang string
+	DefaultTag string
 	Type int
 	Thumb int
 	Datapacks []Datapack `gorm:"many2many:datapack_tags"`
@@ -89,8 +91,13 @@ type Datapack struct {
 	Tags []Tag `gorm:"many2many:datapack_tags"`
 }
 
-func (t *Tag) Relate() {
+func (t *Tag) Relate(language string) {
 	db.Model(&t).Related(&t.Datapacks, "Datapacks")
+	tag := "default_tag"
+	if language != "" && language != "default" {
+		tag = "tag_" + language
+	}
+	db.Raw("SELECT tags." + tag + " as tag FROM tags WHERE id = ?", t.ID).Scan(&t)
 }
 func (a *Author) Relate() {
 	db.Model(&a).Related(&a.Datapacks)
@@ -101,12 +108,15 @@ func (d *Datapack) Relate(language string) {
 	sort.Slice(d.Tags, func(i, j int) bool { // Sort
 		return d.Tags[i].Type < d.Tags[j].Type
 	})
+	for i := 0; i < len(d.Tags); i++ {
+		d.Tags[i].Relate(language)
+	}
 	d.PostTimeString = d.PostTime.Format("2006-01-02 15:04:05")
 	d.UpdateTimeString = d.UpdateTime.Format("2006-01-02 15:04:05")
 	d.Intro = "    " + strings.ReplaceAll(d.Intro, "\n", ".\n    ") + "."
 	//Set Name
 	name := "default_name"
-	if language != "" && language != "default"{
+	if language != "" && language != "default" {
 		name = "name_" + language
 	}
 	db.Raw("SELECT datapacks." + name + " as name FROM datapacks WHERE id = ?", d.ID).Scan(&d)
@@ -143,8 +153,8 @@ func (d *Datapack) AccurateCountKeyWords(language string, keywordsRegMatrix *[3]
 		d.KeyWordCount += KeyWordHighlight(&d.Author.AuthorName, (*keywordsRegMatrix)[2])
 	}
 }
-func (t *Tag) CountKeyWords(keywordsReg string) {
-	t.Relate()
+func (t *Tag) CountKeyWords(language string, keywordsReg string) {
+	t.Relate(language)
 	t.KeyWordCount += KeyWordHighlight(&t.Tag, keywordsReg)
 }
 func (a *Author) CountKeyWords(keywordsReg string) {
@@ -241,7 +251,7 @@ func SplitAllCharacters(content string) (*string, *string) {
 	sqlReg := "($? REGEXP '" + strings.Join(keywords, "' AND $? REGEXP '") + "')"
 	return &keywordsReg, &sqlReg
 }
-func ListTags(page int, tag string) (*[]Tag, int) {
+func ListTags(language string, page int, tag string) (*[]Tag, int) {
 	var tags []Tag
 	if page < 1 {
 		page = 1
@@ -258,7 +268,7 @@ func ListTags(page int, tag string) (*[]Tag, int) {
 			sql.Where(strings.ReplaceAll(*sqlReg, "$?", "tags.tag")).Find(&tags) // Find via Letters
 		}
 		for i := 0; i < len(tags); i++ { // Count and mark keywords
-			tags[i].CountKeyWords(*keywordsReg)
+			tags[i].CountKeyWords(language, *keywordsReg)
 		}
 		sort.Slice(tags, func(i, j int) bool { // Sort
 			if tags[j].KeyWordCount == tags[i].KeyWordCount {
@@ -275,6 +285,9 @@ func ListTags(page int, tag string) (*[]Tag, int) {
 	} else {
 		tags = append(tags[offset : offset + limit])
 	}
+	for i := 0; i < len(tags); i++ {
+		tags[i].Relate(language)
+	}
 	return &tags, total
 }
 func GetTag(language string, id string) *Tag {
@@ -282,7 +295,7 @@ func GetTag(language string, id string) *Tag {
 	var sql = db
 	sql.Where("tags.id = '" + id + "'").Limit(1).Find(&tags)
 	if len(tags) > 0 {
-		tags[0].Relate()
+		tags[0].Relate(language)
 		for i := 0; i < len(tags[0].Datapacks); i++ {
 			tags[0].Datapacks[i].Relate(language)
 		}
@@ -399,7 +412,11 @@ func SearchDatapacks(language string, page int, content string, source string, v
 	if language != "" && language != "default" {
 		name = "name_" + language
 	}
-	cols := []string{"datapacks." + name, "datapacks.intro", "t.tag"}
+	tag := "default_tag"
+	if language != "" && language != "default" {
+		tag = "tag_" + language
+	}
+	cols := []string{"datapacks." + name, "datapacks.intro", "t." + tag}
 	for _, v := range cols {
 		regexps = append(regexps, strings.ReplaceAll(*sqlReg, "$?", v))
 	}

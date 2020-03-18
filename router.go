@@ -218,12 +218,11 @@ func tagList(c *gin.Context) {
 	if err != nil {
 		p = 1
 	}
-	tags, total := ListTags(p, name)
-	// html render
-	// html render
 	if lang == "" {
 		lang = "default"
 	}
+	tags, total := ListTags(lang, p, name)
+	// html render
 	c.HTML(http.StatusOK, lang + "/tags.html", gin.H {
 		//domain
 		"Domain": "tags",
@@ -252,7 +251,7 @@ func tag(c *gin.Context) {
 	tag := GetTag(lang, id)
 	// html render
 	if tag == nil { // No Result
-		tags, total := ListAuthors(p, id)
+		tags, total := ListTags(lang, p, id)
 		fmt.Println(tags, total)
 	} else {
 		fmt.Println(tag)

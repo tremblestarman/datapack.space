@@ -1,12 +1,26 @@
-import pymysql, json, os, uuid, urllib, socket
+import pymysql, json, os, uuid, urllib, socket, time
 from warnings import filterwarnings
-from util.translate import youdao_translate
+from googletrans import Translator
 from multiprocessing.dummy import Pool as thread_pool
 filterwarnings('ignore',category=pymysql.Warning)
 BASE_DIR = os.path.dirname(__file__)
 socket.setdefaulttimeout(30)
+class translator:
+    limit = 100
+    current_time = 0
+    timeout = 60
+    trans = Translator()
+    def translate(self, text: str, lang: str):
+        if self.current_time >= self.limit:
+            print('sleep to avoid banned. (wait 1 minute')
+            time.sleep(self.timeout)
+            self.current_time = 0
+        self.current_time += 1
+        return self.trans.translate(text, dest=lang).text
 class datapack_db:
     img_queue = []
+    tags = set()
+    trans = translator()
     def __init__(self):
         try:
             with open(BASE_DIR + '/auth.json', 'r', encoding='utf-8') as f:
@@ -14,7 +28,7 @@ class datapack_db:
                 auth['charset'] = 'UTF8MB4'
                 self.db = pymysql.connect(**auth)
             with open(BASE_DIR + '/languages.json', 'r', encoding="utf-8") as f:
-                self.lang = json.loads(f.read())
+                self.languages = json.loads(f.read())
             self.cur = self.db.cursor()
             self.cur.execute('show databases;') # initialize database
             if not ('datapack_collection',) in self.cur.fetchall():
@@ -25,11 +39,11 @@ class datapack_db:
             (
                 id VARCHAR(36) NOT NULL,
                 link VARCHAR(255) NOT NULL,
-                {' '.join([f"name_{k} TINYTEXT," for k, _ in self.lang.items()])}
                 author_id VARCHAR(36) NOT NULL,
                 intro TEXT NOT NULL,
                 full_content MEDIUMTEXT NOT NULL,
                 default_lang TINYTEXT,
+                {' '.join([f"name_{k.replace('-','_')} TINYTEXT," for k, _ in self.languages.items()])}
                 default_name TINYTEXT,
                 source TEXT NOT NULL,
                 post_time DATETIME,
@@ -39,14 +53,16 @@ class datapack_db:
                 FOREIGN KEY (author_id) REFERENCES authors(id),
                 UNIQUE (link)
             );'''
-            tag_info = '''create table if not exists tags
+            tag_info = f'''create table if not exists tags
             (
                 id VARCHAR(36) NOT NULL,
-                tag VARCHAR(16) NOT NULL,
+                default_lang TINYTEXT,
+                {' '.join([f"tag_{k.replace('-','_')} TINYTEXT," for k, _ in self.languages.items()])}
+                default_tag TINYTEXT NOT NULL,
                 type INT NOT NULL,
                 thumb INT DEFAULT 0,
                 PRIMARY KEY (id),
-                UNIQUE (tag)
+                UNIQUE (id)
             );'''
             author_info = '''create table if not exists authors
             (
@@ -71,15 +87,24 @@ class datapack_db:
             self.cur.execute(datapack_tag)
             print('connect successfully')
             # add colums
-            for k, _ in self.lang.items():
+            for k, _ in self.languages.items():
                 operated = True
                 try:
-                    add_col = f'''ALTER TABLE datapacks ADD name_{k} TINYTEXT;'''
+                    add_col = f'''ALTER TABLE datapacks ADD name_{k.replace('-','_')} TINYTEXT;'''
                     self.cur.execute(add_col)
                 except:
                     operated = False
                 if operated:
-                    print('added "', k, '" colum')
+                    print('datapacks added "', k.replace('-', '_'), '" colum')
+            for k, _ in self.languages.items():
+                operated = True
+                try:
+                    add_col = f'''ALTER TABLE tags ADD tag_{k.replace('-','_')} TINYTEXT;'''
+                    self.cur.execute(add_col)
+                except:
+                    operated = False
+                if operated:
+                    print('tags added "', k.replace('-', '_'), '" colum')
             # preload
             self.cur.execute('select id from datapacks')
             res = self.cur.fetchall()
@@ -99,15 +124,34 @@ class datapack_db:
         avatar = '{info['author_avatar']}';'''
         self.cur.execute(author_insert)
         return str(aid)
+    def _tag_translate(self, tag: str, type: int, default_lang: str):
+        # not translated or updated
+        translated = {}
+        for k, v in self.languages.items():
+            try:
+                translated[k] = tag if k == default_lang or type <= 1 else self.trans.translate(tag, k).lower()
+                if not (k == default_lang or type <= 1):
+                    print(k, ':translated', '"', tag, '"', 'to', '"', translated[k], '"')
+            except:
+                print("translation error.")
+        return translated
     def _tag_insert(self, info: dict):
         tag_sort = [info['source'], info['game_version'], info['tag'], info['keywords']]
         def __exe(_tag: str, _type: int):
-            _tag = pymysql.escape_string(_tag)
             tid = uuid.uuid3(uuid.NAMESPACE_DNS, _tag)
-            tag_insert = f'''insert into tags (id, tag, type) 
-            values ('{tid}', '{_tag}', {_type}) 
+            if str(tid) in self.tags:
+                return str(tid)
+            else:
+                self.tags.add(str(tid))
+            translated = self._tag_translate(_tag, _type, info['default_lang'])
+            for k, _ in translated.items():
+                translated[k] = pymysql.escape_string(translated[k])
+            tag_insert = f'''insert into tags (id, default_tag, default_lang, {' '.join([f"tag_{k.replace('-','_')}," for k, _ in self.languages.items()])} type) 
+            values ('{tid}', '{_tag}', '{self.languages[info['default_lang']]['name']}', {' '.join([f"'{translated[k]}'," for k, _ in self.languages.items()])} {_type}) 
             on duplicate key update 
-            tag = '{_tag}',
+            default_lang = '{self.languages[info['default_lang']]['name']}',
+            default_tag = '{_tag}',
+            {' '.join([f"tag_{k.replace('-','_')} = '{translated[k]}'," for k, _ in self.languages.items()])}
             type = 
             case 
             when type > {_type} then {_type}
@@ -159,47 +203,48 @@ class datapack_db:
         img = os.path.dirname(BASE_DIR) + f"/bin/img/'{_dir}'/'{id}'.png"
         if os.path.exists(img):
             os.remove(img)
-    def _title_translate(self, info: dict, default_name = None, pre_title: dict = None):
+    def _name_translate(self, info: dict, pre_default_name = None, pre_names: dict = None):
         # not translated or updated
-        updated = pre_title == None or not default_name == info['default_name']
-        translator = self.lang[info['default_lang']]['translator']
+        translate_all = pre_default_name == None or pre_names == None or not pre_default_name == info['default_name']
         i = 0
-        for k, v in self.lang.items():
+        for k, v in self.languages.items():
             if k == info['default_lang']: # default language
                 continue
-            if (updated or pre_title[i] == None or pre_title[i] == '') and ('title_' + k not in info or info['title_' + k] in [None, '', 'auto']):
-                # (haven't translated or title updated) and (haven't got title or need to be translated)
-                if 'youdao' in translator and k in translator['youdao']['to']:
-                    info['title_' + k] = youdao_translate(info['title_' + info['default_lang']], translator['youdao']['from'], translator['youdao']['to'][k])
-                elif 'google' in translator and k in translator['google']['to']:
-                    print(1)
+            if translate_all or pre_names[i] == None or pre_names[i] == '':
+                if 'name_' + k in info and info['name_' + k] not in ['', 'auto']:
+                    continue
+                try:
+                    info['name_' + k] = self.trans.translate(info['default_name'], k).upper()
+                except:
+                    print("translation error.")
+                print(k, ':translated', '"', info['default_name'], '"', 'to', '"', info['name_' + k], '"')
             i += 1
     def _incremental_update(self, info: dict, previous: list):
         if info['post_time'] == info['update_time']:
             info['post_time'] = info['update_time'] = previous[0]
-        self._title_translate(info, previous[1], previous[2:])
+        self._name_translate(info, previous[1], previous[2:])
     def _datapack_insert(self, info: dict):
         aid = self._author_insert(info)
         assert not aid == None
         did = uuid.uuid3(uuid.NAMESPACE_DNS, info['link'])
-        self.cur.execute("select post_time, default_name, " + ','.join(["name_" + k for k, _ in self.lang.items()]) + f" from datapacks where id = '{did}'")
+        self.cur.execute("select post_time, default_name, " + ','.join(["name_" + k.replace('-', '_') for k, _ in self.languages.items()]) + f" from datapacks where id = '{did}'")
         res = self.cur.fetchall()
         exists = [j for i in res for j in i] if not res == None else []
         if not exists.__len__() == 0:
             self._incremental_update(info, exists) #incremental_update
         if exists.__len__() == 0: # new element
-            self._title_translate(info)
+            self._name_translate(info)
         intro = pymysql.escape_string('\n'.join(info['summrization'])) #escape summaries
         content_raw = pymysql.escape_string(info['content_raw']) #escape content
-        for k, _ in self.lang.items():
-            info['title_' + k] = pymysql.escape_string(info['title_' + k])
-        datapack_insert = f'''insert into datapacks (id, link, {' '.join([f"name_{k}," for k, _ in self.lang.items()])} author_id, default_lang, default_name, intro, full_content, source, post_time, update_time) 
-        values ('{did}', '{info['link']}', {",".join(["'" + info["title_" + k] + "'" for k, _ in self.lang.items()])}, '{aid}', '{info['default_lang']}', '{info['default_name']}', '{intro}', '{content_raw}', '{info['source']}', '{info['post_time']}', '{info['update_time']}') 
+        for k, _ in self.languages.items():
+            info['name_' + k] = pymysql.escape_string(info['name_' + k])
+        datapack_insert = f'''insert into datapacks (id, link, {' '.join([f"name_{k.replace('-','_')}," for k, _ in self.languages.items()])} author_id, default_lang, default_name, intro, full_content, source, post_time, update_time) 
+        values ('{did}', '{info['link']}', {",".join(["'" + info["name_" + k] + "'" for k, _ in self.languages.items()])}, '{aid}', '{self.languages[info['default_lang']]['name']}', '{info['default_name']}', '{intro}', '{content_raw}', '{info['source']}', '{info['post_time']}', '{info['update_time']}') 
         on duplicate key update 
         link = '{info['link']}',
-        {"".join(["name_" + k + " = '" + info["title_" + k] + "'," for k, _ in self.lang.items()])}
+        {"".join(["name_" + k.replace('-','_') + " = '" + info["name_" + k] + "'," for k, _ in self.languages.items()])}
         author_id = '{aid}',
-        default_lang = '{info['default_lang']}',
+        default_lang = '{self.languages[info['default_lang']]['name']}',
         default_name = '{info['default_name']}',
         intro = '{intro}',
         full_content = '{content_raw}',
