@@ -37,5 +37,8 @@ body {
     background: transparent url('../img/css/noise-transparent.png') repeat 0 0;
 }
 #background.author-palette {
-    background: transparent url('../img/css/end_sky.png') repeat 0 0;
+    background: transparent url('../img/css/noise-endsky.png') repeat 0 0;
+}
+#background.tag-palette {
+    background: transparent url('../img/css/noise-chorus.png') repeat 0 0;
 }

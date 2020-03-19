@@ -21,7 +21,7 @@
             {{if ne .NoResult true}}
             <div class="tag-container">
                 {{range .Tags}}
-                    <div class="tag tag-{{.Type}}" id="{{.ID}}" onclick="jump_tag({{.ID}})">{{.Tag}}</div>
+                    <div class="tag tag-{{.Type}}" id="{{.ID}}" onclick="jump_tag({{.ID}})">{{.Tag | unescaped}}</div>
                 {{end}}
             </div>
             <div class="bottom" style="--pillar: rgb(71, 33, 71);--pillar-shadow: rgba(86, 46, 86, 0.74);">

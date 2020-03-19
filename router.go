@@ -190,6 +190,7 @@ func author(c *gin.Context) {
 		var sources []Tag
 		lastUpdateTime := ""
 		for i := 0; i < len(author.Datapacks); i++ {
+			author.Datapacks[i].Initialize() // Initialize
 			sourcesMap[author.Datapacks[i].Source] = author.Datapacks[i].Tags[0]
 			if author.Datapacks[i].UpdateTimeString > lastUpdateTime {
 				lastUpdateTime = author.Datapacks[i].UpdateTimeString
@@ -265,12 +266,15 @@ func tag(c *gin.Context) {
 			"Page": p,
 		})
 	} else {
+		synonymous := tag.GetSynonymousTag(lang)
 		c.HTML(http.StatusOK, lang + "/tag.html", gin.H {
 			//domain
 			"Domain": tag.Tag,
 			//result-related
 			"Tag": tag,
 			"TotalCount": len(tag.Datapacks),
+			"Synonymous": synonymous,
+			"SynonymousCount": len(*synonymous),
 		})
 	}
 }

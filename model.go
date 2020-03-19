@@ -56,6 +56,7 @@ type Tag struct {
 	ID string `gorm:"primary_key:true"`
 	Tag string
 	DefaultLang string
+	DefaultLangId string
 	DefaultTag string
 	Type int
 	Thumb int
@@ -78,6 +79,7 @@ type Datapack struct {
 	Author Author
 	AuthorID string
 	DefaultLang string
+	DefaultLangId string
 	DefaultName string
 	Source string
 	Intro string
@@ -211,7 +213,7 @@ func GetDatapack(language string, id string) *Datapack {
 			return db.Select("*, tags." + tag + " as tag").Order("tags.type") // Set Tag Name & Set Order
 		}).
 		Preload("Author"). // Preload Author
-		Where("datapacks.id = '" + id + "'").Limit(1).Find(&datapacks)
+		Where("datapacks.id = '" + id + "'").First(&datapacks)
 	if len(datapacks) > 0 {
 		datapacks[0].Initialize()
 		return &(datapacks[0])
@@ -260,7 +262,7 @@ func ListTags(language string, page int, tag string) (*[]Tag, int) {
 		keywordsReg, sqlReg := &tag, &tag
 		if len(tags) == 0 {
 			keywordsReg, sqlReg = SplitAllCharacters(tag)
-			sql.Where(strings.ReplaceAll(*sqlReg, "$?", "tags.tag")).Find(&tags) // Find via Letters
+			sql.Where(strings.ReplaceAll(*sqlReg, "$?", "tags." + _tag)).Find(&tags) // Find via Letters
 		}
 		for i := 0; i < len(tags); i++ { // Count and mark keywords
 			tags[i].CountKeyWords(*keywordsReg)
@@ -282,6 +284,17 @@ func ListTags(language string, page int, tag string) (*[]Tag, int) {
 	}
 	return &tags, total
 }
+func (t Tag) GetSynonymousTag(language string) *[]Tag {
+	var tags []Tag
+	// Set language
+	_tag := "default_tag"
+	if language != "" && language != "default" {
+		_tag = "tag_" + language
+	}
+	db.Select("distinct tags.*, tags.default_tag as tag").
+		Where("tags." + _tag + " = " + t.Tag).Not("tags.id = " + t.ID).Find(&tags)
+	return &tags
+}
 func GetTag(language string, id string) *Tag {
 	var tags []Tag
 	var sql = db
@@ -291,14 +304,16 @@ func GetTag(language string, id string) *Tag {
 		name, tag = "name_" + language, "tag_" + language
 	}
 	// Query
-	sql.Preload("Datapacks", func(db *gorm.DB) *gorm.DB { // Preload Datapacks
+	sql.Model(&Tag{}).
+		Select("distinct tags.*, tags.default_tag as tag"). // Set Tag Name As Default
+		Preload("Datapacks", func(db *gorm.DB) *gorm.DB { // Preload Datapacks
 			return db.Select("*, datapacks." + name + " as name").Order("datapacks.post_time DESC") // Set Datapack Name & Set Order
 		}).
 		Preload("Datapacks.Tags", func(db *gorm.DB) *gorm.DB { // Preload Datapacks.Tags
 			return db.Select("*, tags." + tag + " as tag").Order("tags.type") // Set Tag Name & Set Order
 		}).
 		Where("tags.id = '" + id + "'"). // Find Tag Id
-		Limit(1).Find(&tags) // Find One
+		First(&tags) // Find One
 	if len(tags) > 0 {
 		return &(tags[0])
 	}
@@ -357,7 +372,7 @@ func GetAuthor(language string, id string) *Author {
 			return db.Select("*, tags." + tag + " as tag").Order("tags.type") // Set Tag Name & Set Order
 		}).
 		Where("authors.id = '" + id + "'"). // Find Tag Id
-		Limit(1).Find(&authors) // Find One
+		First(&authors) // Find One
 	if len(authors) > 0 {
 		return &(authors[0])
 	}
