@@ -59,7 +59,7 @@ type Tag struct {
 	DefaultTag string
 	Type int
 	Thumb int
-	Datapacks []Datapack `gorm:"many2many:datapack_tags"`
+	Datapacks []Datapack `gorm:"many2many:datapack_tags;association_foreignkey:id;foreignkey:id;association_jointable_foreignkey:datapack_id;jointable_foreignkey:tag_id;"`
 }
 type Author struct {
 	SearchResult
@@ -88,38 +88,13 @@ type Datapack struct {
 	UpdateTimeString string
 	CoverExists bool
 	Thumb int
-	Tags []Tag `gorm:"many2many:datapack_tags"`
+	Tags []Tag `gorm:"many2many:datapack_tags;association_foreignkey:id;foreignkey:id;association_jointable_foreignkey:tag_id;jointable_foreignkey:datapack_id;"`
 }
 
-func (t *Tag) Relate(language string) {
-	db.Model(&t).Related(&t.Datapacks, "Datapacks")
-	tag := "default_tag"
-	if language != "" && language != "default" {
-		tag = "tag_" + language
-	}
-	db.Raw("SELECT tags." + tag + " as tag FROM tags WHERE id = ?", t.ID).Scan(&t)
-}
-func (a *Author) Relate() {
-	db.Model(&a).Related(&a.Datapacks)
-}
-func (d *Datapack) Relate(language string) {
-	db.Model(&d).Related(&d.Author)
-	db.Model(&d).Related(&d.Tags, "Tags")
-	sort.Slice(d.Tags, func(i, j int) bool { // Sort
-		return d.Tags[i].Type < d.Tags[j].Type
-	})
-	for i := 0; i < len(d.Tags); i++ {
-		d.Tags[i].Relate(language)
-	}
+func (d *Datapack) Initialize() {
 	d.PostTimeString = d.PostTime.Format("2006-01-02 15:04:05")
 	d.UpdateTimeString = d.UpdateTime.Format("2006-01-02 15:04:05")
 	d.Intro = "    " + strings.ReplaceAll(d.Intro, "\n", ".\n    ") + "."
-	//Set Name
-	name := "default_name"
-	if language != "" && language != "default" {
-		name = "name_" + language
-	}
-	db.Raw("SELECT datapacks." + name + " as name FROM datapacks WHERE id = ?", d.ID).Scan(&d)
 	d.CoverExists, _ = PathExists("bin/img/cover/" + d.ID + ".png")
 }
 
@@ -131,8 +106,8 @@ func KeyWordHighlight(raw *string, keywordsReg string) int {
 	})
 	return (len(*raw) - l) / q
 }
-func (d *Datapack) CountKeyWords(language string, keywordsReg string) {
-	d.Relate(language)
+func (d *Datapack) CountKeyWords(keywordsReg string) {
+	d.Initialize()
 	d.KeyWordCount += KeyWordHighlight(&d.Name, keywordsReg)
 	d.KeyWordCount += KeyWordHighlight(&d.Intro, keywordsReg)
 	for _, t := range d.Tags {
@@ -141,8 +116,7 @@ func (d *Datapack) CountKeyWords(language string, keywordsReg string) {
 		}
 	}
 }
-func (d *Datapack) AccurateCountKeyWords(language string, keywordsRegMatrix *[3]string) {
-	d.Relate(language)
+func (d *Datapack) AccurateCountKeyWords(keywordsRegMatrix *[3]string) {
 	if (*keywordsRegMatrix)[0] != "" {
 		d.KeyWordCount += KeyWordHighlight(&d.Name, (*keywordsRegMatrix)[0])
 	}
@@ -153,12 +127,10 @@ func (d *Datapack) AccurateCountKeyWords(language string, keywordsRegMatrix *[3]
 		d.KeyWordCount += KeyWordHighlight(&d.Author.AuthorName, (*keywordsRegMatrix)[2])
 	}
 }
-func (t *Tag) CountKeyWords(language string, keywordsReg string) {
-	t.Relate(language)
+func (t *Tag) CountKeyWords(keywordsReg string) {
 	t.KeyWordCount += KeyWordHighlight(&t.Tag, keywordsReg)
 }
 func (a *Author) CountKeyWords(keywordsReg string) {
-	a.Relate()
 	a.KeyWordCount += KeyWordHighlight(&a.AuthorName, keywordsReg)
 }
 
@@ -186,7 +158,7 @@ func datapackFilter(sql *gorm.DB, source string, version string, postTimeRange i
 		sql = sql.Where("source = '" + source + "'")
 	}
 	if version != "" {
-		sql = sql.Where("t.type = 1 AND t.tag = '" + version + "'")
+		sql = sql.Where("t.type = 1 AND t.default_tag = '" + version + "'")
 	}
 	if postTimeRange != 0 {
 		sql = dateRange(sql, postTimeRange, "datapacks.post_time")
@@ -203,28 +175,45 @@ func ListDatapacks(language string, page int, order string, source string, versi
 	}
 	var offset, limit = (page - 1) * datapackPageCount, datapackPageCount
 	var sql = db
-	sql = sql.Select("distinct datapacks.*").Order(order).Joins("JOIN datapack_tags AS dt ON datapacks.id = dt.datapack_id JOIN tags AS t ON dt.tag_id = t.id")
-	sql = datapackFilter(sql, source, version, postTimeRange, updateTimeRange)
-	sql.Find(&datapacks)
-	total := len(datapacks)
-	if offset >= len(datapacks) {
-		datapacks = make([]Datapack, 0)
-	} else if offset + limit > len(datapacks) { // Slice
-		datapacks = append((datapacks)[offset :])
-	} else {
-		datapacks = append((datapacks)[offset : offset + limit])
+	// Set language
+	name, tag := "default_name", "default_tag"
+	if language != "" && language != "default" {
+		name, tag = "name_" + language, "tag_" + language
 	}
+	// Query
+	total := 0
+	sql = db.Model(&Datapack{}).
+		Select("distinct datapacks.*, datapacks." + name + " as name"). // Set Datapack Name
+		Preload("Tags", func(db *gorm.DB) *gorm.DB { // Preload Tags
+			return db.Select("*, tags." + tag + " as tag").Order("tags.type") // Set Tag Name & Set Order
+		}).
+		Preload("Author"). // Preload Author
+		Joins("JOIN datapack_tags AS dt ON datapacks.id = dt.datapack_id JOIN tags AS t ON dt.tag_id = t.id") // Join Three Tables
+	sql = datapackFilter(sql, source, version, postTimeRange, updateTimeRange) // Filter, Using Joined Table
+	sql.Count(&total).Order(order).Offset(offset).Limit(limit).Find(&datapacks) // Count All & Only Find Datapack to be Shown
+	// Initialize Datapacks
 	for i := 0; i < len(datapacks); i++ {
-		datapacks[i].Relate(language)
+		datapacks[i].Initialize()
 	}
 	return &datapacks, total
 }
 func GetDatapack(language string, id string) *Datapack {
 	var datapacks []Datapack
 	var sql = db
-	sql.Where("datapacks.id = '" + id + "'").Limit(1).Find(&datapacks)
+	// Set language
+	name, tag := "default_name", "default_tag"
+	if language != "" && language != "default" {
+		name, tag = "name_" + language, "tag_" + language
+	}
+	sql.Model(&Datapack{}).
+		Select("distinct datapacks.*, datapacks." + name + " as name"). // Set Datapack Name
+		Preload("Tags", func(db *gorm.DB) *gorm.DB { // Preload Tags
+			return db.Select("*, tags." + tag + " as tag").Order("tags.type") // Set Tag Name & Set Order
+		}).
+		Preload("Author"). // Preload Author
+		Where("datapacks.id = '" + id + "'").Limit(1).Find(&datapacks)
 	if len(datapacks) > 0 {
-		datapacks[0].Relate(language)
+		datapacks[0].Initialize()
 		return &(datapacks[0])
 	}
 	return nil
@@ -257,18 +246,24 @@ func ListTags(language string, page int, tag string) (*[]Tag, int) {
 		page = 1
 	}
 	var offset, limit = (page - 1) * tagPageCount,tagPageCount
-	var sql = db
-	if tag == "" { // Return All
-		sql.Select("distinct tags.*").Find(&tags)
-	} else {
-		sql.Where("tags.tag REG '" + tag + "'").Find(&tags) // Find via Reg
+	// Set language
+	_tag := "default_tag"
+	if language != "" && language != "default" {
+		_tag = "tag_" + language
+	}
+	var sql = db.Select("distinct tags.*, tags." + _tag + " as tag")
+	// Return All
+	if tag == "" {
+		sql.Find(&tags)
+	} else { // Find via Reg
+		sql.Where("tags.tag REG '" + tag + "'").Find(&tags)
 		keywordsReg, sqlReg := &tag, &tag
 		if len(tags) == 0 {
 			keywordsReg, sqlReg = SplitAllCharacters(tag)
 			sql.Where(strings.ReplaceAll(*sqlReg, "$?", "tags.tag")).Find(&tags) // Find via Letters
 		}
 		for i := 0; i < len(tags); i++ { // Count and mark keywords
-			tags[i].CountKeyWords(language, *keywordsReg)
+			tags[i].CountKeyWords(*keywordsReg)
 		}
 		sort.Slice(tags, func(i, j int) bool { // Sort
 			if tags[j].KeyWordCount == tags[i].KeyWordCount {
@@ -285,20 +280,26 @@ func ListTags(language string, page int, tag string) (*[]Tag, int) {
 	} else {
 		tags = append(tags[offset : offset + limit])
 	}
-	for i := 0; i < len(tags); i++ {
-		tags[i].Relate(language)
-	}
 	return &tags, total
 }
 func GetTag(language string, id string) *Tag {
 	var tags []Tag
 	var sql = db
-	sql.Where("tags.id = '" + id + "'").Limit(1).Find(&tags)
+	// Set language
+	name, tag := "default_name", "default_tag"
+	if language != "" && language != "default" {
+		name, tag = "name_" + language, "tag_" + language
+	}
+	// Query
+	sql.Preload("Datapacks", func(db *gorm.DB) *gorm.DB { // Preload Datapacks
+			return db.Select("*, datapacks." + name + " as name").Order("datapacks.post_time DESC") // Set Datapack Name & Set Order
+		}).
+		Preload("Datapacks.Tags", func(db *gorm.DB) *gorm.DB { // Preload Datapacks.Tags
+			return db.Select("*, tags." + tag + " as tag").Order("tags.type") // Set Tag Name & Set Order
+		}).
+		Where("tags.id = '" + id + "'"). // Find Tag Id
+		Limit(1).Find(&tags) // Find One
 	if len(tags) > 0 {
-		tags[0].Relate(language)
-		for i := 0; i < len(tags[0].Datapacks); i++ {
-			tags[0].Datapacks[i].Relate(language)
-		}
 		return &(tags[0])
 	}
 	return nil
@@ -310,10 +311,11 @@ func ListAuthors(page int, author string) (*[]Author, int) {
 	}
 	var offset, limit = (page - 1) * authorPageCount, authorPageCount
 	var sql = db
-	if author == "" { // Return All
+	// Return All
+	if author == "" {
 		sql.Select("distinct authors.*").Find(&authors)
-	} else {
-		sql.Where("authors.author_name REG '" + author + "'").Limit(1).Find(&authors) // Find via Reg
+	} else { // Find via Reg
+		sql.Where("authors.author_name REG '" + author + "'").Limit(1).Find(&authors)
 		keywordsReg, sqlReg := &author, &author
 		if len(authors) == 0 { // No Result
 			keywordsReg, sqlReg = SplitAllCharacters(author)
@@ -342,12 +344,21 @@ func ListAuthors(page int, author string) (*[]Author, int) {
 func GetAuthor(language string, id string) *Author {
 	var authors []Author
 	var sql = db
-	sql.Where("authors.id = '" + id + "'").Limit(1).Find(&authors)
+	// Set language
+	name, tag := "default_name", "default_tag"
+	if language != "" && language != "default" {
+		name, tag = "name_" + language, "tag_" + language
+	}
+	// Query
+	sql.Preload("Datapacks", func(db *gorm.DB) *gorm.DB { // Preload Datapacks
+			return db.Select("*, datapacks." + name + " as name").Order("datapacks.post_time DESC") // Set Datapack Name & Set Order
+		}).
+		Preload("Datapacks.Tags", func(db *gorm.DB) *gorm.DB { // Preload Datapacks.Tags
+			return db.Select("*, tags." + tag + " as tag").Order("tags.type") // Set Tag Name & Set Order
+		}).
+		Where("authors.id = '" + id + "'"). // Find Tag Id
+		Limit(1).Find(&authors) // Find One
 	if len(authors) > 0 {
-		authors[0].Relate()
-		for i := 0; i < len(authors[0].Datapacks); i++ {
-			authors[0].Datapacks[i].Relate(language)
-		}
 		return &(authors[0])
 	}
 	return nil
@@ -408,25 +419,33 @@ func SearchDatapacks(language string, page int, content string, source string, v
 	var offset, limit = (page - 1) * datapackPageCount, datapackPageCount
 	keywordsReg, sqlReg := WordsIntersect(content)
 	var regexps []string
-	name := "default_name"
+	// Set language
+	name, tag := "default_name", "default_tag"
 	if language != "" && language != "default" {
-		name = "name_" + language
-	}
-	tag := "default_tag"
-	if language != "" && language != "default" {
-		tag = "tag_" + language
+		name, tag = "name_" + language, "tag_" + language
 	}
 	cols := []string{"datapacks." + name, "datapacks.intro", "t." + tag}
+	// Set SqlRegs Expression
 	for _, v := range cols {
 		regexps = append(regexps, strings.ReplaceAll(*sqlReg, "$?", v))
 	}
-	sql = sql.Select("distinct datapacks.*").Joins("JOIN authors AS a ON datapacks.author_id = a.id JOIN datapack_tags AS dt ON datapacks.id = dt.datapack_id JOIN tags AS t ON dt.tag_id = t.id").Where(strings.Join(regexps, " OR ") + " AND (t.type = 1 OR t.type = 3 OR t.type = 4)")
-	sql = datapackFilter(sql, source, version, postTimeRange, updateTimeRange)
-	sql.Find(&datapacks)
-	for i := 0; i < len(datapacks); i++ { // Count and mark keywords
-		datapacks[i].CountKeyWords(language, *keywordsReg)
-	}
+	// Query
+	sql = db.Model(&Datapack{}).
+		Select("distinct datapacks.*, datapacks." + name + " as name"). // Set Datapack Name
+		Preload("Tags", func(db *gorm.DB) *gorm.DB { // Preload Tags
+			return db.Select("*, tags." + tag + " as tag").Order("tags.type") // Set Tag Name & Set Order
+		}).
+		Preload("Author"). // Preload Author
+		Joins("JOIN datapack_tags AS dt ON datapacks.id = dt.datapack_id JOIN tags AS t ON dt.tag_id = t.id"). // Join Three Tables
+		Where(strings.Join(regexps, " OR ") + " AND (t.type = 1 OR t.type = 3 OR t.type = 4)") // Search
+	sql = datapackFilter(sql, source, version, postTimeRange, updateTimeRange) // Filter, Using Joined Table
+	sql.Find(&datapacks) // Find All
 	total := len(datapacks)
+	// Count and Mark Keywords
+	for i := 0; i < len(datapacks); i++ {
+		datapacks[i].CountKeyWords(*keywordsReg)
+	}
+	// Sort by Keywords Occur-Time And Slice
 	datapacksSortTrim(&datapacks, offset, limit)
 	return &datapacks, total
 }
@@ -439,32 +458,45 @@ func AccurateSearchDatapacks(language string, page int, name string, intro strin
 	var sql = db
 	var offset, limit = (page - 1) * datapackPageCount, datapackPageCount
 	var keywordsMatrix [3]string
-	sql = sql.Select("distinct datapacks.*").Joins("JOIN authors AS a ON datapacks.author_id = a.id JOIN datapack_tags AS dt ON datapacks.id = dt.datapack_id JOIN tags AS t ON dt.tag_id = t.id")
+	// Set language
+	_name, tag := "default_name", "default_tag"
+	if language != "" && language != "default" {
+		_name, tag = "name_" + language, "tag_" + language
+	}
+	// Query
+	sql = db.Model(&Datapack{}).
+		Select("distinct datapacks.*, datapacks." + _name + " as name"). // Set Datapack Name
+		Preload("Tags", func(db *gorm.DB) *gorm.DB { // Preload Tags
+			return db.Select("*, tags." + tag + " as tag").Order("tags.type") // Set Tag Name & Set Order
+		}).
+		Preload("Author"). // Preload Author
+		Joins("JOIN datapack_tags AS dt ON datapacks.id = dt.datapack_id JOIN tags AS t ON dt.tag_id = t.id") // Join Three Tables
+	// Query Name
 	if name != "" {
 		keywordsReg, sqlReg := LettersIn(name)
 		keywordsMatrix[0] = *keywordsReg
-		name := "default_name"
-		if language != "" && language != "default"{
-			name = "name_" + language
-		}
-		sql = sql.Where(strings.ReplaceAll(*sqlReg, "$?", "datapacks." + name))
+		sql = sql.Where(strings.ReplaceAll(*sqlReg, "$?", "datapacks." + _name))
 	}
+	// Query Intro
 	if intro != "" {
 		keywordsReg, sqlReg := LettersIn(intro)
 		keywordsMatrix[1] = *keywordsReg
 		sql = sql.Where(strings.ReplaceAll(*sqlReg, "$?", "datapacks.intro"))
 	}
+	// Query Author
 	if author != "" {
 		keywordsReg, sqlReg := LettersIn(author)
 		keywordsMatrix[2] = *keywordsReg
 		sql = sql.Where(strings.ReplaceAll(*sqlReg, "$?", "a.author_name"))
 	}
-	sql = datapackFilter(sql, source, version, postTimeRange, updateTimeRange)
-	sql.Find(&datapacks)
-	for i := 0; i < len(datapacks); i++ { // Count and mark keywords
-		datapacks[i].AccurateCountKeyWords(language, &keywordsMatrix)
-	}
+	sql = datapackFilter(sql, source, version, postTimeRange, updateTimeRange) // Filter, Using Joined Table
+	sql.Find(&datapacks) // Find All
 	total := len(datapacks)
+	// Count and Mark Keywords
+	for i := 0; i < len(datapacks); i++ {
+		datapacks[i].AccurateCountKeyWords(&keywordsMatrix)
+	}
+	// Sort by Keywords Occur-Time And Slice
 	datapacksSortTrim(&datapacks, offset, limit)
 	return &datapacks, total
 }

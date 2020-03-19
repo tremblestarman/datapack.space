@@ -43,6 +43,7 @@ class datapack_db:
                 intro TEXT NOT NULL,
                 full_content MEDIUMTEXT NOT NULL,
                 default_lang TINYTEXT,
+                default_lang_id TINYTEXT,
                 {' '.join([f"name_{k.replace('-','_')} TINYTEXT," for k, _ in self.languages.items()])}
                 default_name TINYTEXT,
                 source TEXT NOT NULL,
@@ -57,8 +58,10 @@ class datapack_db:
             (
                 id VARCHAR(36) NOT NULL,
                 default_lang TINYTEXT,
+                default_lang_id TINYTEXT,
                 {' '.join([f"tag_{k.replace('-','_')} TINYTEXT," for k, _ in self.languages.items()])}
                 default_tag TINYTEXT NOT NULL,
+                quotation INT DEFAULT 0,
                 type INT NOT NULL,
                 thumb INT DEFAULT 0,
                 PRIMARY KEY (id),
@@ -105,6 +108,7 @@ class datapack_db:
                     operated = False
                 if operated:
                     print('tags added "', k.replace('-', '_'), '" colum')
+            self.cur.execute('update tags set quotation = 0;')
             # preload
             self.cur.execute('select id from datapacks')
             res = self.cur.fetchall()
@@ -146,10 +150,12 @@ class datapack_db:
             translated = self._tag_translate(_tag, _type, info['default_lang'])
             for k, _ in translated.items():
                 translated[k] = pymysql.escape_string(translated[k])
-            tag_insert = f'''insert into tags (id, default_tag, default_lang, {' '.join([f"tag_{k.replace('-','_')}," for k, _ in self.languages.items()])} type) 
-            values ('{tid}', '{_tag}', '{self.languages[info['default_lang']]['name']}', {' '.join([f"'{translated[k]}'," for k, _ in self.languages.items()])} {_type}) 
+            tag_insert = f'''insert into tags (id, default_tag, default_lang, default_lang_id, {' '.join([f"tag_{k.replace('-','_')}," for k, _ in self.languages.items()])} type) 
+            values ('{tid}', '{_tag}', '{self.languages[info['default_lang']]['name']}', '{info['default_lang']}', {' '.join([f"'{translated[k]}'," for k, _ in self.languages.items()])} {_type}) 
             on duplicate key update 
+            quotation = quotation + 1,
             default_lang = '{self.languages[info['default_lang']]['name']}',
+            default_lang_id = '{info['default_lang']}',
             default_tag = '{_tag}',
             {' '.join([f"tag_{k.replace('-','_')} = '{translated[k]}'," for k, _ in self.languages.items()])}
             type = 
@@ -238,13 +244,14 @@ class datapack_db:
         content_raw = pymysql.escape_string(info['content_raw']) #escape content
         for k, _ in self.languages.items():
             info['name_' + k] = pymysql.escape_string(info['name_' + k])
-        datapack_insert = f'''insert into datapacks (id, link, {' '.join([f"name_{k.replace('-','_')}," for k, _ in self.languages.items()])} author_id, default_lang, default_name, intro, full_content, source, post_time, update_time) 
-        values ('{did}', '{info['link']}', {",".join(["'" + info["name_" + k] + "'" for k, _ in self.languages.items()])}, '{aid}', '{self.languages[info['default_lang']]['name']}', '{info['default_name']}', '{intro}', '{content_raw}', '{info['source']}', '{info['post_time']}', '{info['update_time']}') 
+        datapack_insert = f'''insert into datapacks (id, link, {' '.join([f"name_{k.replace('-','_')}," for k, _ in self.languages.items()])} author_id, default_lang, default_lang_id, default_name, intro, full_content, source, post_time, update_time) 
+        values ('{did}', '{info['link']}', {",".join(["'" + info["name_" + k] + "'" for k, _ in self.languages.items()])}, '{aid}', '{self.languages[info['default_lang']]['name']}', '{info['default_lang']}', '{info['default_name']}', '{intro}', '{content_raw}', '{info['source']}', '{info['post_time']}', '{info['update_time']}') 
         on duplicate key update 
         link = '{info['link']}',
         {"".join(["name_" + k.replace('-','_') + " = '" + info["name_" + k] + "'," for k, _ in self.languages.items()])}
         author_id = '{aid}',
         default_lang = '{self.languages[info['default_lang']]['name']}',
+        default_lang_id = '{info['default_lang']}',
         default_name = '{info['default_name']}',
         intro = '{intro}',
         full_content = '{content_raw}',

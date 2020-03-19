@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"html/template"
 	"net/http"
@@ -252,8 +251,26 @@ func tag(c *gin.Context) {
 	// html render
 	if tag == nil { // No Result
 		tags, total := ListTags(lang, p, id)
-		fmt.Println(tags, total)
+		c.HTML(http.StatusOK, lang + "/tags.html", gin.H {
+			//domain
+			"Domain": "tags",
+			//result-related
+			"Tags": tags,
+			"NoResult": len(*tags) == 0,
+			//page-related
+			"PageNotEnd": p * tagPageCount < total,
+			"OffsetCount": (p - 1) * tagPageCount + 1,
+			"EndCount": (p - 1) * tagPageCount + len(*tags),
+			"TotalCount": total,
+			"Page": p,
+		})
 	} else {
-		fmt.Println(tag)
+		c.HTML(http.StatusOK, lang + "/tag.html", gin.H {
+			//domain
+			"Domain": tag.Tag,
+			//result-related
+			"Tag": tag,
+			"TotalCount": len(tag.Datapacks),
+		})
 	}
 }

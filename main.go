@@ -10,19 +10,36 @@ func main() {
 	Connect()
 	defer db.Close()   //close database
 	_ = seg.LoadDict() //load dict
-	/*dps, total := ListDatapacks("en",1,orderByPostTimeDesc,"mcbbs","1.15")
+	/*
+	var sum int64
+	for i:= 0; i < 100; i++ {
+		t1 := time.Now()
+		v, _ := ListAuthors(1, "")
+		vs := GetAuthor("", (*v)[0].ID)
+		fmt.Println(vs.Datapacks[0].Tags[4].Tag)
+		t2 := time.Now()
+		fmt.Println(t2.Sub(t1))
+		sum += t2.Sub(t1).Nanoseconds()
+	}
+	fmt.Println(sum/1e8, "ms")
+	*//*
+	dps, total := ListDatapacks("",1,orderByPostTimeDesc,"","1.14",0,0)
 	fmt.Println(total)
 	for _, v := range *dps {
-		fmt.Println(v.Name + " " + v.DefaultName + " " + v.Tags[2].Tag)
+		fmt.Println(v.Name + " " + v.DefaultName + " " + v.Tags[2].Tag + " " + v.Author.AuthorName)
 	}
 	fmt.Println("==== Search")
-	for _, v := range *SearchDatapacks(1, "挖掘任意木头") {
-		fmt.Print(v.Name + " " + v.NameZh + " ")
+	dp, total := SearchDatapacks("", 1, "羊", "", "", 0, 0)
+	fmt.Println(total)
+	for _, v := range *dp {
+		fmt.Print(v.Name + " " + v.Tags[2].Tag + " ")
 		fmt.Println(v.KeyWordCount)
 	}
 	fmt.Println("==== AccurateSearch")
-	for _, v := range *AccurateSearchDatapacks(1, "砍树", "", "", 0, 0) {
-		fmt.Print(v.Name + " " + v.NameZh + " ")
+	dp, total := AccurateSearchDatapacks("",1, "矿", "", "", "", "", 0, 0)
+	fmt.Println(total)
+	for _, v := range *dp {
+		fmt.Print(v.Name + " " + v.Tags[2].Tag + " ")
 		fmt.Println(v.KeyWordCount)
 	}
 	fmt.Println("==== Today")
@@ -59,5 +76,5 @@ func main() {
 	r.GET("/author/:id", author)
 	r.GET("/tag", tagList)
 	r.GET("/tag/:id", tag)
-	_ = r.Run(":8080")
+	_ = r.Run(":8080")/**/
 }
