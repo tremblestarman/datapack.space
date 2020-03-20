@@ -152,7 +152,7 @@ span.highlight {
     --shadow: rgba(58, 20, 58, 0.6);
     --pillar: rgb(71, 33, 71);
     --pillar-shadow: rgba(86, 46, 86, 0.74);
-    --arrow-shadow: rgba(86, 46, 86, 0.74);
+    --arrow-shadow: rgba(124, 91, 124, 0.74);
     --word: rgb(124, 91, 124);
 }
 .tag-palette .options {

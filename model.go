@@ -513,3 +513,24 @@ func AccurateSearchDatapacks(language string, page int, name string, intro strin
 	datapacksSortTrim(&datapacks, offset, limit)
 	return &datapacks, total
 }
+// Rand
+func GetRandID(table string) string {
+	var id []string
+	err := db.Raw("select id from " + table + " order by rand() limit 1;").Pluck("id", &id).Error
+	if err != nil {
+		panic(err)
+	}
+	if len(id) == 0 {
+		panic("result empty.")
+	}
+	return id[0]
+}
+func GetRandDatapack(language string) *Datapack {
+	return GetDatapack(language, GetRandID("datapacks"))
+}
+func GetRandAuthor(language string) *Author {
+	return GetAuthor(language, GetRandID("authors"))
+}
+func GetRandTag(language string) *Tag {
+	return GetTag(language, GetRandID("tags"))
+}

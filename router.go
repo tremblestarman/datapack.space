@@ -8,6 +8,21 @@ import (
 )
 
 func unescaped (x string) interface{} { return template.HTML(x) }
+func getLanguage (c *gin.Context) string {
+	lang := c.Query("language")
+	if lang == "" {
+		lang = "default"
+	}
+	return lang
+}
+func getPage (c *gin.Context) int {
+	page := c.Query("p")
+	p, err := strconv.Atoi(page)
+	if err != nil {
+		p = 1
+	}
+	return p
+}
 func getOrder (orderId string, language string) string {
 	orderName := orderByPostTimeDesc
 	switch orderId {
@@ -26,13 +41,100 @@ func getOrder (orderId string, language string) string {
 	return orderName
 }
 
-func index(c *gin.Context) {
-	page := c.Query("p")
-	p, err := strconv.Atoi(page)
-	lang := c.Query("language")
-	if err != nil {
-		p = 1
+func renderDatapacks (c *gin.Context, page int, total int, language string, datapacks *[]Datapack) {
+	c.HTML(http.StatusOK, language + "/datapacks.html", gin.H {
+		//domain
+		"Domain": "datapacks",
+		//result-related
+		"Datapacks": datapacks,
+		"NoResult": len(*datapacks) == 0,
+		//page-related
+		"PageNotEnd": page * datapackPageCount < total,
+		"OffsetCount": (page - 1) * datapackPageCount + 1,
+		"EndCount": (page - 1) * datapackPageCount + len(*datapacks),
+		"TotalCount": total,
+		"Page": page,
+	})
+}
+func renderDatapack (c *gin.Context, language string, datapack *Datapack) {
+	c.HTML(http.StatusOK, language + "/datapack.html", gin.H {
+		//domain
+		"Domain": datapack.Name,
+		//result-related
+		"Datapack": datapack,
+		"NoResult": datapack == nil,
+	})
+}
+func renderAuthors (c *gin.Context, page int, total int, language string, authors *[]Author) {
+	c.HTML(http.StatusOK, language + "/authors.html", gin.H {
+		//domain
+		"Domain": "authors",
+		//result-related
+		"Authors": authors,
+		"NoResult": len(*authors) == 0,
+		//page-related
+		"PageNotEnd": page * authorPageCount < total,
+		"OffsetCount": (page - 1) * authorPageCount + 1,
+		"EndCount": (page - 1) * authorPageCount + len(*authors),
+		"TotalCount": total,
+		"Page": page,
+	})
+}
+func renderAuthor (c *gin.Context, language string, author *Author) {
+	sourcesMap := map[string]Tag{} //Source / Last Update Time Analysis
+	var sources []Tag
+	lastUpdateTime := ""
+	for i := 0; i < len(author.Datapacks); i++ {
+		author.Datapacks[i].Initialize() // Initialize
+		sourcesMap[author.Datapacks[i].Source] = author.Datapacks[i].Tags[0]
+		if author.Datapacks[i].UpdateTimeString > lastUpdateTime {
+			lastUpdateTime = author.Datapacks[i].UpdateTimeString
+		}
 	}
+	for _, tag := range sourcesMap {
+		sources = append(sources, tag)
+	}
+	c.HTML(http.StatusOK, language + "/author.html", gin.H {
+		//domain
+		"Domain": author.AuthorName,
+		//result-related
+		"Author": author,
+		"TotalCount": len(author.Datapacks),
+		"Sources": sources,
+		"LastUpdateTime": lastUpdateTime,
+	})
+}
+func renderTags (c *gin.Context, page int, total int, language string, tags *[]Tag) {
+	c.HTML(http.StatusOK, language + "/tags.html", gin.H {
+		//domain
+		"Domain": "tags",
+		//result-related
+		"Tags": tags,
+		"NoResult": len(*tags) == 0,
+		//page-related
+		"PageNotEnd": page * tagPageCount < total,
+		"OffsetCount": (page - 1) * tagPageCount + 1,
+		"EndCount": (page - 1) * tagPageCount + len(*tags),
+		"TotalCount": total,
+		"Page": page,
+	})
+}
+func renderTag (c *gin.Context, language string, tag *Tag) {
+	synonymous := tag.GetSynonymousTag(language)
+	c.HTML(http.StatusOK, language + "/tag.html", gin.H {
+		//domain
+		"Domain": tag.Tag,
+		//result-related
+		"Tag": tag,
+		"TotalCount": len(tag.Datapacks),
+		"Synonymous": synonymous,
+		"SynonymousCount": len(*synonymous),
+	})
+}
+
+func index(c *gin.Context) {
+	lang := getLanguage(c)
+	p := getPage(c)
 	order := c.Query("order")
 	orderName := getOrder(order, lang)
 	postTime := c.Query("p_time")
@@ -49,31 +151,12 @@ func index(c *gin.Context) {
 	filterVersion := c.Query("version")
 	datapacks, total := ListDatapacks(lang, p, orderName, filterSource, filterVersion, postTimeRange, updateTimeRange)
 	// html render
-	if lang == "" {
-		lang = "default"
-	}
-	c.HTML(http.StatusOK, lang + "/datapacks.html", gin.H {
-		//domain
-		"Domain": "datapacks",
-		//result-related
-		"Datapacks": datapacks,
-		"NoResult": len(*datapacks) == 0,
-		//page-related
-		"PageNotEnd": p * datapackPageCount < total,
-		"OffsetCount": (p - 1) * datapackPageCount + 1,
-		"EndCount": (p - 1) * datapackPageCount + len(*datapacks),
-		"TotalCount": total,
-		"Page": p,
-	})
+	renderDatapacks(c, p, total, lang, datapacks)
 }
 func search(c *gin.Context) {
 	var datapacks *[]Datapack
 	total := 0
-	page := c.Query("p")
-	p, err := strconv.Atoi(page)
-	if err != nil {
-		p = 1
-	}
+	p := getPage(c)
 	search := c.Query("search")
 	postTime := c.Query("p_time")
 	postTimeRange, err := strconv.Atoi(postTime)
@@ -87,7 +170,7 @@ func search(c *gin.Context) {
 	}
 	filterSource := c.Query("source")
 	filterVersion := c.Query("version")
-	lang := c.Query("language")
+	lang := getLanguage(c)
 	if search != "" {
 		datapacks, total = SearchDatapacks(lang, p, search, filterSource, filterVersion, postTimeRange, updateTimeRange)
 	} else {
@@ -97,184 +180,72 @@ func search(c *gin.Context) {
 		datapacks, total = AccurateSearchDatapacks(lang, p, nameContent, introContent, authorContent, filterSource, filterVersion, postTimeRange, updateTimeRange)
 	}
 	// html render
-	if lang == "" {
-		lang = "default"
-	}
-	c.HTML(http.StatusOK, lang + "/datapacks.html", gin.H {
-		//domain
-		"Domain": "datapacks",
-		//result-related
-		"Datapacks": datapacks,
-		"NoResult": len(*datapacks) == 0,
-		//page-related
-		"PageNotEnd": p * datapackPageCount < total,
-		"OffsetCount": (p - 1) * datapackPageCount + 1,
-		"EndCount": (p - 1) * datapackPageCount + len(*datapacks),
-		"TotalCount": total,
-		"Page": p,
-	})
+	renderDatapacks(c, p, total, lang, datapacks)
 }
 func datapack(c *gin.Context) {
 	id := c.Param("id")
-	lang := c.Query("language")
+	lang := getLanguage(c)
 	datapack := GetDatapack(lang, id)
 	// html render
-	if lang == "" {
-		lang = "default"
-	}
-	c.HTML(http.StatusOK, lang + "/datapack.html", gin.H {
-		//domain
-		"Domain": datapack.Name,
-		//result-related
-		"Datapack": datapack,
-		"NoResult": datapack == nil,
-	})
+	renderDatapack(c, lang, datapack)
+}
+func datapackRand(c *gin.Context) {
+	lang := getLanguage(c)
+	datapack := GetRandDatapack(lang)
+	// html render
+	renderDatapack(c, lang, datapack)
 }
 func authorList(c *gin.Context) {
-	page := c.Query("p")
 	name := c.Query("author")
-	lang := c.Query("language")
-	p, err := strconv.Atoi(page)
-	if err != nil {
-		p = 1
-	}
+	lang := getLanguage(c)
+	p := getPage(c)
 	authors, total := ListAuthors(p, name)
 	// html render
-	if lang == "" {
-		lang = "default"
-	}
-	c.HTML(http.StatusOK, lang + "/authors.html", gin.H {
-		//domain
-		"Domain": "authors",
-		//result-related
-		"Authors": authors,
-		"NoResult": len(*authors) == 0,
-		//page-related
-		"PageNotEnd": p * authorPageCount < total,
-		"OffsetCount": (p - 1) * authorPageCount + 1,
-		"EndCount": (p - 1) * authorPageCount + len(*authors),
-		"TotalCount": total,
-		"Page": p,
-	})
+	renderAuthors(c, p, total, lang, authors)
 }
 func author(c *gin.Context) {
 	id := c.Param("id")
-	page := c.Query("p")
-	p, err := strconv.Atoi(page)
-	if err != nil {
-		p = 1
-	}
-	lang := c.Query("language")
-	if lang == "" {
-		lang = "default"
-	}
+	p := getPage(c)
+	lang := getLanguage(c)
 	author := GetAuthor(lang, id)
 	// html render
 	if author == nil { // No Result
 		authors, total := ListAuthors(p, id)
-		c.HTML(http.StatusOK, lang + "/authors.html", gin.H {
-			//domain
-			"Domain": "authors",
-			//result-related
-			"Authors": authors,
-			"NoResult": len(*authors) == 0,
-			//page-related
-			"PageNotEnd": p * authorPageCount < total,
-			"OffsetCount": (p - 1) * authorPageCount + 1,
-			"EndCount": (p - 1) * authorPageCount + len(*authors),
-			"TotalCount": total,
-			"Page": p,
-		})
+		renderAuthors(c, p, total, lang, authors)
 	} else {
-		sourcesMap := map[string]Tag{} //Source / Last Update Time Analysis
-		var sources []Tag
-		lastUpdateTime := ""
-		for i := 0; i < len(author.Datapacks); i++ {
-			author.Datapacks[i].Initialize() // Initialize
-			sourcesMap[author.Datapacks[i].Source] = author.Datapacks[i].Tags[0]
-			if author.Datapacks[i].UpdateTimeString > lastUpdateTime {
-				lastUpdateTime = author.Datapacks[i].UpdateTimeString
-			}
-		}
-		for _, tag := range sourcesMap {
-			sources = append(sources, tag)
-		}
-		c.HTML(http.StatusOK, lang + "/author.html", gin.H {
-			//domain
-			"Domain": author.AuthorName,
-			//result-related
-			"Author": author,
-			"TotalCount": len(author.Datapacks),
-			"Sources": sources,
-			"LastUpdateTime": lastUpdateTime,
-		})
+		renderAuthor(c, lang, author)
 	}
 }
+func authorRand(c *gin.Context) {
+	lang := getLanguage(c)
+	author := GetRandAuthor(lang)
+	// html render
+	renderAuthor(c, lang, author)
+}
 func tagList(c *gin.Context) {
-	page := c.Query("p")
 	name := c.Query("tag")
-	lang := c.Query("language")
-	p, err := strconv.Atoi(page)
-	if err != nil {
-		p = 1
-	}
-	if lang == "" {
-		lang = "default"
-	}
+	lang := getLanguage(c)
+	p := getPage(c)
 	tags, total := ListTags(lang, p, name)
 	// html render
-	c.HTML(http.StatusOK, lang + "/tags.html", gin.H {
-		//domain
-		"Domain": "tags",
-		//result-related
-		"Tags": tags,
-		"NoResult": len(*tags) == 0,
-		//page-related
-		"PageNotEnd": p * tagPageCount < total,
-		"OffsetCount": (p - 1) * tagPageCount + 1,
-		"EndCount": (p - 1) * tagPageCount + len(*tags),
-		"TotalCount": total,
-		"Page": p,
-	})
+	renderTags(c, p, total, lang, tags)
 }
 func tag(c *gin.Context) {
 	id := c.Param("id")
-	page := c.Query("p")
-	p, err := strconv.Atoi(page)
-	if err != nil {
-		p = 1
-	}
-	lang := c.Query("language")
-	if lang == "" {
-		lang = "default"
-	}
+	p := getPage(c)
+	lang := getLanguage(c)
 	tag := GetTag(lang, id)
 	// html render
 	if tag == nil { // No Result
 		tags, total := ListTags(lang, p, id)
-		c.HTML(http.StatusOK, lang + "/tags.html", gin.H {
-			//domain
-			"Domain": "tags",
-			//result-related
-			"Tags": tags,
-			"NoResult": len(*tags) == 0,
-			//page-related
-			"PageNotEnd": p * tagPageCount < total,
-			"OffsetCount": (p - 1) * tagPageCount + 1,
-			"EndCount": (p - 1) * tagPageCount + len(*tags),
-			"TotalCount": total,
-			"Page": p,
-		})
+		renderTags(c, p, total, lang, tags)
 	} else {
-		synonymous := tag.GetSynonymousTag(lang)
-		c.HTML(http.StatusOK, lang + "/tag.html", gin.H {
-			//domain
-			"Domain": tag.Tag,
-			//result-related
-			"Tag": tag,
-			"TotalCount": len(tag.Datapacks),
-			"Synonymous": synonymous,
-			"SynonymousCount": len(*synonymous),
-		})
+		renderTag(c, lang, tag)
 	}
+}
+func tagRand(c *gin.Context) {
+	lang := getLanguage(c)
+	tag := GetRandTag(lang)
+	// html render
+	renderTag(c, lang, tag)
 }
