@@ -126,8 +126,11 @@ function search_datapacks() {
         delete params['search'];
         search = true;
         if (datapack_name !== '') params["name"] = datapack_name;
+        else delete params["name"];
         if (datapack_author !== '') params["author"] = datapack_author;
+        else delete params["author"];
         if (datapack_intro !== '') params["intro"] = datapack_intro;
+        else delete params["intro"];
     }
     setTimeout(function(){
         let p = [];

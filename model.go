@@ -99,7 +99,6 @@ func (d *Datapack) Initialize() {
 	d.Intro = "    " + strings.ReplaceAll(d.Intro, "\n", ".\n    ") + "."
 	d.CoverExists, _ = PathExists("bin/img/cover/" + d.ID + ".png")
 }
-
 func KeyWordHighlight(raw *string, keywordsReg string) int {
 	l, q := len(*raw), len(keyWordHighlightHead + keyWordHighlightTail)
 	re := regexp.MustCompile("(?i)" + keywordsReg)
@@ -119,6 +118,7 @@ func (d *Datapack) CountKeyWords(keywordsReg string) {
 	}
 }
 func (d *Datapack) AccurateCountKeyWords(keywordsRegMatrix *[3]string) {
+	d.Initialize()
 	if (*keywordsRegMatrix)[0] != "" {
 		d.KeyWordCount += KeyWordHighlight(&d.Name, (*keywordsRegMatrix)[0])
 	}
@@ -155,12 +155,29 @@ func Connect() {
 	}
 }
 // List
+func dateRange(sql *gorm.DB, dateRange int, col string) *gorm.DB {
+	switch dateRange {
+	case 1: // Today
+		sql = sql.Where("TO_DAYS(" + col + ") = TO_DAYS(NOW())")
+	case 2: // 3 Days
+		sql = sql.Where("TO_DAYS(NOW()) - TO_DAYS(" + col + ") <= 3")
+	case 3: // 7 Days
+		sql = sql.Where("DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(" + col + ")")
+	case 4: // 1 Month
+		sql = sql.Where("DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= date(" + col + ")")
+	case 5: // this Month
+		sql = sql.Where("DATE_FORMAT(" + col + ", '%Y%m') = DATE_FORMAT(CURDATE(), '%Y%m')")
+	case 6: // this Year
+		sql = sql.Where("YEAR(" + col + ")=YEAR(NOW())")
+	}
+	return sql
+}
 func datapackFilter(sql *gorm.DB, source string, version string, postTimeRange int, updateTimeRange int) *gorm.DB {
 	if source != "" {
 		sql = sql.Where("source = '" + source + "'")
 	}
 	if version != "" {
-		sql = sql.Where("t.type = 1 AND t.default_tag = '" + version + "'")
+		sql = sql.Where("default_tags_str REGEXP '1:" + version + ",'")
 	}
 	if postTimeRange != 0 {
 		sql = dateRange(sql, postTimeRange, "datapacks.post_time")
@@ -189,8 +206,7 @@ func ListDatapacks(language string, page int, order string, source string, versi
 		Preload("Tags", func(db *gorm.DB) *gorm.DB { // Preload Tags
 			return db.Select("*, tags." + tag + " as tag").Order("tags.type") // Set Tag Name & Set Order
 		}).
-		Preload("Author"). // Preload Author
-		Joins("JOIN datapack_tags AS dt ON datapacks.id = dt.datapack_id JOIN tags AS t ON dt.tag_id = t.id") // Join Three Tables
+		Preload("Author") // Preload Author
 	sql = datapackFilter(sql, source, version, postTimeRange, updateTimeRange) // Filter, Using Joined Table
 	sql.Count(&total).Order(order).Offset(offset).Limit(limit).Find(&datapacks) // Count All & Only Find Datapack to be Shown
 	// Initialize Datapacks
@@ -395,23 +411,6 @@ func LettersIn(text string) (*string, *string) {
 	sqlReg := "($? REGEXP '" + strings.Join(words, "' AND $? REGEXP '") + "')"
 	return &keywordsReg, &sqlReg
 }
-func dateRange(sql *gorm.DB, dateRange int, col string) *gorm.DB {
-	switch dateRange {
-	case 1: // Today
-		sql = sql.Where("TO_DAYS(" + col + ") = TO_DAYS(NOW())")
-	case 2: // 3 Days
-		sql = sql.Where("TO_DAYS(NOW()) - TO_DAYS(" + col + ") <= 3")
-	case 3: // 7 Days
-		sql = sql.Where("DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= date(" + col + ")")
-	case 4: // 1 Month
-		sql = sql.Where("DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= date(" + col + ")")
-	case 5: // this Month
-		sql = sql.Where("DATE_FORMAT(" + col + ", '%Y%m') = DATE_FORMAT(CURDATE(), '%Y%m')")
-	case 6: // this Year
-		sql = sql.Where("YEAR(" + col + ")=YEAR(NOW())")
-	}
-	return sql
-}
 func datapacksSortTrim(datapacks *[]Datapack, offset int, limit int) {
 	sort.Slice(*datapacks, func(i, j int) bool { // Sort
 		return (*datapacks)[j].KeyWordCount < (*datapacks)[i].KeyWordCount
@@ -435,11 +434,11 @@ func SearchDatapacks(language string, page int, content string, source string, v
 	keywordsReg, sqlReg := WordsIntersect(content)
 	var regexps []string
 	// Set language
-	name, tag := "default_name", "default_tag"
+	name, tag, tagStr := "default_name", "default_tag", "default_tags_str"
 	if language != "" && language != "default" {
-		name, tag = "name_" + language, "tag_" + language
+		name, tag, tagStr = "name_" + language, "tag_" + language, "tags_str_" + language
 	}
-	cols := []string{"datapacks." + name, "datapacks.intro", "t." + tag}
+	cols := []string{"datapacks." + name, "datapacks.intro", "datapacks." + tagStr}
 	// Set SqlRegs Expression
 	for _, v := range cols {
 		regexps = append(regexps, strings.ReplaceAll(*sqlReg, "$?", v))
@@ -451,8 +450,7 @@ func SearchDatapacks(language string, page int, content string, source string, v
 			return db.Select("*, tags." + tag + " as tag").Order("tags.type") // Set Tag Name & Set Order
 		}).
 		Preload("Author"). // Preload Author
-		Joins("JOIN datapack_tags AS dt ON datapacks.id = dt.datapack_id JOIN tags AS t ON dt.tag_id = t.id"). // Join Three Tables
-		Where(strings.Join(regexps, " OR ") + " AND (t.type = 1 OR t.type = 3 OR t.type = 4)") // Search
+		Where(strings.Join(regexps, " OR ")) // Search
 	sql = datapackFilter(sql, source, version, postTimeRange, updateTimeRange) // Filter, Using Joined Table
 	sql.Find(&datapacks) // Find All
 	total := len(datapacks)
@@ -484,8 +482,8 @@ func AccurateSearchDatapacks(language string, page int, name string, intro strin
 		Preload("Tags", func(db *gorm.DB) *gorm.DB { // Preload Tags
 			return db.Select("*, tags." + tag + " as tag").Order("tags.type") // Set Tag Name & Set Order
 		}).
-		Preload("Author"). // Preload Author
-		Joins("JOIN datapack_tags AS dt ON datapacks.id = dt.datapack_id JOIN tags AS t ON dt.tag_id = t.id") // Join Three Tables
+		Preload("Author"). // Preload Authors
+		Joins("JOIN authors ON datapacks.author_id = authors.id")
 	// Query Name
 	if name != "" {
 		keywordsReg, sqlReg := LettersIn(name)
@@ -502,7 +500,7 @@ func AccurateSearchDatapacks(language string, page int, name string, intro strin
 	if author != "" {
 		keywordsReg, sqlReg := LettersIn(author)
 		keywordsMatrix[2] = *keywordsReg
-		sql = sql.Where(strings.ReplaceAll(*sqlReg, "$?", "a.author_name"))
+		sql = sql.Where(strings.ReplaceAll(*sqlReg, "$?", "authors.author_name"))
 	}
 	sql = datapackFilter(sql, source, version, postTimeRange, updateTimeRange) // Filter, Using Joined Table
 	sql.Find(&datapacks) // Find All
