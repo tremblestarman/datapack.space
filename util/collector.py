@@ -330,7 +330,7 @@ class datapack_collector:
             elif not k in li and type(v) == list and v.__len__() == 0:
                 post[k] = None
         for k in li:
-            post[k] = [i for i in post[k] if not i == '']
+            post[k] = [i.lower() for i in post[k] if not i == '']
             if post[k].__len__() == 0:
                 post[k] = ['other']
             post[k] = list(set(post[k]))

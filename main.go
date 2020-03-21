@@ -24,9 +24,9 @@ func main() {
 	r.GET("/search", search)
 	r.GET("/author", authorList)
 	r.GET("/author/:id", author)
-	r.GET("/random/author", datapackRand)
+	r.GET("/random/author", authorRand)
 	r.GET("/tag", tagList)
 	r.GET("/tag/:id", tag)
-	r.GET("/random/tag", datapackRand)
+	r.GET("/random/tag", tagRand)
 	_ = r.Run(":8080")
 }

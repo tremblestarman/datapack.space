@@ -63,7 +63,7 @@ class datapack_db:
                 default_lang_id TINYTEXT,
                 {' '.join([f"tag_{k.replace('-','_')} TINYTEXT," for k, _ in self.languages.items()])}
                 default_tag TINYTEXT NOT NULL,
-                quotation INT DEFAULT 0,
+                quotation INT DEFAULT 1,
                 type INT NOT NULL,
                 thumb INT DEFAULT 0,
                 PRIMARY KEY (id),
@@ -154,6 +154,8 @@ class datapack_db:
                 translated = self.translated_tags[str(tid)]
                 for k, _ in translated.items():
                     info["tags_strs_" + k].append(f'{_type}:{translated[k]},')
+                quotation = f"update tags set quotation = quotation + 1 where id = '{tid}';"
+                self.cur.execute(quotation)
                 return str(tid)
             translated = self._tag_translate(_tag, _type, info['default_lang'])
             for k, _ in translated.items():

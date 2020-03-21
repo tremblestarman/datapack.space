@@ -24,7 +24,7 @@ const (
 	orderByUpdateTime = "update_time"
 	orderByUpdateTimeDesc = "update_time desc"
 	datapackPageCount = 15
-	tagPageCount = 50
+	tagPageCount = 100
 	authorPageCount = 24
 	keyWordHighlightHead = "<span class=\"highlight\">"
 	keyWordHighlightTail = "</span>"
@@ -48,49 +48,50 @@ type Auth struct {
 	Password string `json:"password"`
 }
 type SearchResult struct {
-	KeyWordCount int
+	KeyWordCount int `json:"-"`
 }
 
 type Tag struct {
 	SearchResult
-	ID string `gorm:"primary_key:true"`
-	Tag string
-	DefaultLang string
-	DefaultLangId string
-	DefaultTag string
-	Type int
-	Thumb int
-	Datapacks []Datapack `gorm:"many2many:datapack_tags;association_foreignkey:id;foreignkey:id;association_jointable_foreignkey:datapack_id;jointable_foreignkey:tag_id;"`
+	ID string `json:"-" gorm:"primary_key:true"`
+	Tag string `json:"tag_name"`
+	DefaultLang string `json:"tag_language"`
+	DefaultLangId string `json:"-"`
+	DefaultTag string `json:"tag_default_name"`
+	Type int `json:"tag_type"`
+	Thumb int `json:"-"`
+	Quotation int `json:"quotation"`
+	Datapacks []Datapack `json:"datapacks" gorm:"many2many:datapack_tags;association_foreignkey:id;foreignkey:id;association_jointable_foreignkey:datapack_id;jointable_foreignkey:tag_id;"`
 }
 type Author struct {
 	SearchResult
-	ID string `gorm:"primary_key:true"`
-	AuthorUid string
-	AuthorName string
-	Avatar string
-	Thumb int
-	Datapacks []Datapack `gorm:"ForeignKey:AuthorID;AssociationForeignKey:ID"`
+	ID string `json:"-" gorm:"primary_key:true"`
+	AuthorUid string `json:"-"`
+	AuthorName string `json:"author_name"`
+	Avatar string `json:"author_avatar"`
+	Thumb int `json:"-"`
+	Datapacks []Datapack `json:"datapacks" gorm:"ForeignKey:AuthorID;AssociationForeignKey:ID"`
 }
 type Datapack struct {
 	SearchResult
-	ID string `gorm:"primary_key:true"`
-	Link string
-	Name string
-	Author Author
-	AuthorID string
-	DefaultLang string
-	DefaultLangId string
-	DefaultName string
-	Source string
-	Intro string
-	FullContent string
-	PostTime time.Time
-	PostTimeString string
-	UpdateTime time.Time
-	UpdateTimeString string
-	CoverExists bool
-	Thumb int
-	Tags []Tag `gorm:"many2many:datapack_tags;association_foreignkey:id;foreignkey:id;association_jointable_foreignkey:tag_id;jointable_foreignkey:datapack_id;"`
+	ID string `json:"-" gorm:"primary_key:true"`
+	Link string `json:"datapack_link"`
+	Name string `json:"datapack_name"`
+	Author Author `json:"author"`
+	AuthorID string `json:"-"`
+	DefaultLang string `json:"datapack_language"`
+	DefaultLangId string `json:"-"`
+	DefaultName string `json:"datapack_default_name"`
+	Source string `json:"source"`
+	Intro string `json:"introduction"`
+	FullContent string `json:"-"`
+	PostTime time.Time `json:"-"`
+	PostTimeString string `json:"post_time"`
+	UpdateTime time.Time `json:"-"`
+	UpdateTimeString string `json:"update_time"`
+	CoverExists bool `json:"-"`
+	Thumb int `json:"-"`
+	Tags []Tag `json:"tag" gorm:"many2many:datapack_tags;association_foreignkey:id;foreignkey:id;association_jointable_foreignkey:tag_id;jointable_foreignkey:datapack_id;"`
 }
 
 func (d *Datapack) Initialize() {
@@ -269,7 +270,7 @@ func ListTags(language string, page int, tag string) (*[]Tag, int) {
 	if language != "" && language != "default" {
 		_tag = "tag_" + language
 	}
-	var sql = db.Select("distinct tags.*, tags." + _tag + " as tag")
+	var sql = db.Select("distinct tags.*, tags." + _tag + " as tag").Order("tags.quotation DESC")
 	// Return All
 	if tag == "" {
 		sql.Find(&tags)

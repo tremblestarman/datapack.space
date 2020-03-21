@@ -132,6 +132,14 @@ func renderTag (c *gin.Context, language string, tag *Tag) {
 	})
 }
 
+func queryAPI(c *gin.Context, data interface{}) {
+	c.JSON(http.StatusOK, gin.H {
+		"status": 200,
+		"error": nil,
+		"data": data,
+	})
+}
+
 func index(c *gin.Context) {
 	lang := getLanguage(c)
 	p := getPage(c)
@@ -150,8 +158,14 @@ func index(c *gin.Context) {
 	filterSource := c.Query("source")
 	filterVersion := c.Query("version")
 	datapacks, total := ListDatapacks(lang, p, orderName, filterSource, filterVersion, postTimeRange, updateTimeRange)
-	// html render
-	renderDatapacks(c, p, total, lang, datapacks)
+	// api service
+	api := c.Query("api")
+	if api != "" {
+		queryAPI(c, datapacks)
+	} else {
+		// html render
+		renderDatapacks(c, p, total, lang, datapacks)
+	}
 }
 func search(c *gin.Context) {
 	var datapacks *[]Datapack
@@ -179,68 +193,124 @@ func search(c *gin.Context) {
 		authorContent := c.Query("author")
 		datapacks, total = AccurateSearchDatapacks(lang, p, nameContent, introContent, authorContent, filterSource, filterVersion, postTimeRange, updateTimeRange)
 	}
-	// html render
-	renderDatapacks(c, p, total, lang, datapacks)
+	// api service
+	api := c.Query("api")
+	if api != "" {
+		queryAPI(c, datapacks)
+	} else {
+		// html render
+		renderDatapacks(c, p, total, lang, datapacks)
+	}
 }
 func datapack(c *gin.Context) {
 	id := c.Param("id")
 	lang := getLanguage(c)
 	datapack := GetDatapack(lang, id)
-	// html render
-	renderDatapack(c, lang, datapack)
+	// api service
+	api := c.Query("api")
+	if api != "" {
+		queryAPI(c, datapack)
+	} else {
+		// html render
+		renderDatapack(c, lang, datapack)
+	}
 }
 func datapackRand(c *gin.Context) {
 	lang := getLanguage(c)
 	datapack := GetRandDatapack(lang)
-	// html render
-	renderDatapack(c, lang, datapack)
+	// api service
+	api := c.Query("api")
+	if api != "" {
+		queryAPI(c, datapack)
+	} else {
+		// html render
+		renderDatapack(c, lang, datapack)
+	}
 }
 func authorList(c *gin.Context) {
 	name := c.Query("author")
 	lang := getLanguage(c)
 	p := getPage(c)
 	authors, total := ListAuthors(p, name)
-	// html render
-	renderAuthors(c, p, total, lang, authors)
+	// api service
+	api := c.Query("api")
+	if api != "" {
+		queryAPI(c, authors)
+	} else {
+		// html render
+		renderAuthors(c, p, total, lang, authors)
+	}
 }
 func author(c *gin.Context) {
 	id := c.Param("id")
 	p := getPage(c)
 	lang := getLanguage(c)
 	author := GetAuthor(lang, id)
+	// api service
+	api := c.Query("api")
 	// html render
 	if author == nil { // No Result
 		authors, total := ListAuthors(p, id)
-		renderAuthors(c, p, total, lang, authors)
+		if api != "" {
+			queryAPI(c, authors)
+		} else {
+			renderAuthors(c, p, total, lang, authors)
+		}
 	} else {
-		renderAuthor(c, lang, author)
+		if api != "" {
+			queryAPI(c, author)
+		} else {
+			renderAuthor(c, lang, author)
+		}
 	}
 }
 func authorRand(c *gin.Context) {
 	lang := getLanguage(c)
 	author := GetRandAuthor(lang)
-	// html render
-	renderAuthor(c, lang, author)
+	// api service
+	api := c.Query("api")
+	if api != "" {
+		queryAPI(c, author)
+	} else {
+		// html render
+		renderAuthor(c, lang, author)
+	}
 }
 func tagList(c *gin.Context) {
 	name := c.Query("tag")
 	lang := getLanguage(c)
 	p := getPage(c)
 	tags, total := ListTags(lang, p, name)
-	// html render
-	renderTags(c, p, total, lang, tags)
+	// api service
+	api := c.Query("api")
+	if api != "" {
+		queryAPI(c, tags)
+	} else {
+		// html render
+		renderTags(c, p, total, lang, tags)
+	}
 }
 func tag(c *gin.Context) {
 	id := c.Param("id")
 	p := getPage(c)
 	lang := getLanguage(c)
 	tag := GetTag(lang, id)
+	// api service
+	api := c.Query("api")
 	// html render
 	if tag == nil { // No Result
 		tags, total := ListTags(lang, p, id)
-		renderTags(c, p, total, lang, tags)
+		if api != "" {
+			queryAPI(c, tags)
+		} else {
+			renderTags(c, p, total, lang, tags)
+		}
 	} else {
-		renderTag(c, lang, tag)
+		if api != "" {
+			queryAPI(c, tag)
+		} else {
+			renderTag(c, lang, tag)
+		}
 	}
 }
 func tagRand(c *gin.Context) {

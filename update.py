@@ -11,7 +11,7 @@ DC = datapack_collector(BASE_DIR + '/util/schema/mcbbs.json')
 versions = versions | DC.versions
 sources.append(DC.schema['id'])
 DB.info_import(DC.info_list)
-DB.download_img()
+#DB.download_img()
 
 # update sources and versions
 with open(BASE_DIR + '/templates/generic/combo-temp.tmpl', 'r', encoding='utf-8') as tmpl:
