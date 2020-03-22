@@ -59,9 +59,19 @@ function navigation(goal) {
             target.classList.add("sub");
         }
     } else {
+        let params = getQueryObject();
         if (goal == 'datapack') goal = '';
-        location.href = window.location.protocol + "//" + window.location.host + "/" + goal;
+        let url = window.location.protocol + "//" + window.location.host + "/" + goal;
+        if (params.hasOwnProperty('p')) url += "?language=" + params['language'];
+        if (goal == 'language') {
+            url += (params.hasOwnProperty('p')) ? "&" : "?" + "last=" + escape(window.location);
+        }
+        location.href = url;
     }
+}
+function set_language(id) {
+    let params = getQueryObject();
+    replaceParamVal('language', id.replace('-', '_'), unescape(params['last']));
 }
 
 function option_datapacks_default() {
@@ -281,8 +291,10 @@ function getQueryObject(url) {
     });
     return obj;
 }
-function replaceParamVal(paramName, replaceWith) {
-    var oUrl = this.location.href.toString();
+function replaceParamVal(paramName, replaceWith, url) {
+    var oUrl = url
+    if (url == null)
+        oUrl = this.location.href.toString();
     var re = eval('/('+ paramName+'=)([^&]*)/gi');
     var nUrl = oUrl.replace(re,paramName+'='+replaceWith);
     if (oUrl == nUrl) {

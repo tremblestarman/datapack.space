@@ -319,3 +319,18 @@ func tagRand(c *gin.Context) {
 	// html render
 	renderTag(c, lang, tag)
 }
+
+func language(c *gin.Context) {
+	languages := GetLanguages()
+	mapLang := make(map[string]string)
+	for k, v := range *languages {
+		mapLang[k] = v.(map[string]interface{})["name"].(string)
+	}
+	lang := getLanguage(c)
+	c.HTML(http.StatusOK, lang + "/language.html", gin.H {
+		//domain
+		"Domain": "languages",
+		//result-related
+		"languages": mapLang,
+	})
+}

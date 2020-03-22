@@ -1464,3 +1464,31 @@ hide_a:hover {
 .tag-unique .synonymous .tags .tag {
     margin-top: 0;
 }
+/* Language */
+.languages {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-around;
+    margin: 0 auto;
+    min-height: 300px;
+    width: 600px;
+    background-color: #101010;
+}
+.languages .language {
+    height: 48px;
+    width: 180px;
+    background-color: #804080;
+    text-align: center;
+    line-height: 48px;
+    font-size: 24px;
+    font-weight: 900;
+    color: #804080;
+    text-shadow: 0 0 12px rgba(32,32,32,0.9);
+    transition: all 0.5s;
+}
+.language:hover {
+    font-size: 28px;
+    background-color:  #603060;
+    cursor: pointer;
+}

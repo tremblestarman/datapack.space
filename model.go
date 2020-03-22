@@ -155,6 +155,18 @@ func Connect() {
 		fmt.Println(err)
 	}
 }
+func GetLanguages() *map[string]interface{} {
+	var languages map[string]interface{}
+	jstring, err := ioutil.ReadFile("util/languages.json")
+	if err != nil {
+		fmt.Println("languages.json: ", err)
+	}
+	err = json.Unmarshal(jstring, &languages)
+	if err != nil {
+		fmt.Println("languages.json -> map[string] err: ", err)
+	}
+	return &languages
+}
 // List
 func dateRange(sql *gorm.DB, dateRange int, col string) *gorm.DB {
 	switch dateRange {
@@ -205,7 +217,7 @@ func ListDatapacks(language string, page int, order string, source string, versi
 	sql = db.Model(&Datapack{}).
 		Select("distinct datapacks.*, datapacks." + name + " as name"). // Set Datapack Name
 		Preload("Tags", func(db *gorm.DB) *gorm.DB { // Preload Tags
-			return db.Select("*, tags." + tag + " as tag").Order("tags.type") // Set Tag Name & Set Order
+			return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag, tags.default_tag DESC") // Set Tag Name & Set Order
 		}).
 		Preload("Author") // Preload Author
 	sql = datapackFilter(sql, source, version, postTimeRange, updateTimeRange) // Filter, Using Joined Table
@@ -227,7 +239,7 @@ func GetDatapack(language string, id string) *Datapack {
 	sql.Model(&Datapack{}).
 		Select("distinct datapacks.*, datapacks." + name + " as name"). // Set Datapack Name
 		Preload("Tags", func(db *gorm.DB) *gorm.DB { // Preload Tags
-			return db.Select("*, tags." + tag + " as tag").Order("tags.type") // Set Tag Name & Set Order
+			return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag DESC") // Set Tag Name & Set Order
 		}).
 		Preload("Author"). // Preload Author
 		Where("datapacks.id = '" + id + "'").First(&datapacks)
@@ -327,7 +339,7 @@ func GetTag(language string, id string) *Tag {
 			return db.Select("*, datapacks." + name + " as name").Order("datapacks.post_time DESC") // Set Datapack Name & Set Order
 		}).
 		Preload("Datapacks.Tags", func(db *gorm.DB) *gorm.DB { // Preload Datapacks.Tags
-			return db.Select("*, tags." + tag + " as tag").Order("tags.type") // Set Tag Name & Set Order
+			return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag DESC") // Set Tag Name & Set Order
 		}).
 		Where("tags.id = '" + id + "'"). // Find Tag Id
 		First(&tags) // Find One
@@ -386,7 +398,7 @@ func GetAuthor(language string, id string) *Author {
 			return db.Select("*, datapacks." + name + " as name").Order("datapacks.post_time DESC") // Set Datapack Name & Set Order
 		}).
 		Preload("Datapacks.Tags", func(db *gorm.DB) *gorm.DB { // Preload Datapacks.Tags
-			return db.Select("*, tags." + tag + " as tag").Order("tags.type") // Set Tag Name & Set Order
+			return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag DESC") // Set Tag Name & Set Order
 		}).
 		Where("authors.id = '" + id + "'"). // Find Tag Id
 		First(&authors) // Find One
@@ -448,7 +460,7 @@ func SearchDatapacks(language string, page int, content string, source string, v
 	sql = db.Model(&Datapack{}).
 		Select("distinct datapacks.*, datapacks." + name + " as name"). // Set Datapack Name
 		Preload("Tags", func(db *gorm.DB) *gorm.DB { // Preload Tags
-			return db.Select("*, tags." + tag + " as tag").Order("tags.type") // Set Tag Name & Set Order
+			return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag DESC") // Set Tag Name & Set Order
 		}).
 		Preload("Author"). // Preload Author
 		Where(strings.Join(regexps, " OR ")) // Search
@@ -481,7 +493,7 @@ func AccurateSearchDatapacks(language string, page int, name string, intro strin
 	sql = db.Model(&Datapack{}).
 		Select("distinct datapacks.*, datapacks." + _name + " as name"). // Set Datapack Name
 		Preload("Tags", func(db *gorm.DB) *gorm.DB { // Preload Tags
-			return db.Select("*, tags." + tag + " as tag").Order("tags.type") // Set Tag Name & Set Order
+			return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag DESC") // Set Tag Name & Set Order
 		}).
 		Preload("Author"). // Preload Authors
 		Joins("JOIN authors ON datapacks.author_id = authors.id")

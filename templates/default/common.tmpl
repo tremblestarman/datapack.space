@@ -9,6 +9,12 @@
     {{template "default/authors_msg"}}
     {{else if eq .Domain "tags"}}
     {{template "default/tags_msg"}}
+    {{else if eq .Domain "languages"}}
+    {{template "default/languages_msg"}}
+    {{else if eq .Domain "guide"}}
+    {{template "default/guide_msg"}}
+    {{else if eq .Domain "about"}}
+    {{template "default/about_msg"}}
     {{else}}
     {{.Domain}}
     {{end}} - {{template "default/website_intro_msg"}}</title>
@@ -29,7 +35,7 @@ tag-palette
         <div class="sub-bar sub">
             <div class="navi" onclick="navigation('about')"><div class="ico"><img src="/bin/img/css/biome-about.png" alt=""/></div>{{template "default/about_msg"}}</div>
             <div class="navi" onclick="navigation('guide')"><div class="ico"><img src="/bin/img/css/biome-guide.png" alt=""/></div>{{template "default/guide_msg"}}</div>
-            <div class="navi" onclick="navigation('language')"><div class="ico"><img src="/bin/img/css/biome-language.png" alt=""/></div>{{template "default/language_msg"}}</div>
+            <div class="navi" onclick="navigation('language')"><div class="ico"><img src="/bin/img/css/biome-language.png" alt=""/></div>{{template "default/languages_msg"}}</div>
         </div>
         <div class="navi" onclick="navigation('more')"><div class="ico"><img src="/bin/img/css/biome-more.png" alt=""/></div>…</div>
         <div class="navi" onclick="navigation('tag')"><div class="ico"><img src="/bin/img/css/biome-tag.png" alt=""/></div>{{template "default/tags_msg"}}</div>

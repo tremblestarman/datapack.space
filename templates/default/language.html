@@ -1,0 +1,10 @@
+{{define "default/language.html"}}
+    {{template "default/header" .}}
+        <div class="languages">
+            <div class="language" onclick="set_language('default')">{{template "default/default"}}</div>
+        {{range $k, $v := .languages}}
+            <div class="language" onclick="set_language({{$k}})">{{$v}}</div>
+        {{end}}
+        </div>
+    <div class="languages" style="min-height: 48px; height: 96px; margin-top: 48px;"></div>
+{{end}}
