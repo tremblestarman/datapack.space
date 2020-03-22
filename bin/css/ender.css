@@ -396,6 +396,20 @@ svg.button:active {
     box-shadow: 0 0 20px 10px rgba(71, 33, 71, 0.6);
     position: relative;
 }
+.utter .guide-panel {
+    margin: 0 auto;
+    background: rgb(144, 100, 144);
+    box-shadow: 0 0 20px 10px rgba(118, 78, 118);
+    padding: 20px;
+    position: relative;
+}
+.utter .about-panel {
+    margin: 0 auto;
+    background: #202020;
+    box-shadow: 0 0 20px 10px rgba(24,24,24) inset;
+    padding: 20px;
+    position: relative;
+}
 .pillar {
     height: 100%;
     width: 8px;
@@ -1473,7 +1487,7 @@ hide_a:hover {
     margin: 0 auto;
     min-height: 300px;
     width: 600px;
-    background-color: #101010;
+    background-color: #202020;
 }
 .languages .language {
     height: 48px;
@@ -1492,3 +1506,13 @@ hide_a:hover {
     background-color:  #603060;
     cursor: pointer;
 }
+/* Guide */
+.guide-panel {
+    position: relative;
+}
+.guide-link {
+    position: absolute;
+    left: 600px;
+    top: 20px;
+}
+/* About */

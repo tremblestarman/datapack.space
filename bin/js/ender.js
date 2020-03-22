@@ -6,13 +6,22 @@ function jump(href, target) {
     }
 }
 function jump_datapack(id) {
-    location.href = window.location.protocol + "//" + window.location.host + "/datapack/" + id;
+    let params = getQueryObject();
+    let url = window.location.protocol + "//" + window.location.host + "/datapack/" + id;
+    if (params.hasOwnProperty('language')) url += "?language=" + params['language'];
+    location.href = url;
 }
 function jump_tag(id) {
-    location.href = window.location.protocol + "//" + window.location.host + "/tag/" + id;
+    let params = getQueryObject();
+    let url = window.location.protocol + "//" + window.location.host + "/tag/" + id;
+    if (params.hasOwnProperty('language')) url += "?language=" + params['language'];
+    location.href = url;
 }
 function jump_author(id) {
-    location.href = window.location.protocol + "//" + window.location.host + "/author/" + id;
+    let params = getQueryObject();
+    let url = window.location.protocol + "//" + window.location.host + "/author/" + id;
+    if (params.hasOwnProperty('language')) url += "?language=" + params['language'];
+    location.href = url;
 }
 
 function load() {
@@ -62,16 +71,16 @@ function navigation(goal) {
         let params = getQueryObject();
         if (goal == 'datapack') goal = '';
         let url = window.location.protocol + "//" + window.location.host + "/" + goal;
-        if (params.hasOwnProperty('p')) url += "?language=" + params['language'];
+        if (params.hasOwnProperty('language')) url += "?language=" + params['language'];
         if (goal == 'language') {
-            url += (params.hasOwnProperty('p')) ? "&" : "?" + "last=" + escape(window.location);
+            url += ((params.hasOwnProperty('language')) ? "&" : "?") + "last=" + escape(window.location);
         }
         location.href = url;
     }
 }
 function set_language(id) {
     let params = getQueryObject();
-    replaceParamVal('language', id.replace('-', '_'), unescape(params['last']));
+    replaceParamVal('language', id.replace('-', '_'), unescape(params['last']), false);
 }
 
 function option_datapacks_default() {
@@ -291,13 +300,13 @@ function getQueryObject(url) {
     });
     return obj;
 }
-function replaceParamVal(paramName, replaceWith, url) {
+function replaceParamVal(paramName, replaceWith, url, incremental) {
     var oUrl = url
-    if (url == null)
-        oUrl = this.location.href.toString();
+    if (url == null) oUrl = this.location.href.toString();
+    if (incremental == null) incremental = true;
     var re = eval('/('+ paramName+'=)([^&]*)/gi');
     var nUrl = oUrl.replace(re,paramName+'='+replaceWith);
-    if (oUrl == nUrl) {
+    if (oUrl == nUrl && incremental) {
         if (nUrl.indexOf("?") != -1) {
             nUrl += "&" + paramName + "=" + replaceWith;
         } else {

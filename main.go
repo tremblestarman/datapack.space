@@ -29,5 +29,7 @@ func main() {
 	r.GET("/tag/:id", tag)
 	r.GET("/random/tag", tagRand)
 	r.GET("/language", language)
+	r.GET("/guide", guide)
+	r.GET("/about", about)
 	_ = r.Run(":8080")
 }

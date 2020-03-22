@@ -334,3 +334,17 @@ func language(c *gin.Context) {
 		"languages": mapLang,
 	})
 }
+func guide(c *gin.Context) {
+	lang := getLanguage(c)
+	c.HTML(http.StatusOK, lang + "/guide.html", gin.H {
+		//domain
+		"Domain": "guide",
+	})
+}
+func about(c *gin.Context) {
+	lang := getLanguage(c)
+	c.HTML(http.StatusOK, lang + "/about.html", gin.H {
+		//domain
+		"Domain": "about",
+	})
+}
