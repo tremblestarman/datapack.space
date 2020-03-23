@@ -1,0 +1,68 @@
+{{define "zh_CN/tags.html"}}
+    {{template "zh_CN/header" .}}
+    {{template "zh_CN/page_turner_top" .}}
+    <div class="options folded" id="tag">
+        <div class="pillar left"></div>
+        <div class="pillar right"></div>
+        <div class="search-bar folded">
+            <div class="line" style="height: 52px;"><input class="search normal" id="normal-search" type="text" value="" onkeypress="search_tags_keyboard()"/>
+                {{template "icon/magnify" .}}
+            </div>
+        </div>
+    </div>
+    <div class="menu">
+        <div class="tag-panel tag-palette" style="--pillar: rgb(91, 63, 91);--pillar-shadow: rgba(106, 66, 106, 0.74);">
+            <div class="pillar left"></div>
+            <div class="pillar right"></div>
+            <div class="bottom" style="--pillar: rgb(71, 33, 71);--pillar-shadow: rgba(86, 46, 86, 0.74);">
+                <div class="pillar left" style="left:42px;"></div>
+                <div class="pillar right" style="left:842px;"></div>
+            </div>
+            {{if ne .NoResult true}}
+            <div class="tag-container">
+                <div class="grid">
+                    <div class="sizer"></div>
+                    {{range .Tags}}
+                        <div class="tag tag-{{.Type}}" id="{{.ID}}" onclick="jump_tag({{.ID}})" weight="{{.Quotation}}">{{.Tag | unescaped}} ({{.Quotation}})</div>
+                    {{end}}
+                </div>
+            </div>
+            <div class="bottom" style="--pillar: rgb(71, 33, 71);--pillar-shadow: rgba(86, 46, 86, 0.74);">
+                <div class="pillar left" style="left:42px;"></div>
+                <div class="pillar right" style="left:842px;"></div>
+            </div>
+            {{end}}
+        </div>
+    </div>
+    {{template "zh_CN/page_turner_bottom" .}}
+    <div class="footer-bar">
+        {{if .NoResult}}
+            <div id="no-result">???</div>
+        {{end}}
+    </div>
+    <link rel="stylesheet" href="/bin/css/noise.css" type="text/css"/>
+    {{template "zh_CN/footer"}}
+    <script src="/bin/js/masonry.min.js"></script>
+    <script>
+        option_tags_default();
+        var elements = document.getElementsByClassName('tag');
+        let min = elements[0].getAttribute("weight"),
+            max = elements[0].getAttribute("weight");
+        Array.prototype.forEach.call(elements, function(tag) {
+            let w = Number.parseInt(tag.getAttribute("weight"));
+            if (min > w) min = w;
+            if (max < w) max = w;
+        });
+        let delta = (max - min) / 9;
+        delta = (delta < 10) ? 1 : delta;
+        for (let i = elements.length - 1; i >= 0; i--) {
+            let w = Number.parseInt(elements[i].getAttribute("weight"));
+            elements[i].style.setProperty('--w', 'calc(' + (10 * Math.floor((w - min) / delta) + 10).toString() + '% - 6px)');
+        }
+        var msnry = new Masonry('.grid', {
+            itemSelector: '.tag',
+            columnWidth: '.sizer',
+            percentPosition: true
+        });
+    </script>
+{{end}}

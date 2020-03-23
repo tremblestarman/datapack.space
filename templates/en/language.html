@@ -1,0 +1,15 @@
+{{define "en/language.html"}}
+    {{template "en/header" .}}
+        <div class="languages">
+            <div class="language" onclick="set_language('default')">{{template "en/default"}}</div>
+        {{range $k, $v := .languages}}
+            <div class="language" onclick="set_language({{$k}})">{{$v}}</div>
+        {{end}}
+        </div>
+    <script src="/bin/js/particles.js"></script>
+    <script>
+        particlesJS.load('background', '/bin/js/mist-chorus.json', function() {
+            console.log('particles.js config loaded');
+        });
+    </script>
+{{end}}

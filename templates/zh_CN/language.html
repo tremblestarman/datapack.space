@@ -1,0 +1,15 @@
+{{define "zh_CN/language.html"}}
+    {{template "zh_CN/header" .}}
+        <div class="languages">
+            <div class="language" onclick="set_language('default')">{{template "zh_CN/default"}}</div>
+        {{range $k, $v := .languages}}
+            <div class="language" onclick="set_language({{$k}})">{{$v}}</div>
+        {{end}}
+        </div>
+    <script src="/bin/js/particles.js"></script>
+    <script>
+        particlesJS.load('background', '/bin/js/mist-chorus.json', function() {
+            console.log('particles.js config loaded');
+        });
+    </script>
+{{end}}

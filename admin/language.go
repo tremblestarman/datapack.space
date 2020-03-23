@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 type Language struct {
@@ -18,6 +20,8 @@ type Language struct {
 var h = flag.Bool("h", false, "help")
 var c = flag.Bool("c", false, "create a new language")
 var d = flag.Bool("d", false, "delete a language")
+var u = flag.Bool("u", false, "update a language")
+var a = flag.Bool("a", false, "select all")
 var id = flag.String("id", "", "the id of the language")
 var name = flag.String("name", "", "the name of the language")
 
@@ -26,15 +30,29 @@ func GetLanguages(parent string) *map[string]Language {
 	jstring, err := ioutil.ReadFile(parent + "\\util\\languages.json")
 	if err != nil {
 		fmt.Println("languages.json: ", err)
+		os.Exit(1)
 	}
 	err = json.Unmarshal(jstring, &languages)
 	if err != nil {
 		fmt.Println("languages.json -> map[Language] err: ", err)
+		os.Exit(1)
 	}
-	fmt.Println("loaded", parent + "\\util\\languages.json")
+	fmt.Println("loaded", parent+"\\util\\languages.json")
 	return &languages
 }
-func FileCopy(src, dst string) error {
+func WriteLanguage(parent string, languages *map[string]Language) {
+	jstring, err := json.Marshal(languages)
+	if err != nil {
+		fmt.Println("map[Language] -> languages.json err: ", err)
+		os.Exit(1)
+	}
+	err = ioutil.WriteFile(parent+"\\util\\languages.json", jstring, os.ModeAppend)
+	if err != nil {
+		fmt.Println("languages.json: ", err)
+		os.Exit(1)
+	}
+}
+func FileCopy(src, dst string, id string) error {
 	var err error
 	var srcfd *os.File
 	var dstfd *os.File
@@ -59,12 +77,15 @@ func FileCopy(src, dst string) error {
 
 	tmpl, err := ioutil.ReadFile(dst)
 	if err != nil {
-		fmt.Println(dst + ": ", err)
+		fmt.Println(dst+": ", err)
 	}
-	ioutil.WriteFile(dst, tmpl, os.ModeAppend)
+	err = ioutil.WriteFile(dst, bytes.ReplaceAll(tmpl, []byte("default/"), []byte(strings.ReplaceAll(id, "-", "_")+"/")), os.ModeAppend)
+	if err != nil {
+		fmt.Println(dst+": ", err)
+	}
 	return os.Chmod(dst, srcinfo.Mode())
 }
-func DirCopy(src string, dst string) error {
+func DirCopy(src string, dst string, id string) error {
 	var err error
 	var fds []os.FileInfo
 	var srcinfo os.FileInfo
@@ -85,11 +106,11 @@ func DirCopy(src string, dst string) error {
 		dstfp := path.Join(dst, fd.Name())
 
 		if fd.IsDir() {
-			if err = DirCopy(srcfp, dstfp); err != nil {
+			if err = DirCopy(srcfp, dstfp, id); err != nil {
 				fmt.Println(err)
 			}
 		} else {
-			if err = FileCopy(srcfp, dstfp); err != nil {
+			if err = FileCopy(srcfp, dstfp, id); err != nil {
 				fmt.Println(err)
 			}
 		}
@@ -98,14 +119,14 @@ func DirCopy(src string, dst string) error {
 }
 
 func main() {
-	parent, err := filepath.Abs(filepath.Dir(filepath.Dir(os.Args[0])))
+	parent, err := filepath.Abs("..")
 	if err != nil {
 		fmt.Println(err)
 	}
 	languages := GetLanguages(parent)
 	flag.Usage = func() {
 		_, err := fmt.Fprintf(os.Stderr, `language:
-Usage: language -c [-id id] [-name name] | -d [-id id]
+Usage: language -c [-id id] [-name name] | -d [-id id] | -u [-a | -id id]
 Options:
 `)
 		if err != nil {
@@ -114,6 +135,10 @@ Options:
 		flag.PrintDefaults()
 	}
 	flag.Parse()
+	if *id == "default" || *id == "generic" {
+		fmt.Println("id can't be '" + *id + "'")
+		os.Exit(2)
+	}
 	if *h { // Help
 		flag.Usage()
 	}
@@ -127,11 +152,56 @@ Options:
 			fmt.Println(*id, "language already exists")
 			os.Exit(2)
 		}
-		(*languages)[*id] = Language{Name:*name}
-		err := DirCopy(parent + "\\templates\\default", parent + "\\templates\\" + *id)
+		(*languages)[*id] = Language{Name: *name}
+		err := DirCopy(parent+"\\templates\\default", parent+"\\templates\\"+strings.ReplaceAll(*id, "-", "_"), *id)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
+		}
+		WriteLanguage(parent, languages)
+		fmt.Println(*id, "created")
+	}
+	if *u { // Update
+		if *id == "" && !*a {
+			fmt.Println("the language to update should have id")
+			os.Exit(2)
+		}
+		if *id != "" {
+			_, ok := (*languages)[*id]
+			if !ok {
+				fmt.Println(*id, "language does not exist")
+				os.Exit(2)
+			}
+		}
+		var updates []string
+		if *a {
+			for i, _ := range *languages {
+				updates = append(updates, i)
+			}
+		} else {
+			updates = append(updates, *id)
+		}
+		for _, i := range updates { // Save translation & Remove & Copy & Write translation
+			dir := parent + "\\templates\\" + strings.ReplaceAll(i, "-", "_")
+			tmpl, err := ioutil.ReadFile(dir + "\\translation.tmpl") //save
+			if err != nil {
+				fmt.Println(dir+"\\translation.tmpl"+": ", err)
+			}
+			err = os.RemoveAll(dir) //remove
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			err = DirCopy(parent+"\\templates\\default", dir, i) //copy
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			err = ioutil.WriteFile(dir+"\\translation.tmpl", tmpl, os.ModeAppend) //write
+			if err != nil {
+				fmt.Println(dir+"\\translation.tmpl"+": ", err)
+			}
+			fmt.Println(i, "updated")
 		}
 	}
 	if *d { // Delete
@@ -145,10 +215,12 @@ Options:
 			os.Exit(2)
 		}
 		delete(*languages, *id)
-		err := os.RemoveAll(parent + "\\templates\\" + *id)
+		err := os.RemoveAll(parent + "\\templates\\" + strings.ReplaceAll(*id, "-", "_"))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+		WriteLanguage(parent, languages)
+		fmt.Println(*id, "deleted")
 	}
 }

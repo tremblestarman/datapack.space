@@ -236,6 +236,8 @@ class datapack_db:
                 except:
                     print("translation error.")
                 print(k, ':translated', '"', info['default_name'], '"', 'to', '"', info['name_' + k], '"')
+            else:
+                info['name_' + k] = pre_names[i]
             i += 1
     def _incremental_update(self, info: dict, previous: list):
         if info['post_time'] == info['update_time']:

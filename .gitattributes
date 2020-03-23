@@ -1,3 +1,7 @@
 *.css linguist-vendored
 *.scss linguist-vendored
 * text=auto
+
+/templates/* linguist-generated
+/templates/default/* linguist-language=Html
+/templates/generic/* linguist-language=Html

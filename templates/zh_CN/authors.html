@@ -1,0 +1,144 @@
+{{define "zh_CN/authors.html"}}
+    {{template "zh_CN/header" .}}
+    {{template "zh_CN/page_turner_top" .}}
+    <div class="options folded" id="author">
+        <div class="pillar left"></div>
+        <div class="pillar right"></div>
+        <div class="search-bar folded">
+            <div class="line" style="height: 52px;"><input class="search normal" id="normal-search" type="text" value="" onkeypress="search_authors_keyboard()"/>
+                {{template "icon/magnify" .}}
+            </div>
+        </div>
+    </div>
+    <div class="menu">
+        <div class="author-panel datapack-palette" style="--pillar: rgb(78, 78, 118); --pillar-shadow: rgba(62, 62, 98, 0.74);">
+            <div class="pillar left"></div>
+            <div class="pillar right"></div>
+            <div class="bottom" style="--pillar: rgb(78, 78, 118); --pillar-shadow: rgba(62, 62, 98, 0.83);">
+                <div class="pillar left"></div>
+                <div class="pillar right"></div>
+            </div>
+            {{if ne .NoResult true}}
+            <div style="display:flex; position: relative; justify-content: center; height: 160px;">
+                <em id="end_crystal" style="position: absolute; left: 400px; top: 80px; height: 0; width: 0;"></em>
+                <img src="/bin/img/css/end_crystal_slateless.gif" style="height: 236px;"/>
+            </div>
+            <div class="author-container">
+                {{range .Authors}}
+                    <div class="author" id="{{.ID}}" onclick="jump_author({{.ID}})" onmouseover="updateLine()" onmouseleave="removeLine()">
+                        <em class="anchor" style="position: absolute; left: 72px; top: 42px; height: 0; width: 0;"></em>
+                        <div class="back"></div>
+                        <div class="avatar"><img src="bin/img/author/{{.ID}}.png" alt=""/></div>
+                        <span class="name">{{.AuthorName | unescaped}}</span>
+                    </div>
+                {{end}}
+            </div>
+            <div class="bottom" style="--pillar: rgb(78, 78, 118); --pillar-shadow: rgba(62, 62, 98, 0.83);">
+                <div class="pillar left"></div>
+                <div class="pillar right"></div>
+            </div>
+            {{end}}
+        </div>
+    </div>
+    {{template "zh_CN/page_turner_bottom" .}}
+    <div class="footer-bar">
+        {{if .NoResult}}
+            <div id="no-result">???</div>
+        {{end}}
+    </div>
+    <link rel="stylesheet" href="/bin/css/noise.css" type="text/css"/>
+    {{template "zh_CN/footer"}}
+    <style type="text/css">
+        @keyframes beam {
+            0% {
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(-28px);
+            }
+            100% {
+                transform: translateX(0);
+            }
+        }
+        #line {
+            opacity: 1;
+            height: var(--l);
+            width: 3px;
+            overflow: hidden;
+            -moz-transform: rotate(var(--a));
+            -webkit-transform: rotate(var(--a));
+            -o-transform: rotate(var(--a));
+            -ms-transform: rotate(var(--a));
+            position: absolute;
+            top: var(--y);
+            left: var(--x);
+            pointer-events: none;
+        }
+        #line.hide {
+            opacity: 0;
+        }
+        #line .bg {
+            position: absolute;
+            height: 100%;
+            width: 32px;
+            background: transparent url('/bin/img/css/end_crystal_beam.png') repeat 0 0;
+            animation: beam .75s linear infinite;
+            pointer-events: none;
+        }
+    </style>
+    <script>
+        option_authors_default();
+
+        let end_crystal = document.getElementById("end_crystal");
+        let line = document.createElement("div"),
+            bg = document.createElement("div");
+        line.classList.add('hide');
+        line.id = 'line';
+        bg.classList.add('bg');
+        line.appendChild(bg);
+        document.body.appendChild(line);
+
+        function modifyLineElement(x, y, length, angle) {
+            line.setAttribute('style', '--l:' + length + 'px; --a:' + angle + 'rad; --x:' + x + 'px; --y:' + y + 'px;');
+            if (line.classList.contains('hide')) line.classList.remove('hide');
+        }
+        function setLine(x1, y1, x2, y2) {
+            let a = x1 - x2,
+                b = y1 - y2,
+                c = Math.sqrt(a * a + b * b),
+                sx = (x1 + x2) / 2,
+                sy = (y1 + y2) / 2,
+                y = sy - c / 2,
+                alpha = Math.PI * 3 / 2 - Math.atan2(-b, a);
+            return modifyLineElement(sx, y, c, alpha);
+        }
+        function updateLine(target) {
+            function getElementTop(element) {
+                var actTop = element.offsetTop;
+                var current = element.offsetParent;
+                while(current !== null){
+                    actTop += current.offsetTop;
+                    current = current.offsetParent;
+                }
+                return actTop;
+            }
+            if (event != null) target = event.currentTarget.children[0];
+            event.currentTarget.children[1].classList.add('show');
+            event.currentTarget.children[2].classList.add('show');
+            cancelAnimationFrame(timer);
+            timer = requestAnimationFrame(function fn(){
+                setLine(end_crystal.getBoundingClientRect().left + document.body.scrollLeft,
+                    186,
+                    target.getBoundingClientRect().left + document.body.scrollLeft,
+                    getElementTop(target));
+                timer = requestAnimationFrame(fn);
+            });
+        }
+        function removeLine() {
+            event.currentTarget.children[1].classList.remove('show');
+            event.currentTarget.children[2].classList.remove('show');
+            cancelAnimationFrame(timer);
+            if (!line.classList.contains('hide')) line.classList.add('hide');
+        }
+    </script>
+{{end}}

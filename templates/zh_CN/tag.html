@@ -1,0 +1,52 @@
+{{define "zh_CN/tag.html"}}
+    {{template "zh_CN/header" .}}
+    <div class="tag-unique" style="--pillar: rgb(91, 63, 91);--pillar-shadow: rgba(106, 66, 106, 0.74);">
+        <div class="pillar left"></div>
+        <div class="pillar right"></div>
+        <div class="bottom" style="--pillar: rgb(71, 33, 71);--pillar-shadow: rgba(86, 46, 86, 0.74);">
+            <div class="pillar left" style="left:42px;"></div>
+            <div class="pillar right" style="left:842px;"></div>
+            <div class="tag tag-{{.Tag.Type}}">{{.Tag.Tag | unescaped}}</div>
+        </div>
+        <div class="element tag" id="{{.Tag.ID}}">
+            <div class="info">
+                <div class="language stats">{{template "zh_CN/language_tag"}} : {{.Tag.DefaultLang}}</div>
+                <div class="counter stats">{{template "zh_CN/counter_tag_msg"}} : {{.TotalCount}}</div>
+            </div>
+            {{if gt .SynonymousCount 0}}
+                <div class="synonymous">
+                    <div class="title">{{template "zh_CN/synonymous_tag"}}</div>
+                    <div class="tags">
+                        {{range .Synonymous}}
+                            <div class="tag tag-{{.Type}}" onclick="jump_tag({{.ID}})">{{.Tag | unescaped}}</div>
+                        {{end}}
+                    </div>
+                </div>
+            {{end}}
+            <div class="datapacks result">
+                {{range .Tag.Datapacks}}
+                    <div class="datapack-short">
+                        <div class="name" onclick="jump_datapack('{{.ID}}')">{{.Name}}</div>
+                        <div class="tags">
+                            {{range .Tags}}
+                                <div class="tag tag-{{.Type}}" onclick="jump_tag({{.ID}})">{{.Tag | unescaped}}</div>
+                            {{end}}
+                        </div>
+                        <div class="_goto mask-attach" onclick="jump_datapack('{{.ID}}')"></div>
+                    </div>
+                {{end}}
+            </div>
+        </div>
+        <div class="bottom" style="--pillar: rgb(71, 33, 71);--pillar-shadow: rgba(86, 46, 86, 0.74);">
+            <div class="pillar left" style="left:42px;"></div>
+            <div class="pillar right" style="left:842px;"></div>
+            <div class="tag tag-{{.Tag.Type}}">{{.Tag.Tag | unescaped}}</div>
+        </div>
+    </div>
+    <script src="/bin/js/particles.js"></script>
+    <script>
+        particlesJS.load('background', '/bin/js/mist-chorus.json', function() {
+            console.log('particles.js config loaded');
+        });
+    </script>
+{{end}}

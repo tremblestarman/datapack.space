@@ -79,8 +79,9 @@ function navigation(goal) {
     }
 }
 function set_language(id) {
-    let params = getQueryObject();
-    replaceParamVal('language', id.replace('-', '_'), unescape(params['last']), false);
+    let url = unescape(getQueryObject()['last']);
+    if (id === "default") removeGO('language', url);
+    else replaceGO('language', id.replace('-', '_'), url);
 }
 
 function option_datapacks_default() {
@@ -239,7 +240,7 @@ function next_page() {
         loading();
     },500);
     setTimeout(function(){
-        replaceParamVal("p", page + 1)
+        replaceGO("p", page + 1)
     },500);
 }
 function last_page() {
@@ -251,7 +252,7 @@ function last_page() {
         loading();
     },500);
     setTimeout(function(){
-        replaceParamVal("p", page - 1)
+        replaceGO("p", page - 1)
     },500);
 }
 function to_page() {
@@ -266,7 +267,7 @@ function to_page() {
         loading();
     },500);
     setTimeout(function(){
-        replaceParamVal("p", num)
+        replaceGO("p", num)
     },500);
 }
 
@@ -300,19 +301,31 @@ function getQueryObject(url) {
     });
     return obj;
 }
-function replaceParamVal(paramName, replaceWith, url, incremental) {
-    var oUrl = url
-    if (url == null) oUrl = this.location.href.toString();
-    if (incremental == null) incremental = true;
-    var re = eval('/('+ paramName+'=)([^&]*)/gi');
-    var nUrl = oUrl.replace(re,paramName+'='+replaceWith);
-    if (oUrl == nUrl && incremental) {
-        if (nUrl.indexOf("?") != -1) {
-            nUrl += "&" + paramName + "=" + replaceWith;
-        } else {
-            nUrl += "?" + paramName + "=" + replaceWith;
-        }
+function removeUrlParam(paramName, url) {
+    return url
+        .replace(new RegExp('[?&]' + paramName + '=[^&#]*(#.*)?$'), '$1')
+        .replace(new RegExp('([?&])' + paramName + '=[^&]*&'), '$1');
+}
+function removeGO(paramName, url) {
+    if (url == null) url = this.location.href.toString();
+    let nUrl = removeUrlParam(paramName, url);
+    this.location = nUrl;
+    window.location.href = nUrl;
+}
+function replaceUrlParam(paramName, paramValue, url) {
+    if (paramValue == null) {
+        paramValue = '';
     }
+    var pattern = new RegExp('\\b('+paramName+'=).*?(&|#|$)');
+    if (url.search(pattern)>=0) {
+        return url.replace(pattern,'$1' + paramValue + '$2');
+    }
+    url = url.replace(/[?#]$/,'');
+    return url + (url.indexOf('?')>0 ? '&' : '?') + paramName + '=' + paramValue;
+}
+function replaceGO(paramName, replaceWith, url) {
+    if (url == null) url = this.location.href.toString();
+    let nUrl = replaceUrlParam(paramName, replaceWith, url);
     this.location = nUrl;
     window.location.href = nUrl;
 }

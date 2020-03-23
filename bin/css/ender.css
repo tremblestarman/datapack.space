@@ -1501,7 +1501,7 @@ hide_a:hover {
     text-shadow: 0 0 12px rgba(32,32,32,0.9);
     transition: all 0.5s;
 }
-.language:hover {
+.languages .language:hover {
     font-size: 28px;
     background-color:  #603060;
     cursor: pointer;

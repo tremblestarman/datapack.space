@@ -1,0 +1,123 @@
+{{define "en/datapack.html"}}
+{{template "en/header" .}}
+    <div class="shulker-shell"><div class="shell-part" onclick="jump('{{.Datapack.Link}}', '_blank')" title="{{template "en/goto_link_msg"}}">{{template "en/goto_link_msg"}}</div></div>
+    <div class="datapack-unique"style="--pillar: rgb(124, 92, 124); --pillar-shadow: rgba(172, 123, 172, 0.74);">
+        <div class="pillar left"></div>
+        <div class="pillar right"></div>
+        <div class="shulker-top"></div>
+        <div class="element datapack" id="{{.Datapack.ID}}">
+            <div class="cover"
+            {{if ne .Datapack.CoverExists true}}
+                style="background-image: url('/bin/img/css/datapack_default.png');"
+            {{end}}>
+                <img {{if .Datapack.CoverExists}}src="/bin/img/cover/{{.Datapack.ID}}.png"{{end}} alt=""/>
+                <div class="mask closed" onclick="glass_pane_close()"></div>
+                <div class="thumb mask-attach" onclick="function thumb(uid) {
+                    return null;
+                }
+                thumb('{{.Datapack.ID}}');" title="{{template "en/end_crystal_msg"}} : {{.Datapack.Thumb}}" style="opacity: 0;"></div>
+                <div class="goto mask-attach" onclick="jump('{{.Datapack.Link}}', '_blank')" style="opacity: 0;"></div>
+            </div>
+            <div class="info">
+                <div class="name" onclick="jump('{{.Datapack.Link}}', '_blank')">{{.Datapack.Name | unescaped}}</div>
+                <div class="intro">
+                    <div class="time">{{template "en/post_at_msg"}} {{.Datapack.PostTimeString}} , {{template "en/update_at_msg"}} {{.Datapack.UpdateTimeString}}</div>
+                    <div class="text">{{.Datapack.FullContent | unescaped}}</div>
+                </div>
+            </div>
+            <div class="attachments">
+                <div class="author" id="{{.Datapack.AuthorID}}">
+                    <div class="avatar"><img src="/bin/img/author/{{.Datapack.AuthorID}}.png" alt="" onclick="jump_author({{.Datapack.AuthorID}})"/></div>
+                    <span class="name" onclick="jump_author({{.Datapack.AuthorID}})">{{.Datapack.Author.AuthorName | unescaped}}</span>
+                </div>
+                <div class="tags">
+                    {{range .Datapack.Tags}}
+                        {{if gt .Type 1}}
+                            <div class="tag tag-{{.Type}} invisible" onclick="jump_tag({{.ID}})">{{.Tag | unescaped}}</div>
+                        {{else}}
+                            <div class="tag tag-{{.Type}}" onclick="jump_tag({{.ID}})">{{.Tag | unescaped}}</div>
+                        {{end}}
+                    {{end}}
+                </div>
+                <div class="thumb"></div>
+            </div>
+        </div>
+        <div class="shulker-bottom"></div>
+    </div>
+    <div class="shulker-shell">
+        <div class="shell-part left" onclick="shulker_closing()" title="{{template "en/to_top_msg"}}"></div>
+        <div class="shell-part right" onclick="shulker_closing()" title="{{template "en/to_top_msg"}}"></div>
+    </div>
+    <script src="/bin/js/particles.js"></script>
+    <script type="text/javascript">
+        unfold_datapack({{.Datapack.ID}});
+        function height_fit(e) {
+            for (var target = e.target; target && target != this && target != document; target = target.parentNode) {
+                if (target.matches('.text')) {
+                    let datapack = document.getElementById({{.Datapack.ID}});
+                    let objs = datapack.children;
+                    let cover = objs[0];
+                    let intro = objs[1];
+                    let attachments = objs[2];
+                    let intro_height = Number(window.getComputedStyle(intro).getPropertyValue("height").replace("px",""));
+                    let attachments_height = Number(window.getComputedStyle(attachments).getPropertyValue("height").replace("px",""));
+                    attachments.style.top = (320 + intro_height) + "px";
+                    datapack.style.height = (320 + intro_height + attachments_height) + "px";
+                    break;
+                }
+            }
+        }
+        document.addEventListener('click', function(e) {
+            height_fit(e);
+        }, false);
+        function load_extra() {
+            height_fit(document.getElementById({{.Datapack.ID}}));
+        }
+        let elements = document.getElementsByTagName('hide_a');
+        Array.prototype.forEach.call(elements, function(hide_a) {
+            hide_a.title = '{{template "en/hide_a_msg"}}';
+        });
+        elements = document.getElementsByTagName('hide');
+        Array.prototype.forEach.call(elements, function(hide) {
+            hide.title = '{{template "en/hide_msg"}}';
+        });
+        particlesJS.load('background', '/bin/js/mist-shulker.json', function() {
+            console.log('particles.js config loaded');
+        });
+        function shulker_closing() {
+            let shulker = document.getElementsByClassName('datapack-unique')[0],
+                shulker_height = Number(window.getComputedStyle(shulker).getPropertyValue("height").replace("px",""));
+            function re_height() {
+                timer = requestAnimationFrame(function fn(){
+                    let c_height = Number(getComputedStyle(shulker).getPropertyValue("height").replace("px", ""));
+                    if(c_height < shulker_height){
+                        shulker.style.height = (c_height += 100) + "px";
+                        timer = requestAnimationFrame(fn);
+                    } else {
+                        shulker.style.height = "auto";
+                        shulker.classList.remove("closing");
+                        cancelAnimationFrame(timer);
+                    }
+                });
+            }
+            if (!shulker.classList.contains("closing")) {
+                shulker.classList.add("closing");
+                cancelAnimationFrame(timer);
+                timer = requestAnimationFrame(function fn(){
+                    let oTop = document.body.scrollTop || document.documentElement.scrollTop,
+                        c_height = Number(getComputedStyle(shulker).getPropertyValue("height").replace("px", ""));
+                    if(c_height >= 148) {
+                        if (oTop > 0) document.body.scrollTop = document.documentElement.scrollTop = oTop - 100;
+                        shulker.style.height = (c_height - 100) + "px";
+                        timer = requestAnimationFrame(fn);
+                    } else { //animation end
+                        shulker.style.height = "48px";
+                        cancelAnimationFrame(timer);
+                        setTimeout(re_height, 500); //call re_height function
+                    }
+                });
+            }
+        }
+    </script>
+{{template "en/footer"}}
+{{end}}
