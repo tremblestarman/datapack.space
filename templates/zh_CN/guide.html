@@ -1,9 +1,15 @@
 {{define "zh_CN/guide.html"}}
     {{template "zh_CN/header" .}}
-    <div class="guide-panel">
+    <div class="guide-panel doc">
+        <div class="guide-link doc-navigate">
+            {{template "zh_CN/guide-link"}}
+        </div>
         {{template "zh_CN/guide"}}
     </div>
-    <div class="guide-link">
-        {{template "zh_CN/guide-link"}}
-    </div>
+    >
+    <script>
+        function show_options() {
+            console.log("just a fake button.");
+        }
+    </script>
 {{end}}

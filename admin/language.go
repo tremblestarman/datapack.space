@@ -21,6 +21,7 @@ var h = flag.Bool("h", false, "help")
 var c = flag.Bool("c", false, "create a new language")
 var d = flag.Bool("d", false, "delete a language")
 var u = flag.Bool("u", false, "update a language")
+var r = flag.Bool("r", false, "reset a language")
 var a = flag.Bool("a", false, "select all")
 var id = flag.String("id", "", "the id of the language")
 var name = flag.String("name", "", "the name of the language")
@@ -161,7 +162,7 @@ Options:
 		WriteLanguage(parent, languages)
 		fmt.Println(*id, "created")
 	}
-	if *u { // Update
+	if *u || *r { // Update or Reset
 		if *id == "" && !*a {
 			fmt.Println("the language to update should have id")
 			os.Exit(2)
@@ -181,7 +182,7 @@ Options:
 		} else {
 			updates = append(updates, *id)
 		}
-		for _, i := range updates { // Save translation & Remove & Copy & Write translation
+		for _, i := range updates { // Save translation & Remove & Copy [& Write translation]
 			dir := parent + "\\templates\\" + strings.ReplaceAll(i, "-", "_")
 			tmpl, err := ioutil.ReadFile(dir + "\\translation.tmpl") //save
 			if err != nil {
@@ -197,11 +198,15 @@ Options:
 				fmt.Println(err)
 				os.Exit(1)
 			}
-			err = ioutil.WriteFile(dir+"\\translation.tmpl", tmpl, os.ModeAppend) //write
-			if err != nil {
-				fmt.Println(dir+"\\translation.tmpl"+": ", err)
+			if *u {
+				err = ioutil.WriteFile(dir+"\\translation.tmpl", tmpl, os.ModeAppend) //write
+				if err != nil {
+					fmt.Println(dir+"\\translation.tmpl"+": ", err)
+				}
+				fmt.Println(i, "updated")
+			} else if *r {
+				fmt.Println(i, "reseted")
 			}
-			fmt.Println(i, "updated")
 		}
 	}
 	if *d { // Delete

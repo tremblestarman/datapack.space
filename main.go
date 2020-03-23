@@ -31,5 +31,6 @@ func main() {
 	r.GET("/language", language)
 	r.GET("/guide", guide)
 	r.GET("/about", about)
+	r.POST("/thumb", thumbByID)
 	_ = r.Run(":8080")
 }

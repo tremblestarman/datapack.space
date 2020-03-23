@@ -550,3 +550,11 @@ func GetRandAuthor(language string) *Author {
 func GetRandTag(language string) *Tag {
 	return GetTag(language, GetRandID("tags"))
 }
+
+// Thumb
+func Thumb(table string, id string) {
+	err := db.Table(table).Where("id = ?", id).UpdateColumn("thumb", gorm.Expr("thumb + 1")).Error
+	if err != nil {
+		fmt.Println(err)
+	}
+}

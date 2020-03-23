@@ -399,15 +399,13 @@ svg.button:active {
 .utter .guide-panel {
     margin: 0 auto;
     background: rgb(144, 100, 144);
-    box-shadow: 0 0 20px 10px rgba(118, 78, 118);
-    padding: 20px;
+    box-shadow: 0 0 20px 10px rgb(118, 78, 118);
     position: relative;
 }
 .utter .about-panel {
     margin: 0 auto;
     background: #202020;
-    box-shadow: 0 0 20px 10px rgba(24,24,24) inset;
-    padding: 20px;
+    box-shadow: 0 0 20px 10px rgb(24,24,24) inset;
     position: relative;
 }
 .pillar {
@@ -1509,10 +1507,49 @@ hide_a:hover {
 /* Guide */
 .guide-panel {
     position: relative;
+    color: rgb(72, 36, 72);
+    padding: 20px 60px;
 }
 .guide-link {
-    position: absolute;
-    left: 600px;
+    border-bottom-color: rgba(72,72,72,0.3);
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-left-color: rgba(72,72,72,0.3);
+    border-left-style: solid;
+    border-left-width: 1px;
+}
+.doc-navigate {
+    position: relative;
+    clear: right;
+    float: right;
+    margin: 0 0 1em 1em;
+    padding: 0 0 10px 20px;
+    width: 200px;
     top: 20px;
+}
+.doc li {
+    list-style-type: circle;
+}
+.doc h1,h2,h3 {
+    overflow: hidden;
+    display: block;
+    margin-block-start: 0.5em;
+    margin-block-end: 0.1em;
+    margin-inline-start: 0;
+    margin-inline-end: 0;
+    font-weight: bold;
+    border-bottom-color: rgba(72,72,72,0.3);
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+}
+.doc p {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0;
+    margin-inline-end: 0;
+    font-size: 0.875em;
+    line-height: inherit;
+    margin: 0.5em 0;
 }
 /* About */

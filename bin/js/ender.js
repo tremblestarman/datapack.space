@@ -519,3 +519,12 @@ function glass_pane_close() {
         target.parentNode.children[3].style.opacity = "0";
     }
 }
+
+function thumb(table, id) {
+    var http = new XMLHttpRequest();
+    var url = window.location.protocol + "//" + window.location.host + "/thumb";
+    var params = "table=" + table + "&id=" + id;
+    http.open('POST', url, true);
+    http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    http.send(params);
+}

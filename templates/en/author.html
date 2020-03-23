@@ -19,7 +19,7 @@
                         <div class="tag tag-0" onclick="jump_tag({{.ID}})">{{.Tag | unescaped}}</div>
                     {{end}}
                 </div>
-                <div class="thumb mask-attach" onclick="function thumb(uid) {return null;}thumb('{{.Author.ID}}');" title="{{template "en/end_crystal_msg"}} : {{.Author.Thumb}}"></div>
+                <div class="thumb mask-attach" onclick="thumb('authors','{{.Author.ID}}');" title="{{template "en/end_crystal_msg"}} : {{.Author.Thumb}}"></div>
             </div>
             <div class="datapacks result">
                 {{range .Author.Datapacks}}

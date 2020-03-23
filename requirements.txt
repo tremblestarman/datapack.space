@@ -1,5 +1,4 @@
 cryptography
-jieba
 textrank4zh
 lxml
 bs4

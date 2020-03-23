@@ -1,9 +1,15 @@
 {{define "default/guide.html"}}
     {{template "default/header" .}}
-    <div class="guide-panel">
+    <div class="guide-panel doc">
+        <div class="guide-link doc-navigate">
+            {{template "default/guide-link"}}
+        </div>
         {{template "default/guide"}}
     </div>
-    <div class="guide-link">
-        {{template "default/guide-link"}}
-    </div>
+    >
+    <script>
+        function show_options() {
+            console.log("just a fake button.");
+        }
+    </script>
 {{end}}
