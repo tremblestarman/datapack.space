@@ -1,0 +1,92 @@
+{{define "zh_TW/datapacks.html"}}
+{{template "zh_TW/header" .}}
+    {{template "zh_TW/page_turner_top" .}}
+    <div class="options folded" id="datapack">
+        <div class="pillar left"></div>
+        <div class="pillar right"></div>
+        <div class="search-bar folded">
+            <div class="line" style="height: 52px;"><input class="search normal" id="normal-search" type="text" value="" onkeypress="search_datapacks_keyboard()"/>
+            {{template "icon/magnify" .}}
+            {{template "icon/triangle-arrow"}}
+            </div>
+            <div class="line hide" style="margin-left: 62px; width: 720px; height:28px;">
+                <label class="lab">数据包名</label><input class="search accurate" id="datapack-name" type="text" value="" onkeypress="search_datapacks_keyboard()"/>
+                <label class="lab">作者名</label><input class="search accurate" id="datapack-author" type="text" value="" onkeypress="search_datapacks_keyboard()"/>
+            </div>
+            <div class="line hide" style="margin-left: 62px; width: 720px; height:28px;">
+                <label class="lab">介绍内容</label><input class="search accurate double" id="datapack-intro" type="text" value="" onkeypress="search_datapacks_keyboard()"/>
+            </div>
+        </div>
+        <link rel="stylesheet" href="/bin/css/ender-dropdown.css" type="text/css"/>
+        <div class="combo-list">
+            {{template "zh_TW/combo-order"}}
+            {{template "combo/source"}}
+            {{template "combo/version"}}
+            {{template "zh_TW/combo-filter-post-time"}}
+            {{template "zh_TW/combo-filter-update-time"}}
+        </div>
+        <script type="text/javascript" src="/bin/js/ender-dropdown.js"></script>
+        <script type="text/javascript">
+            option_datapacks_default();
+        </script>
+    </div>
+    <div class="menu">
+        <div class="datapack-list" style="--pillar: rgb(124, 92, 124); --pillar-shadow: rgba(172, 123, 172, 0.74);">
+            <div class="pillar left"></div>
+            <div class="pillar right"></div>
+            {{range .Datapacks}}
+                <div class="bottom" style="--background: rgb(144, 101, 144); --arrow-shadow: rgba(176, 124, 176, 0.5); --pillar: rgb(98, 75, 98); --pillar-shadow: rgba(176, 124, 176, 0.5);">
+                    <div class="pillar left"></div>
+                    <span class="more folded" onclick="show_datapack({{.ID}})">
+                        {{template "icon/arrow-up"}}
+                    </span>
+                    <div class="pillar right"></div>
+                </div>
+                <div class="element datapack" id="{{.ID}}">
+                    <div class="cover"
+                    {{if ne .CoverExists true}}
+                        style="background-image: url('bin/img/css/datapack_default.png');"
+                    {{end}}>
+                        <img {{if .CoverExists}}src="bin/img/cover/{{.ID}}.png"{{end}} alt=""/>
+                        <div class="mask closed" onclick="glass_pane_close()"></div>
+                        <div class="thumb mask-attach" onclick="thumb('datapacks','{{.ID}}');" title="{{template "zh_TW/end_crystal_msg"}} : {{.Thumb}}" style="opacity: 0;"></div>
+                        <div class="goto mask-attach" onclick="jump_datapack('{{.ID}}')" style="opacity: 0;"></div>
+                    </div>
+                    <div class="info">
+                        <div class="name" onclick="jump_datapack('{{.ID}}')">{{.Name | unescaped}}</div>
+                        <div class="intro">
+                            <div class="time">{{template "zh_TW/post_at_msg"}} {{.PostTimeString}} , {{template "zh_TW/update_at_msg"}} {{.UpdateTimeString}}</div>
+                            <div class="text">{{.Intro | unescaped}}</div>
+                        </div>
+                    </div>
+                    <div class="attachments">
+                        <div class="author" id="{{.AuthorID}}">
+                            <div class="avatar"><img src="bin/img/author/{{.AuthorID}}.png" alt="" onclick="jump_author({{.AuthorID}})"/></div>
+                            <span class="name" onclick="jump_author({{.AuthorID}})">{{.Author.AuthorName | unescaped}}</span>
+                        </div>
+                        <div class="tags">
+                        {{range .Tags}}
+                            {{if gt .Type 1}}
+                            <div class="tag tag-{{.Type}} invisible" onclick="jump_tag({{.ID}})">{{.Tag | unescaped}}</div>
+                            {{else}}
+                            <div class="tag tag-{{.Type}}" onclick="jump_tag({{.ID}})">{{.Tag | unescaped}}</div>
+                            {{end}}
+                        {{end}}
+                        </div>
+                        <div class="thumb"></div>
+                    </div>
+                </div>
+            {{end}}
+        </div>
+    </div>
+    {{template "zh_TW/page_turner_bottom" .}}
+    <div class="footer-bar">
+    {{if .NoResult}}
+        <div id="no-result">???</div>
+    {{else}}
+        <div class="back-to-top" onclick="back_to_top()" title="{{template "zh_TW/to_top_msg"}}"></div>
+    {{end}}
+    </div>
+    <link rel="stylesheet" href="/bin/css/noise.css" type="text/css"/>
+{{template "zh_TW/footer"}}
+{{end}}

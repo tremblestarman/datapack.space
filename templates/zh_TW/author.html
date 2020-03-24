@@ -1,0 +1,50 @@
+{{define "zh_TW/author.html"}}
+    {{template "zh_TW/header" .}}
+    <div class="bottom author-bottom" style="--pillar: rgb(78, 78, 118); --pillar-shadow: rgba(62, 62, 98, 0.83);">
+        <div class="pillar left"></div>
+        <div class="pillar right"></div>
+    </div>
+    <div class="author-unique" style="--pillar: rgb(78, 78, 118); --pillar-shadow: rgba(62, 62, 98, 0.74);">
+        <div class="pillar left"></div>
+        <div class="pillar right"></div>
+        <div class="dragon"></div>
+        <div class="element author" id="{{.Author.ID}}">
+            <div class="info">
+                <div class="avatar"><img src="/bin/img/author/{{.Author.ID}}.png" alt=""/></div>
+                <span class="name">{{.Author.AuthorName | unescaped}}</span>
+                <span class="counter">{{template "zh_TW/counter_msg"}} : {{.TotalCount}}</span>
+                <span class="last-update">{{template "zh_TW/last_update_msg"}} : {{.LastUpdateTime}}</span>
+                <div class="tags">
+                    {{range .Sources}}
+                        <div class="tag tag-0" onclick="jump_tag({{.ID}})">{{.Tag | unescaped}}</div>
+                    {{end}}
+                </div>
+                <div class="thumb mask-attach" onclick="thumb('authors','{{.Author.ID}}');" title="{{template "zh_TW/end_crystal_msg"}} : {{.Author.Thumb}}"></div>
+            </div>
+            <div class="datapacks result">
+                {{range .Author.Datapacks}}
+                    <div class="datapack-short">
+                        <div class="name" onclick="jump_datapack('{{.ID}}')">{{.Name}}</div>
+                        <div class="tags">
+                        {{range .Tags}}
+                            <div class="tag tag-{{.Type}}" onclick="jump_tag({{.ID}})">{{.Tag | unescaped}}</div>
+                        {{end}}
+                        </div>
+                        <div class="_goto mask-attach" onclick="jump_datapack('{{.ID}}')"></div>
+                    </div>
+                {{end}}
+            </div>
+        </div>
+        <div class="dragon-bottom"></div>
+    </div>
+    <div class="bottom author-bottom" style="--pillar: rgb(78, 78, 118); --pillar-shadow: rgba(62, 62, 98, 0.83);">
+        <div class="pillar left"></div>
+        <div class="pillar right"></div>
+    </div>
+    <script src="/bin/js/particles.js"></script>
+    <script>
+        particlesJS.load('background', '/bin/js/mist-dragon.json', function() {
+            console.log('particles.js config loaded');
+        });
+    </script>
+{{end}}

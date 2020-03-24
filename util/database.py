@@ -6,7 +6,7 @@ filterwarnings('ignore',category=pymysql.Warning)
 BASE_DIR = os.path.dirname(__file__)
 socket.setdefaulttimeout(30)
 class translator:
-    limit = 100
+    limit = 50
     current_time = 0
     timeout = 60
     trans = Translator()
@@ -92,24 +92,19 @@ class datapack_db:
             self.cur.execute(datapack_tag)
             print('connect successfully')
             # add colums
-            for k, _ in self.languages.items():
-                operated = True
-                try:
-                    add_col = f'''ALTER TABLE datapacks ADD name_{k.replace('-','_')} TINYTEXT;'''
-                    self.cur.execute(add_col)
-                except:
-                    operated = False
-                if operated:
-                    print('datapacks added "', k.replace('-', '_'), '" colum')
-            for k, _ in self.languages.items():
-                operated = True
-                try:
-                    add_col = f'''ALTER TABLE tags ADD tag_{k.replace('-','_')} TINYTEXT;'''
-                    self.cur.execute(add_col)
-                except:
-                    operated = False
-                if operated:
-                    print('tags added "', k.replace('-', '_'), '" colum')
+            def alter(table: str, col: str, type: str):
+                for k, _ in self.languages.items():
+                    operated = True
+                    try:
+                        add_col = f'''ALTER TABLE {table} ADD {col}_{k.replace('-','_')} {type};'''
+                        self.cur.execute(add_col)
+                    except:
+                        operated = False
+                    if operated:
+                        print(f'{table} added "', k.replace('-', '_'), f'" of colum {col}')
+            alter('datapacks', 'name', 'TINYTEXT')
+            alter('datapacks', 'tags_str', 'TEXT')
+            alter('tags', 'tag', 'TINYTEXT')
             self.cur.execute('update tags set quotation = 0;')
             # preload
             self.cur.execute('select id from datapacks')
@@ -117,6 +112,7 @@ class datapack_db:
             self._datapack_removal = [j for i in res for j in i] if not res == None else None
             assert not self._datapack_removal == None
             print('preloaded successfully')
+            self.db.commit()
         except Exception as e:
             print('connect error:', e)
     def _author_insert(self, info: dict):
@@ -130,16 +126,25 @@ class datapack_db:
         avatar = '{info['author_avatar']}';'''
         self.cur.execute(author_insert)
         return str(aid)
-    def _tag_translate(self, tag: str, type: int, default_lang: str):
+    def _tag_translate(self, tid, tag: str, type: int, default_lang: str):
+        self.cur.execute("select " + ','.join(["tag_" + k.replace('-', '_') for k, _ in self.languages.items()]) + f" from tags where id = '{tid}'")
+        res = self.cur.fetchall()
+        exists = [j for i in res for j in i] if not res == None else []
         # not translated or updated
+        i = 0
         translated = {}
         for k, v in self.languages.items():
-            try:
-                translated[k] = tag if k == default_lang or type <= 1 else self.trans.translate(tag, k).lower()
-                if not (k == default_lang or type <= 1):
-                    print(k, ':translated', '"', tag, '"', 'to', '"', translated[k], '"')
-            except:
-                print("translation error.")
+            if not exists[i] == '':
+                translated[k] = exists[i]
+                print(k, ':had translated', '"', tag, '"')
+            else:
+                try:
+                    translated[k] = tag if k == default_lang or type <= 1 else self.trans.translate(tag, k).lower()
+                    if not (k == default_lang or type <= 1):
+                        print(k, ':translated', '"', tag, '"', 'to', '"', translated[k], '"')
+                except:
+                    print("translation error.")
+            i += 1
         return translated
     def _tag_insert(self, info: dict):
         tag_sort = [info['source'], info['game_version'], info['tag'], info['keywords']]
@@ -157,7 +162,7 @@ class datapack_db:
                 quotation = f"update tags set quotation = quotation + 1 where id = '{tid}';"
                 self.cur.execute(quotation)
                 return str(tid)
-            translated = self._tag_translate(_tag, _type, info['default_lang'])
+            translated = self._tag_translate(str(tid), _tag, _type, info['default_lang'])
             for k, _ in translated.items():
                 translated[k] = pymysql.escape_string(translated[k])
                 info["tags_strs_" + k].append(f'{_type}:{translated[k]},')
@@ -249,7 +254,8 @@ class datapack_db:
         tids = self._tag_insert(info)
         assert not tids == None
         did = uuid.uuid3(uuid.NAMESPACE_DNS, info['link'])
-        self.cur.execute("select post_time, default_name, " + ','.join(["name_" + k.replace('-', '_') for k, _ in self.languages.items()]) + f" from datapacks where id = '{did}'")
+        self.cur.execute("select post_time, default_name, " + ','.join(["name_" + k.replace(
+            '-', '_') for k, _ in self.languages.items()]) + f" from datapacks where id = '{did}'")
         res = self.cur.fetchall()
         exists = [j for i in res for j in i] if not res == None else []
         if not exists.__len__() == 0:
@@ -296,6 +302,7 @@ class datapack_db:
             did = str(self._datapack_insert(info))
             if did in self._datapack_removal:
                 self._datapack_removal.remove(did)
+            self.db.commit()
             print(did, ':', info['link'], 'has been imported into database successfully.')
         print('checking and deleting...')
         for i in range(0, self._datapack_removal.__len__()):

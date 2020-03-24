@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -228,4 +229,24 @@ Options:
 		WriteLanguage(parent, languages)
 		fmt.Println(*id, "deleted")
 	}
+	// Update GitAttributes
+	gitAttributes, err := ioutil.ReadFile(parent + "\\.gitattributes")
+	if err != nil {
+		os.Exit(1)
+	}
+	re, _ := regexp.Compile("\\n/templates/\\S*/\\* linguist-generated")
+	sAttributes := re.ReplaceAllString(string(gitAttributes[:]), "")
+	re, _ = regexp.Compile("\\s*$")
+	sAttributes = re.ReplaceAllString(sAttributes, "")
+	var sGenerated []string
+	for i, _ := range *languages {
+		sGenerated = append(sGenerated, "\n/templates/"+i+"/* linguist-generated")
+	}
+	gitAttributes = []byte(sAttributes + strings.Join(sGenerated, ""))
+	err = ioutil.WriteFile(parent+"\\.gitattributes", gitAttributes, os.ModeAppend)
+	if err != nil {
+		fmt.Println(".gitattributes: ", err)
+		os.Exit(1)
+	}
+	fmt.Println(".gitattributes updated.")
 }

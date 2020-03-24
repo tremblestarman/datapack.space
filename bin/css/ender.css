@@ -1482,9 +1482,9 @@ hide_a:hover {
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-around;
-    margin: 0 auto;
+    margin: 100px auto;
     min-height: 300px;
-    width: 600px;
+    width: 300px;
     background-color: #202020;
 }
 .languages .language {
@@ -1511,12 +1511,8 @@ hide_a:hover {
     padding: 20px 60px;
 }
 .guide-link {
-    border-bottom-color: rgba(72,72,72,0.3);
-    border-bottom-style: solid;
-    border-bottom-width: 1px;
-    border-left-color: rgba(72,72,72,0.3);
-    border-left-style: solid;
-    border-left-width: 1px;
+    border-bottom: rgba(72,72,72,0.3) solid 1px;
+    border-left: rgba(72,72,72,0.3) solid 1px;
 }
 .doc-navigate {
     position: relative;
@@ -1527,8 +1523,17 @@ hide_a:hover {
     width: 200px;
     top: 20px;
 }
+.doc-navigate ul {
+    margin-block-start: 0;
+    margin-block-end: 0;
+}
 .doc li {
+    margin-block-start: 0.75em;
     list-style-type: circle;
+}
+.doc-navigate ul li {
+    margin-block-start: 0;
+    font-size: 0.875em;
 }
 .doc h1,h2,h3 {
     overflow: hidden;
@@ -1537,10 +1542,13 @@ hide_a:hover {
     margin-block-end: 0.1em;
     margin-inline-start: 0;
     margin-inline-end: 0;
-    font-weight: bold;
-    border-bottom-color: rgba(72,72,72,0.3);
-    border-bottom-style: solid;
-    border-bottom-width: 1px;
+    font-weight: bold
+}
+.doc h1,h2 {
+    border-bottom: rgba(72,72,72,0.3) solid 1px;
+}
+.doc h2 {
+    border-bottom-color: rgba(72,72,72,0.1);
 }
 .doc p {
     display: block;

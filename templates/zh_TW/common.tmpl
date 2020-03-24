@@ -1,0 +1,82 @@
+{{define "zh_TW/header"}}
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>{{if eq .Domain "datapacks"}}
+    {{template "zh_TW/datapacks_msg"}}
+    {{else if eq .Domain "authors"}}
+    {{template "zh_TW/authors_msg"}}
+    {{else if eq .Domain "tags"}}
+    {{template "zh_TW/tags_msg"}}
+    {{else if eq .Domain "languages"}}
+    {{template "zh_TW/languages_msg"}}
+    {{else if eq .Domain "guide"}}
+    {{template "zh_TW/guide_msg"}}
+    {{else if eq .Domain "about"}}
+    {{template "zh_TW/about_msg"}}
+    {{else}}
+    {{.Domain}}
+    {{end}} - {{template "zh_TW/website_intro_msg"}}</title>
+    <script type="text/javascript" src="/bin/js/ender.js"></script>
+    <link rel="stylesheet" href="/bin/css/ender.css" type="text/css"/>
+</head>
+<body onload="load()">
+    <div id="background" class="{{if eq .Domain "datapacks"}}
+datapack-palette
+{{else if eq .Domain "authors"}}
+author-palette
+{{else if eq .Domain "tags"}}
+tag-palette
+{{end}}"></div>
+    <div id="loading">Loading World ...</div>
+    <div class="navi-bar folded" id="navi">
+        <div class="selection" onclick="show_navi_bar()"></div>
+        <div class="sub-bar sub">
+            <div class="navi" onclick="navigation('about')"><div class="ico"><img src="/bin/img/css/biome-about.png" alt=""/></div>{{template "zh_TW/about_msg"}}</div>
+            <div class="navi" onclick="navigation('guide')"><div class="ico"><img src="/bin/img/css/biome-guide.png" alt=""/></div>{{template "zh_TW/guide_msg"}}</div>
+            <div class="navi" onclick="navigation('language')"><div class="ico"><img src="/bin/img/css/biome-language.png" alt=""/></div>{{template "zh_TW/languages_msg"}}</div>
+        </div>
+        <div class="navi" onclick="navigation('more')"><div class="ico"><img src="/bin/img/css/biome-more.png" alt=""/></div>…</div>
+        <div class="navi" onclick="navigation('tag')"><div class="ico"><img src="/bin/img/css/biome-tag.png" alt=""/></div>{{template "zh_TW/tags_msg"}}</div>
+        <div class="navi" onclick="navigation('author')"><div class="ico"><img src="/bin/img/css/biome-author.png" alt=""/></div>{{template "zh_TW/authors_msg"}}</div>
+        <div class="navi" onclick="navigation('datapack')"><div class="ico"><img src="/bin/img/css/biome-datapack.png" alt=""/></div>{{template "zh_TW/datapacks_msg"}}</div>
+    </div>
+    <div class="utter {{if eq .Domain "datapacks"}}
+datapack-palette
+{{else if eq .Domain "authors"}}
+author-palette
+{{else if eq .Domain "tags"}}
+tag-palette
+{{end}}" id="utter">
+{{end}}
+
+{{define "zh_TW/footer"}}
+</div>
+</body>
+</html>
+{{end}}
+
+{{define "zh_TW/page_turner_top"}}
+<div class="page_turner folded"><div class="option-shower show"></div>{{template "icon/option"}}{{template "zh_TW/page_turner" .}}</div>
+{{end}}
+
+{{define "zh_TW/page_turner_bottom"}}
+<div class="page_turner">{{template "zh_TW/page_turner" .}}</div>
+{{end}}
+
+{{define "zh_TW/page_turner"}}
+<div class="pillar left"></div>
+<div class="pillar right"></div>
+{{if ne .NoResult true}}
+    {{if gt .Page 1}}
+    <div class="turn left" onclick="last_page()">{{template "icon/arrow-left"}}</div>
+    {{end}}
+    <div class="page-info">Page &nbsp;
+        <input class="page-goto" type="text" value="{{.Page}}" onkeypress="to_page()"/>
+        <span>{{.OffsetCount}} &nbsp; - &nbsp;{{.EndCount}} &nbsp; | &nbsp; {{.TotalCount}}</span></div>
+    {{if .PageNotEnd}}
+    <div class="turn right" onclick="next_page()">{{template "icon/arrow-right"}}</div>
+    {{end}}
+{{end}}
+{{end}}
