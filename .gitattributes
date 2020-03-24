@@ -1,6 +1,6 @@
 *.css linguist-vendored
 *.scss linguist-vendored
 * text=auto
-/templates/en/* linguist-generated
-/templates/zh-CN/* linguist-generated
-/templates/zh-TW/* linguist-generated
+templates/en/* linguist-generated
+templates/zh_CN/* linguist-generated
+templates/zh_TW/* linguist-generated

@@ -234,13 +234,13 @@ Options:
 	if err != nil {
 		os.Exit(1)
 	}
-	re, _ := regexp.Compile("\\n/templates/\\S*/\\* linguist-generated")
+	re, _ := regexp.Compile("\\ntemplates/\\S*/\\* linguist-generated")
 	sAttributes := re.ReplaceAllString(string(gitAttributes[:]), "")
 	re, _ = regexp.Compile("\\s*$")
 	sAttributes = re.ReplaceAllString(sAttributes, "")
 	var sGenerated []string
 	for i, _ := range *languages {
-		sGenerated = append(sGenerated, "\n/templates/"+i+"/* linguist-generated")
+		sGenerated = append(sGenerated, "\ntemplates/" + strings.ReplaceAll(i, "-", "_") + "/* linguist-generated")
 	}
 	gitAttributes = []byte(sAttributes + strings.Join(sGenerated, ""))
 	err = ioutil.WriteFile(parent+"\\.gitattributes", gitAttributes, os.ModeAppend)
