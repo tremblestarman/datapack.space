@@ -1,0 +1,160 @@
+{
+    "domain": "https://www.planetminecraft.com/",
+    "id": "planetminecraft",
+    "name": "PlanetMinecraft",
+    "lang": "en",
+    "scan": {
+        "type": "selenium",
+        "entrance": "https://www.planetminecraft.com/resources/data-packs/?order=order_latest&p=1",
+        "next_xpath": "//p[@class='white_btnset']/a[contains(@class,'pagination_next') and contains(@title,'Next Page')]"
+    },
+    "sleep": 2.5,
+    "timeout": 60,
+    "post_path": {
+        "ul": {
+            "class": "resource_list",
+            "li.": {
+                "class": "resource r-data",
+                "div": {
+                    "class": "r-info",
+                    "a": {
+                        "class": "r-title",
+                        "__entrance__": "href"
+                    }
+                }
+            }
+        }
+    },
+    "post_type": "url",
+    "info_collect": {
+        "name": {
+            "div": {
+                "id": "resource-title-text",
+                "h1": {
+                    "__name__": "."
+                }
+            }
+        },
+        "name_en": {
+            "div": {
+                "id": "resource-title-text",
+                "h1": {
+                    "__name__": "."
+                }
+            }
+        },
+        "author_uid": {
+            "div": {
+                "id": "author_id",
+                "__author_uid__": "."
+            }
+        },
+        "author_name": {
+            "div": {
+                "class": "mini-info",
+                "a": {
+                    "href": "/\\S+",
+                    "__author_name__": "title"
+                }
+            }
+        },
+        "author_avatar": {
+            "div": {
+                "class": "mini-info",
+                "img": {
+                    "class": "avatar_icon",
+                    "__author_avatar__": "src"
+                }
+            }
+        },
+        "version": {
+            "h2": {
+                "style": "padding-top:40px;",
+                "__version__": "."
+            }
+        },
+        "game_version": {
+            "table": {
+                "class": "resource-info",
+                "tr.": {
+                    "b": {
+                        "__game_version__": "."
+                    }
+                }
+            }
+        },
+        "tag": {
+            "div": {
+                "id": "item_tags",
+                "div.": {
+                    "class": "tag",
+                    "a": {
+                        "__tag__": "."
+                    }
+                }
+            }
+        },
+        "content_raw": {
+            "div": {
+                "id": "r-text-block",
+                "__content__": "."
+            }
+        },
+        "content_filtered": "auto",
+        "cover_img": {
+            "div": {
+                "id": "tab_image_gallery",
+                "img": {
+                    "__content__": "src"
+                }
+            }
+        },
+        "post_time": {
+            "div": {
+                "class": "post_date txt-subtle",
+                "abbr.1": {
+                    "class": "comment-date timeago",
+                    "__post_time__": "title"
+                }
+            }
+        },
+        "update_time": {
+            "div": {
+                "class": "post_date txt-subtle",
+                "abbr.0": {
+                    "class": "comment-date timeago",
+                    "__post_time__": "title"
+                }
+            }
+        }
+    },
+    "info_refine": {
+        "version": {
+            "remove": " Update Logs"
+        },
+        "game_version": {
+            "regex": {
+                "from": "1\\.(\\d+)",
+                "to": "1.%s"
+            }
+        },
+        "post_time": {
+            "remove": "-\\d\\d:\\d\\d",
+            "replace": {
+                "from": "T",
+                "to": " "
+            }
+        },
+        "update_time": {
+            "remove": "-\\d\\d:\\d\\d",
+            "replace": {
+                "from": "T",
+                "to": " "
+            }
+        }
+    },
+    "info_adapt": {
+        "game_version": "if game_version.__len__() > 1:\n    if game_version[0] > game_version[1]:\n        game_version[0], game_version[1] = game_version[1], game_version[0]\n    temp = []\n    v1 = game_version[0].split('.')\n    v2 = game_version[1].split('.')\n    for i in range(int(v1[1]), int(v2[1]) + 1):\n        temp.append(v1[0] + '.' + str(i))\n    game_version = temp",
+        "content_raw": "content_raw = '<link rel=\"stylesheet\" href=\"\/bin\/css\/planetminecraft.css\" type=\"text\/css\"\/>' + content_raw"
+    }
+}

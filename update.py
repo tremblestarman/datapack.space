@@ -1,4 +1,5 @@
 import os, json
+from time import sleep
 from util.collector import datapack_collector
 from util.database import datapack_db
 BASE_DIR = os.path.dirname(__file__)
@@ -6,12 +7,23 @@ versions = set()
 sources = []
 DB = datapack_db()
 
-# crawl and insert
-DC = datapack_collector(BASE_DIR + '/util/schema/mcbbs.json')
-versions = versions | DC.versions
-sources.append(DC.schema['id'])
-DB.info_import(DC.info_list)
-#DB.download_img()
+for schema in os.listdir(BASE_DIR + '/util/schema'):
+    # crawl and insert
+    if (schema == 'mcbbs.json'):
+        continue
+    DC = datapack_collector(BASE_DIR + '/util/schema/' + schema)
+    while DC.post_pool.__len__() > 0:
+        DC.analyze_all()
+        DB.info_import(DC.info_list)
+        DB.download_img()
+        DC.info_list.clear()
+        print('==== a package just have finished, sleep 10s to prevent being banned ====')
+        sleep(10)
+    versions = versions | DC.versions
+    sources.append(DC.schema['id'])
+    del DC
+# delete recordis that do not exist
+DB.info_delete_nonexistent()
 
 # update sources and versions
 with open(BASE_DIR + '/templates/generic/combo-temp.tmpl', 'r', encoding='utf-8') as tmpl:

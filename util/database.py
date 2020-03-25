@@ -134,7 +134,7 @@ class datapack_db:
         i = 0
         translated = {}
         for k, v in self.languages.items():
-            if not exists[i] == '':
+            if exists.__len__() > 0 and i < exists.__len__() and not exists[i] == '':
                 translated[k] = exists[i]
                 print(k, ':had translated', '"', tag, '"')
             else:
@@ -265,6 +265,7 @@ class datapack_db:
         intro = pymysql.escape_string('\n'.join(info['summrization'])) #escape summaries
         content_raw = pymysql.escape_string(info['content_raw']) #escape content
         info["default_tags_str"] = ''.join(info["default_tags_strs"])
+        info["default_name"] = pymysql.escape_string(info["default_name"])
         for k, _ in self.languages.items():
             info['name_' + k] = pymysql.escape_string(info['name_' + k])
             info["tags_str_" + k] = ''.join(info["tags_strs_" + k])
@@ -304,14 +305,6 @@ class datapack_db:
                 self._datapack_removal.remove(did)
             self.db.commit()
             print(did, ':', info['link'], 'has been imported into database successfully.')
-        print('checking and deleting...')
-        for i in range(0, self._datapack_removal.__len__()):
-            print(str(i + 1), '/', str(self._datapack_removal.__len__()))
-            rem = self._datapack_removal[i]
-            datapack_delete = f"delete from datapacks where id = '{rem}';"
-            self.cur.execute(datapack_delete)
-            self._img_remove('cover', rem)
-            print(rem, 'has been deleted.')
         self.cur.execute('''DELETE FROM datapack_tags
         WHERE id NOT IN (
             SELECT temp.min_id FROM (
@@ -336,6 +329,15 @@ class datapack_db:
         pool.join()
         del self.total
         self.img_queue.clear()
+    def info_delete_nonexistent(self):
+        print('checking and deleting...')
+        for i in range(0, self._datapack_removal.__len__()):
+            print(str(i + 1), '/', str(self._datapack_removal.__len__()))
+            rem = self._datapack_removal[i]
+            datapack_delete = f"delete from datapacks where id = '{rem}';"
+            self.cur.execute(datapack_delete)
+            self._img_remove('cover', rem)
+            print(rem, 'has been deleted.')
     def reset(self):
         self.cur.execute('drop table if exists datapacks, tags, authors, datapack_tags;')
         print('reseted')

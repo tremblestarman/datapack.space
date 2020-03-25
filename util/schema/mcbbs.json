@@ -3,8 +3,11 @@
     "id": "mcbbs",
     "name": "Minecraft中文论坛",
     "lang": "zh-CN",
-    "entrance": "https://www.mcbbs.net/forum.php?mod=forumdisplay&fid=39&filter=author&orderby=dateline&sortid=38&page=$p",
-    "page_start": 1,
+    "scan": {
+        "type": "normal",
+        "entrance": "https://www.mcbbs.net/forum.php?mod=forumdisplay&fid=39&filter=author&orderby=dateline&sortid=38&page=$p",
+        "page_start": 1
+    },
     "post_path": {
         "table": {
             "id": "threadlisttableid",
@@ -21,7 +24,7 @@
             }
         }
     },
-    "path_type": "url",
+    "post_type": "url",
     "info_collect": {
         "name": {
             "div": {
@@ -309,7 +312,6 @@
                 }
             ]
         },
-        "content_adapter": "html = '<link rel=\"stylesheet\" href=\"\/bin\/css\/mcbbs.css\" type=\"text\/css\"\/><div id=\"postlist\" class=\"pl\">\\n' + html + '<\/div>'",
         "cover_img": {
             "regex": {
                 "from": "=\\\"(http\\S+.[png|jpg])\\\"",
@@ -329,5 +331,8 @@
                 "to": "%s:00"
             }
         }
+    },
+    "info_adapt": {
+        "content_raw": "content_raw = '<link rel=\"stylesheet\" href=\"\/bin\/css\/mcbbs.css\" type=\"text\/css\"\/><div id=\"postlist\" class=\"pl\">\\n' + content_raw + '<\/div>'"
     }
 }
