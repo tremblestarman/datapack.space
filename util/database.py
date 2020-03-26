@@ -16,11 +16,31 @@ class translator:
             time.sleep(self.timeout)
             self.current_time = 0
         self.current_time += 1
-        return self.trans.translate(text, dest=lang).text
+        try:
+            result = self.trans.translate(text, dest=lang).text
+            return result
+        except Exception as e:
+            count = 1
+            print(f"- translate '{text}' to '{lang}' error:", e)
+            while count <= 5:
+                print('error might caused by being banned or slow network speed.\n\
+                    (wait 15s to be unbanned or to fix network problem.')
+                time.sleep(15)
+                try:
+                    result = self.trans.translate(text, dest=lang).text
+                    return result
+                except Exception as e:
+                    print(f"- translate '{text}' to '{lang}' error:", e)
+                    print('- reloading for %d time' % count if count == 1 else '- reloading for %d times' % count)
+                    count += 1
+            if count > 5:
+                print("- translation failed!")
+                return text
 class datapack_db:
     img_queue = []
     translated_tags = {}
     trans = translator()
+    timeout = 5
     def __init__(self):
         try:
             with open(BASE_DIR + '/auth.json', 'r', encoding='utf-8') as f:
@@ -55,7 +75,7 @@ class datapack_db:
                 PRIMARY KEY (id),
                 FOREIGN KEY (author_id) REFERENCES authors(id),
                 UNIQUE (link)
-            );'''
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
             tag_info = f'''create table if not exists tags
             (
                 id VARCHAR(36) NOT NULL,
@@ -68,7 +88,7 @@ class datapack_db:
                 thumb INT DEFAULT 0,
                 PRIMARY KEY (id),
                 UNIQUE (id)
-            );'''
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
             author_info = '''create table if not exists authors
             (
                 id VARCHAR(36) NOT NULL,
@@ -78,14 +98,14 @@ class datapack_db:
                 thumb INT DEFAULT 0,
                 PRIMARY KEY (id),
                 UNIQUE (author_uid)
-            );'''
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
             datapack_tag = '''create table if not exists datapack_tags
             (
                 id INT NOT NULL AUTO_INCREMENT,
                 datapack_id VARCHAR(36) NOT NULL,
                 tag_id VARCHAR(36) NOT NULL,
                 PRIMARY KEY (id)
-            );'''
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
             self.cur.execute(tag_info)
             self.cur.execute(author_info)
             self.cur.execute(datapack_info)
@@ -134,7 +154,7 @@ class datapack_db:
         i = 0
         translated = {}
         for k, v in self.languages.items():
-            if exists.__len__() > 0 and i < exists.__len__() and not exists[i] == '':
+            if not k == default_lang and exists.__len__() > 0 and i < exists.__len__() and not exists[i] == '':
                 translated[k] = exists[i]
                 print(k, ':had translated', '"', tag, '"')
             else:
@@ -195,31 +215,26 @@ class datapack_db:
             os.mkdir(img_dir)
         try:
             opener = urllib.request.build_opener()
-            opener.addheaders = [
-                ('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
+            opener.addheaders = [('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
             urllib.request.install_opener(opener)
-            urllib.request.urlretrieve(
-                url, filename=img_dir + f'/{str(id)}.png')
-        except socket.timeout:
+            urllib.request.urlretrieve(url, filename=img_dir + f'/{str(id)}.png')
+        except Exception as e:
             count = 1
+            print(f'- download img ({url}) error:', e)
             while count <= 5:
+                time.sleep(self.timeout)
                 try:
                     opener = urllib.request.build_opener()
-                    opener.addheaders = [
-                        ('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
+                    opener.addheaders = [('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
                     urllib.request.install_opener(opener)
-                    urllib.request.urlretrieve(
-                        url, filename=img_dir + f'/{str(id)}.png')
+                    urllib.request.urlretrieve(url, filename=img_dir + f'/{str(id)}.png')
                     break
-                except socket.timeout:
-                    print('- reloading for %d time' % count if count ==
-                        1 else '- reloading for %d times' % count)
+                except Exception as e:
+                    print(f'- download img ({url}) error:', e)
+                    print('- reloading for %d time' % count if count == 1 else '- reloading for %d times' % count)
                     count += 1
             if count > 5:
                 print("- downloading failed!")
-        except Exception as e:
-            print(f'- download img ({url}) error:', e)
-            return ''
         print(f'- saved img {url}.')
         return f'/{_dir}/{str(id)}.png'
     def _img_remove(self, _dir: str, id):

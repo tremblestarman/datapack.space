@@ -82,7 +82,7 @@ class datapack_collector:
     timeout = 5
     async_count = 32
     retry = 2
-    def __init__(self, schema):
+    def __init__(self, schema, skip: int):
         '''
         Args:
             schema: The schema to be followed. Dict or .json file Path.
@@ -101,6 +101,8 @@ class datapack_collector:
         if 'async_count' in self.schema:
             self.async_count = self.schema['async_count']
         self.__pool_fill()
+        if skip > 0:
+            self.post_pool = self.post_pool[skip:]
         print('totally got', self.post_pool.__len__(), 'from', self.schema['id'] + '.')
     def analyze_all(self):
         # first analyze
@@ -133,8 +135,7 @@ class datapack_collector:
         def analyze(post):
             try:
                 if self.schema['post_type'] == 'url':
-                    self.info_list.append(self.__post_analyze(
-                        post, self.schema['domain']))
+                    self.info_list.append(self.__post_analyze(post, self.schema['domain']))
                 else:
                     self.info_list.append(self.__post_analyze(post))
             except:
@@ -296,7 +297,7 @@ class datapack_collector:
         '''
         Fill the info_pool.
         '''
-        def __pool_fill_one(html):
+        def __pool_fill_one(html, page):
             bs = BeautifulSoup(html, 'lxml')
             target_pool = self.__search(bs, list(self.schema['post_path'].items())[0])
             if not target_pool == None and not target_pool.__len__() == 0 and not set(target_pool) <= set(self.post_pool):
@@ -312,7 +313,7 @@ class datapack_collector:
             while True:
                 url = self.schema['scan']['entrance'].replace(r'$p', str(page))
                 print(page, ':', url, 'start..')
-                to_continue = __pool_fill_one(requests.get(url, headers=self.__get_header(), timeout=self.timeout).text)
+                to_continue = __pool_fill_one(requests.get(url, headers=self.__get_header(), timeout=self.timeout).text, page)
                 if to_continue:
                     if page_max == -1 or page < page_max:
                         page += page_inc
@@ -320,34 +321,52 @@ class datapack_collector:
                 else:
                     break
         elif self.schema['scan']['type'] == 'selenium':
-            options = webdriver.ChromeOptions()
-            prefs = { 'profile.default_content_setting_values': { 'images': 2, 'javascript': 2 } }
-            options.add_experimental_option('prefs', prefs)
-            driver = webdriver.Chrome(chrome_options=options)
-            page = 1
-            driver.get(self.schema['scan']['entrance'])
-            print(page, ':', driver.current_url, 'start..')
-            to_continue = __pool_fill_one(driver.page_source)
-            if not to_continue:
+            def selenium_start(options):
+                driver = webdriver.Chrome(chrome_options=options)
+                page = 1
+                driver.set_page_load_timeout(90)
+                driver.set_script_timeout(90)  # 这两种设置都进行才有效
+                driver.get(self.schema['scan']['entrance'])
+                print(page, ':', driver.current_url, 'start..')
+                to_continue = __pool_fill_one(driver.page_source, page)
+                if not to_continue:
+                    driver.quit()
+                    return
+                next_xpath = self.schema['scan']['next_xpath']
+                try:
+                    while driver.find_element_by_xpath(next_xpath) != None:
+                        actions = ActionChains(driver)
+                        element = driver.find_element_by_xpath(next_xpath)
+                        actions.click(element)
+                        actions.perform()
+                        del actions
+                        page += 1
+                        print(page, ':', driver.current_url, 'start..')
+                        to_continue = __pool_fill_one(driver.page_source, page)
+                        if not to_continue:
+                            driver.quit()
+                            return
+                except:
+                    print('selenium found end.')
                 driver.quit()
-                return
-            next_xpath = self.schema['scan']['next_xpath']
+            options = webdriver.ChromeOptions()
+            prefs = {'profile.default_content_setting_values': { 'images': 2, 'javascript': 2}}
+            options.add_experimental_option('prefs', prefs)
+            if not 'headless' in self.schema['scan'] or self.schema['scan']['headless'] == 'true':
+                options.add_argument('headless')
+                options.add_argument('no-sandbox')
+                options.add_argument('disable-dev-shm-usage')
             try:
-                while driver.find_element_by_xpath(next_xpath) != None:
-                    actions = ActionChains(driver)
-                    element = driver.find_element_by_xpath(next_xpath)
-                    actions.click(element)
-                    actions.perform()
-                    del actions
-                    page += 1
-                    print(page, ':', driver.current_url, 'start..')
-                    to_continue = __pool_fill_one(driver.page_source)
-                    if not to_continue:
-                        driver.quit()
-                        return
-            except:
-                print('selenium found end.')
-            driver.quit()
+                selenium_start(options)
+            except Exception as e:
+                print('selenium error :', e)
+                for i in range(1, 6):
+                    print('attampt: ', i, ' start.')
+                    try:
+                        selenium_start(options)
+                    except Exception as e:
+                        print('selenium error :', e)
+            print('selenium closed.')
     def __post_analyze(self, content: str, domain: str = None):
         '''
         Analyze a post.
@@ -498,3 +517,10 @@ class datapack_collector:
         post['default_tag'] = post['tag']
         post['name_' + self.schema['lang']] = post['name']
         self.versions = self.versions | set(post['game_version'])
+    def __del__(self):
+        if self.retry_list.__len__() > 0:
+            print(self.schema['id'], ': retry finished but',
+                    self.retry_list.__len__(), 'failed.')
+            with open(BASE_DIR + '/collector.err', 'a+', encoding='utf-8') as f:
+                f.write(self.schema['domain'] + ':\n' + '\n'.join(self.retry_list) + '\n')
+            print('please check \'collector.err\'')

@@ -8,12 +8,10 @@ sources = []
 DB = datapack_db()
 
 for schema in os.listdir(BASE_DIR + '/util/schema'):
-    # crawl and insert
-    if (schema == 'mcbbs.json'):
-        continue
     DC = datapack_collector(BASE_DIR + '/util/schema/' + schema)
     while DC.post_pool.__len__() > 0:
         DC.analyze_all()
+        print('==== start import ====')
         DB.info_import(DC.info_list)
         DB.download_img()
         DC.info_list.clear()
