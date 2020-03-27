@@ -2,7 +2,10 @@ import pymysql, json, os, uuid, urllib, socket, time
 from warnings import filterwarnings
 from googletrans import Translator
 from multiprocessing.dummy import Pool as thread_pool
+from func_timeout.exceptions import FunctionTimedOut
+from func_timeout import func_set_timeout
 from emoji import demojize
+from util.err import logger
 filterwarnings('ignore',category=pymysql.Warning)
 BASE_DIR = os.path.dirname(__file__)
 socket.setdefaulttimeout(30)
@@ -11,8 +14,8 @@ class translator:
     current_time = 0
     timeout = 60
     trans = Translator()
+    LOG = logger()
     def translate(self, text: str, lang: str):
-        text = demojize(text)
         if self.current_time >= self.limit:
             print('sleep to prevent being banned. (wait 1 minute')
             time.sleep(self.timeout)
@@ -24,9 +27,9 @@ class translator:
         except Exception as e:
             count = 1
             print(f"- translate '{text}' to '{lang}' error:", e)
+            text = demojize(text) # if error, then demojize it
             while count <= 5:
-                print('error might caused by being banned or slow network speed.\n\
-                    (wait 15s to be unbanned or to fix network problem.')
+                print('error might caused by being banned or slow network speed.\n(wait 15s to be unbanned or to fix network problem.')
                 time.sleep(15)
                 try:
                     result = self.trans.translate(text, dest=lang).text
@@ -36,13 +39,16 @@ class translator:
                     print('- reloading for %d time' % count if count == 1 else '- reloading for %d times' % count)
                     count += 1
             if count > 5:
-                print("- translation failed!")
+                print('retried but error. please check \'/util/err/translation.err\'')
+                self.LOG.log('translation', e, text=text, language=lang)
                 return text
 class datapack_db:
     img_queue = []
     translated_tags = {}
     trans = translator()
     timeout = 5
+    retry_list = [] # retry buffer
+    LOG = logger()
     def __init__(self):
         try:
             with open(BASE_DIR + '/auth.json', 'r', encoding='utf-8') as f:
@@ -236,7 +242,9 @@ class datapack_db:
                     print('- reloading for %d time' % count if count == 1 else '- reloading for %d times' % count)
                     count += 1
             if count > 5:
-                print("- downloading failed!")
+                print("- download failed!")
+                print('please check \'/util/err/download.err\'')
+                self.LOG.log('download', e, type='image', source=url, local=img_dir + f'/{str(id)}.png')
         print(f'- saved img {url}.')
         return f'/{_dir}/{str(id)}.png'
     def _img_remove(self, _dir: str, id):
@@ -265,6 +273,7 @@ class datapack_db:
         if info['post_time'] == info['update_time']:
             info['post_time'] = info['update_time'] = previous[0]
         self._name_translate(info, previous[1], previous[2:])
+    @func_set_timeout(600) # set timeout for 10 minutes
     def _datapack_insert(self, info: dict):
         aid = self._author_insert(info)
         assert not aid == None
@@ -314,10 +323,20 @@ class datapack_db:
         del info
         return str(did)
     def info_import(self, info_list: list):
+        info_list = self.retry_list + info_list # retry
+        self.retry_list.clear()
         for i in range(0, info_list.__len__()):
             print(str(i + 1), '/', str(info_list.__len__()), ':', info_list[i]['link'], '.')
             info = info_list[i]
-            did = str(self._datapack_insert(info))
+            try:
+                did = str(self._datapack_insert(info))
+            except FunctionTimedOut as e: # if timeout occurs, retry
+                print('database operation timeout')
+                self.retry_list.append(info)
+                print('skipped :', info['link'], ', then retry in the next turn.')
+            except Exception as e:
+                print('cannot handle this problem. please check \'/util/err/database.err\'')
+                self.LOG.log('database', e, link=info['link'])
             if did in self._datapack_removal:
                 self._datapack_removal.remove(did)
             self.db.commit()
@@ -347,6 +366,10 @@ class datapack_db:
         del self.total
         self.img_queue.clear()
     def info_delete_nonexistent(self):
+        if self.retry_list.__len__() > 0: # still have to retry
+            for info in self.retry_list:
+                print('retried every time but failed. please check \'/util/err/database.err\'')
+                self.LOG.log('database', e, link=info['link'])
         print('checking and deleting...')
         for i in range(0, self._datapack_removal.__len__()):
             print(str(i + 1), '/', str(self._datapack_removal.__len__()))

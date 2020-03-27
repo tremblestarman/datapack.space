@@ -6,6 +6,7 @@
 /test.py
 /util/auth.json
 /util/post_pool/*
+/util/err/*
 
 # resource
 /bin/img/author/*

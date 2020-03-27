@@ -13,6 +13,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from textrank4zh import TextRank4Keyword, TextRank4Sentence
 from multiprocessing.dummy import Pool as thread_pool
+from util.err import logger
 BASE_DIR = os.path.dirname(__file__)
 headers = [
     "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
@@ -90,6 +91,7 @@ class datapack_collector:
     timeout = 5
     async_count = 32
     retry = 2
+    LOG = logger()
     def __init__(self, schema, refill = False):
         '''
         Args:
@@ -113,12 +115,12 @@ class datapack_collector:
             os.mkdir(pool_dir)
         def post_fill():
             self.__pool_fill()
-#            with open(BASE_DIR + '/post_pool/' + self.schema['id'] + '.pool', 'w+', encoding='utf-8') as f:
-#                f.write('\n'.join(self.post_pool))
+            with open(BASE_DIR + '/post_pool/' + self.schema['id'] + '.pool', 'w+', encoding='utf-8') as f:
+                f.write('\n'.join(self.post_pool))
         if refill:
             post_fill()
         else:
-            with open(BASE_DIR + '/post_pool/' + self.schema['id'] + '.pool', 'w+', encoding='utf-8') as f:
+            with open(BASE_DIR + '/post_pool/' + self.schema['id'] + '.pool', 'r', encoding='utf-8') as f:
                 self.post_pool = [p.strip() for p in f.readlines()]
             if self.post_pool.__len__() == 0:
                 post_fill()
@@ -146,10 +148,7 @@ class datapack_collector:
                     print(self.schema['id'], ': retry finished and analyzed successfully.')
                     break
             if self.retry_list.__len__() > 0:
-                print(self.schema['id'], ': retry finished but', self.retry_list.__len__(),'failed.')
-                with open(BASE_DIR + '/collector.err', 'a+', encoding='utf-8') as f:
-                    f.write('\n'.join(self.retry_list) + '\n')
-                print('please check \'collector.err\'')
+                self.__retry_failed()
     def __async_analyze(self, target_list: list):
         def analyze(post):
             try:
@@ -170,6 +169,12 @@ class datapack_collector:
         pool.join()
         del self.current
         del self.total
+    def __retry_failed():
+        print(self.schema['id'], ': retry finished but', self.retry_list.__len__(), 'failed.')
+        print('please check \'/util/err/post.err\'')
+        for p in self.retry_list: # out put to log
+            self.LOG.log('post', Exception('Retry error'), link=p, domain=self.schema['domain'])
+        self.retry_list.clear()
     def __get_header(self):
         global headers
         return {'user-agent': random.choice(headers)}
@@ -405,7 +410,7 @@ class datapack_collector:
                 driver.quit()
                 print('selenium error :', e)
                 for i in range(1, 6):
-                    print('attampt: ', i, ' start.')
+                    print('attempt: ', i, ' start.')
                     driver = webdriver.Chrome(chrome_options=options, desired_capabilities=capabilities)
                     try:
                         selenium_start(driver)
@@ -413,6 +418,8 @@ class datapack_collector:
                     except Exception as e:
                         driver.quit()
                         print('selenium error :', e)
+                print('attempted but still have error. please check \'/util/err/schema.err\'')
+                self.LOG.log('schema', e, schema=self.schema['id'])
             driver.quit()
             print('selenium closed.')
     def __post_analyze(self, content: str, domain: str = None):
@@ -567,8 +574,4 @@ class datapack_collector:
         self.versions = self.versions | set(post['game_version'])
     def __del__(self):
         if self.retry_list.__len__() > 0:
-            print(self.schema['id'], ': retry finished but',
-                    self.retry_list.__len__(), 'failed.')
-            with open(BASE_DIR + '/collector.err', 'a+', encoding='utf-8') as f:
-                f.write(self.schema['domain'] + ':\n' + '\n'.join(self.retry_list) + '\n')
-            print('please check \'collector.err\'')
+            self.__retry_failed()
