@@ -1,5 +1,8 @@
-cryptography
-textrank4zh
-lxml
 bs4
+cryptography
+emoji
 googletrans
+lxml
+pymysql
+pyvirtualdisplay
+textrank4zh

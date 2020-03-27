@@ -2,6 +2,7 @@ import pymysql, json, os, uuid, urllib, socket, time
 from warnings import filterwarnings
 from googletrans import Translator
 from multiprocessing.dummy import Pool as thread_pool
+from emoji import demojize
 filterwarnings('ignore',category=pymysql.Warning)
 BASE_DIR = os.path.dirname(__file__)
 socket.setdefaulttimeout(30)
@@ -11,6 +12,7 @@ class translator:
     timeout = 60
     trans = Translator()
     def translate(self, text: str, lang: str):
+        text = demojize(text)
         if self.current_time >= self.limit:
             print('sleep to prevent being banned. (wait 1 minute')
             time.sleep(self.timeout)

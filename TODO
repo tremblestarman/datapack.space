@@ -1,0 +1,47 @@
+- Crawler Bugs & Features
+                √ [B] selenium page crash on the first page. 
+                    |   might caused by unselectable element on load.
+                    |   or other settings.
+                    Solution:   Explicit Wait or Other settings.
+                    |________________________________________________
+                    |   Final Fix: len of set() && on url change && on url change time out
+                    |   if element selector timeout, means end. but url change time out, means problem.
+                    |   Added 'display' for selenium : 'headless' via headless, 'virtual' via xvfb, 'window' via windows
+                √ [B] emoji (utf8mb4 characters) translation error.
+                    |   might caused by google or python itself.
+                    Solution: if caused by google, then just preserve it and translate other words
+                    |         if caused by python, then find a way to store or escape emoji to fix this bug.
+                    |_______________________________________________________________________________________
+                    |   Final Fix: just demojize it.
+                √ [F] save 'post_pool'.
+                    |   add update option and save 'post_pool' to a file.
+                    |____________________________________________________    
+[F] APS: antilag-process-system.
+    |   set a LIMIT time of single-process task (especially the DB operation).
+    |   when reach the time, just THROW and error and RESTART the DB operation.
+    |__________________________________________________________________________
+[F] determine whether the post needs to execute DB operation via its 'update_time'
+    |   if there's a record in DB & recorded 'update_time' equals the posts analyzed 'update_time.
+    |   then just skip.
+    |_____________________________________________________________________________________________
+[F] the process of retry ended and log unhandled error and write in '.err' file.
+    |   when reach max 'retry' and still have error, just log it.
+    |   if it's a schema,   log the 'schema' & error.
+    |   if it's a post,     log the 'link' & 'domain' & error.
+    |   if it's a tag,      log the 'tag' (in a way that can be dislayed properly) & error. 
+    |   if it's a img,      log the 'url' & 'local url' & error.
+    |   error in '.err' file should be solved manually.
+    |______________________________________________________________________________________
+- WEB Bugs & Features
+[B] incorrect synonymous tag
+    |   synonymous tags do not show.
+    |   source and version should not be distinguished by languages.
+    Solution: check the source code of this function and test it again.
+    |         if 'tag_type' = 0 or 1 (source or version), show all datapacks with synonymous tags.
+    |_____________________________________________________________________________________________
+[F] a terminal tool based on commandline to do functional DB operation
+    |   1. the most important: migration of all datebase. (write to files & read from files)
+    |   2. basic changes of a column in a record.
+    |   3. combine author, datapack.
+    |   4. mark authorized post.
+    |_______________________________________________________________________________________

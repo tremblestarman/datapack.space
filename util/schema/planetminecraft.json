@@ -6,7 +6,7 @@
     "scan": {
         "type": "selenium",
         "entrance": "https://www.planetminecraft.com/resources/data-packs/?order=order_latest&p=1",
-        "headless": "false",
+        "display": "window",
         "next_xpath": "//p[@class='white_btnset']/a[contains(@class,'pagination_next') and contains(@title,'Next Page')]"
     },
     "sleep": 2.5,

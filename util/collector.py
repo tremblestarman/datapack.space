@@ -6,7 +6,11 @@ import os, json, requests, lxml, re, bs4, random, time, datetime
 from bs4 import BeautifulSoup, element
 from urllib import parse as urlparse
 from selenium import webdriver
+from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver import ActionChains
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 from textrank4zh import TextRank4Keyword, TextRank4Sentence
 from multiprocessing.dummy import Pool as thread_pool
 BASE_DIR = os.path.dirname(__file__)
@@ -25,7 +29,9 @@ headers = [
     "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Ubuntu/11.04 Chromium/16.0.912.77 Chrome/16.0.912.77 Safari/535.7",
     "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:10.0) Gecko/20100101 Firefox/10.0 "
 ]
-
+class UrlChangeTimeOut(Exception):
+    def __init__(self, *args):
+        self.args = args
 class datapack_collector:
     '''
     Info Collector following a certain schema.
@@ -33,6 +39,8 @@ class datapack_collector:
     Args:
         schema:
             The schema to be followed. (dict or .json file path)
+        refill:
+            refill 'post_pool.' 
     Attributes:
         post_pool:
             Post link. (urls)
@@ -82,7 +90,7 @@ class datapack_collector:
     timeout = 5
     async_count = 32
     retry = 2
-    def __init__(self, schema, skip: int):
+    def __init__(self, schema, refill = False):
         '''
         Args:
             schema: The schema to be followed. Dict or .json file Path.
@@ -100,9 +108,20 @@ class datapack_collector:
             self.timeout = self.schema['timeout']
         if 'async_count' in self.schema:
             self.async_count = self.schema['async_count']
-        self.__pool_fill()
-        if skip > 0:
-            self.post_pool = self.post_pool[skip:]
+        pool_dir = os.path.dirname(BASE_DIR) + '/util/post_pool'
+        if not os.path.exists(pool_dir):
+            os.mkdir(pool_dir)
+        def post_fill():
+            self.__pool_fill()
+#            with open(BASE_DIR + '/post_pool/' + self.schema['id'] + '.pool', 'w+', encoding='utf-8') as f:
+#                f.write('\n'.join(self.post_pool))
+        if refill:
+            post_fill()
+        else:
+            with open(BASE_DIR + '/post_pool/' + self.schema['id'] + '.pool', 'w+', encoding='utf-8') as f:
+                self.post_pool = [p.strip() for p in f.readlines()]
+            if self.post_pool.__len__() == 0:
+                post_fill()
         print('totally got', self.post_pool.__len__(), 'from', self.schema['id'] + '.')
     def analyze_all(self):
         # first analyze
@@ -300,7 +319,7 @@ class datapack_collector:
         def __pool_fill_one(html, page):
             bs = BeautifulSoup(html, 'lxml')
             target_pool = self.__search(bs, list(self.schema['post_path'].items())[0])
-            if not target_pool == None and not target_pool.__len__() == 0 and not set(target_pool) <= set(self.post_pool):
+            if not target_pool == None and not target_pool.__len__() == 0 and not (self.post_pool.__len__() > 0 and set(target_pool) <= set(self.post_pool)):
                 self.post_pool = list(set(self.post_pool) | set(target_pool))
                 print(page, ':', 'done.', 'got', target_pool.__len__(), 'elements.')
                 return True
@@ -321,51 +340,80 @@ class datapack_collector:
                 else:
                     break
         elif self.schema['scan']['type'] == 'selenium':
-            def selenium_start(options):
-                driver = webdriver.Chrome(chrome_options=options)
+            def selenium_start(driver):
                 page = 1
                 driver.set_page_load_timeout(90)
-                driver.set_script_timeout(90)  # 这两种设置都进行才有效
+                driver.set_script_timeout(90)
                 driver.get(self.schema['scan']['entrance'])
                 print(page, ':', driver.current_url, 'start..')
                 to_continue = __pool_fill_one(driver.page_source, page)
-                if not to_continue:
-                    driver.quit()
-                    return
+                if not to_continue: # no content then retry
+                    raise Exception('no content')
                 next_xpath = self.schema['scan']['next_xpath']
                 try:
-                    while driver.find_element_by_xpath(next_xpath) != None:
+                    while True:
+                        last_url = driver.current_url
                         actions = ActionChains(driver)
+                        WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.XPATH, next_xpath)))
                         element = driver.find_element_by_xpath(next_xpath)
                         actions.click(element)
-                        actions.perform()
+                        actions.perform() # click the next button
+                        print('clicked', element)
                         del actions
+                        try:
+                            WebDriverWait(driver, 1).until_not(lambda driver: driver.current_url == last_url)
+                            last_url = driver.current_url
+                        except Exception as e: # url change time out
+                            print(e)
+                            raise UrlChangeTimeOut()
                         page += 1
                         print(page, ':', driver.current_url, 'start..')
                         to_continue = __pool_fill_one(driver.page_source, page)
                         if not to_continue:
                             driver.quit()
                             return
-                except:
+                except UrlChangeTimeOut: # if url change time out, then retry
+                    print('time out and prepare to retry')
+                    self.post_pool.clear() # clear
+                    raise Exception('url change time out')
+                except Exception as e: # if cannot find the next button, then end
                     print('selenium found end.')
                 driver.quit()
             options = webdriver.ChromeOptions()
             prefs = {'profile.default_content_setting_values': { 'images': 2, 'javascript': 2}}
             options.add_experimental_option('prefs', prefs)
-            if not 'headless' in self.schema['scan'] or self.schema['scan']['headless'] == 'true':
-                options.add_argument('headless')
-                options.add_argument('no-sandbox')
-                options.add_argument('disable-dev-shm-usage')
+            if not 'display' in self.schema['scan'] or self.schema['scan']['display'] == 'headless':
+                options.add_experimental_option('excludeSwitches', ['enable-automation'])
+                options.add_argument('--headless')
+                options.add_argument('--start-maximized')
+                options.add_argument('--incognito')
+                options.add_argument('--log-level=3')
+                options.add_argument('--no-sandbox')
+                options.add_argument('--disable-dev-shm-usage')
+                options.add_argument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36")
+            elif self.schema['scan']['display'] == 'virtual':
+                from pyvirtualdisplay import Display
+                display = Display(visible=0, size=(800, 800))
+                display.start()
+            capabilities = DesiredCapabilities.CHROME.copy()
+            capabilities['acceptSslCerts'] = True
+            capabilities['acceptInsecureCerts'] = True
+            driver = webdriver.Chrome(chrome_options=options, desired_capabilities=capabilities)
             try:
-                selenium_start(options)
+                selenium_start(driver)
             except Exception as e:
+                driver.quit()
                 print('selenium error :', e)
                 for i in range(1, 6):
                     print('attampt: ', i, ' start.')
+                    driver = webdriver.Chrome(chrome_options=options, desired_capabilities=capabilities)
                     try:
-                        selenium_start(options)
+                        selenium_start(driver)
+                        break
                     except Exception as e:
+                        driver.quit()
                         print('selenium error :', e)
+            driver.quit()
             print('selenium closed.')
     def __post_analyze(self, content: str, domain: str = None):
         '''
