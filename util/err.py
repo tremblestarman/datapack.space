@@ -8,10 +8,10 @@ class logger:
     '''
     Output error to .err file in '/util/err'
     '''
-    def log(self, type: str, err: Exception, **kwargs):
-        with open(ERR_DIR + '/' + type + '.err', 'a+', encoding='utf-8') as f:
+    def log(self, err_type: str, err: Exception, **kwargs):
+        with open(ERR_DIR + '/' + err_type + '.err', 'a+', encoding='utf-8') as f:
             f.write('--------\n')
             f.write('At ' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ';\n')
             for k, v in kwargs.items():
                 f.write(k + '=' + str(v) + ';\n')
-            f.write('error=' + str(err))
+            f.write('error=' + str(err) + '\n')

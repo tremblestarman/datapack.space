@@ -9,10 +9,7 @@ DB = datapack_db()
 
 for schema in os.listdir(BASE_DIR + '/util/schema'):
     # crawl and insert
-    if (schema == 'mcbbs.json'):
-        DC = datapack_collector(BASE_DIR + '/util/schema/' + schema, refill=True)
-    else:
-        DC = datapack_collector(BASE_DIR + '/util/schema/' + schema, refill=False)
+    DC = datapack_collector(BASE_DIR + '/util/schema/' + schema, refill=True)
     while DC.post_pool.__len__() > 0:
         DC.analyze_all()
         print('==== start import ====')

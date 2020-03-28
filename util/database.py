@@ -1,4 +1,5 @@
-import pymysql, json, os, uuid, urllib, socket, time
+import pymysql, json, os, uuid, urllib, socket, time, unicodedata
+from datetime import datetime
 from warnings import filterwarnings
 from googletrans import Translator
 from multiprocessing.dummy import Pool as thread_pool
@@ -28,6 +29,7 @@ class translator:
             count = 1
             print(f"- translate '{text}' to '{lang}' error:", e)
             text = demojize(text) # if error, then demojize it
+            text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8') # and decode with normal letters
             while count <= 5:
                 print('error might caused by being banned or slow network speed.\n(wait 15s to be unbanned or to fix network problem.')
                 time.sleep(15)
@@ -62,7 +64,7 @@ class datapack_db:
             if not ('datapack_collection',) in self.cur.fetchall():
                 self.cur.execute('create database datapack_collection;')
             self.cur.execute('use datapack_collection;')
-            self.cur.execute('drop table if exists datapack_tags;') # delete relation table
+            self.cur.execute('drop table if exists datapack_tags;') # delete relation table and rebuild it
             datapack_info = f'''create table if not exists datapacks
             (
                 id VARCHAR(36) NOT NULL,
@@ -109,7 +111,7 @@ class datapack_db:
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
             datapack_tag = '''create table if not exists datapack_tags
             (
-                id INT NOT NULL AUTO_INCREMENT,
+                id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
                 datapack_id VARCHAR(36) NOT NULL,
                 tag_id VARCHAR(36) NOT NULL,
                 PRIMARY KEY (id)
@@ -188,7 +190,7 @@ class datapack_db:
                 for k, _ in translated.items():
                     info["tags_strs_" + k].append(f'{_type}:{translated[k]},')
                 quotation = f"update tags set quotation = quotation + 1 where id = '{tid}';"
-                self.cur.execute(quotation)
+                self.cur.execute(quotation) # because quotation has been reset
                 return str(tid)
             translated = self._tag_translate(str(tid), _tag, _type, info['default_lang'])
             for k, _ in translated.items():
@@ -270,24 +272,42 @@ class datapack_db:
                 info['name_' + k] = pre_names[i]
             i += 1
     def _incremental_update(self, info: dict, previous: list):
-        if info['post_time'] == info['update_time']:
-            info['post_time'] = info['update_time'] = previous[0]
-        self._name_translate(info, previous[1], previous[2:])
+        if datetime.strptime(info['update_time'], '%Y-%m-%d %H:%M:%S') == previous[1]: # if not updated (convert info to datetime)
+            return True
+        if info['post_time'] == info['update_time']: # if post_time = update_time
+            info['post_time'] = info['update_time'] = previous[0].strftime('%Y-%m-%d %H:%M:%S') # let it be the previous post_time
+        self._name_translate(info, previous[2], previous[3:])
+        return False
     @func_set_timeout(600) # set timeout for 10 minutes
     def _datapack_insert(self, info: dict):
+        did = uuid.uuid3(uuid.NAMESPACE_DNS, info['link']) # generate did
+        assert not did == None
+        # update author info along with his or her avatar
         aid = self._author_insert(info)
         assert not aid == None
-        tids = self._tag_insert(info)
+        # fetch tags and recreate relations & calculate quotations
+        # (because relation form has been rebuilt & quotation has been reset)
+        tids = self._tag_insert(info) # it doesn't take too much time because it may have been preivously processed
         assert not tids == None
-        did = uuid.uuid3(uuid.NAMESPACE_DNS, info['link'])
-        self.cur.execute("select post_time, default_name, " + ','.join(["name_" + k.replace(
-            '-', '_') for k, _ in self.languages.items()]) + f" from datapacks where id = '{did}'")
+        for tid in tids:
+            self.cur.execute(f"select id from datapack_tags where datapack_id = '{did}' and tag_id = '{tid}';")  # get previous relation
+            res = self.cur.fetchall()
+            exists = [j for i in res for j in i] if not res == None else []
+            if exists.__len__() == 0:  # if it is a new relation
+                relation_form = f'''insert into datapack_tags (datapack_id, tag_id) values ('{did}', '{tid}');'''
+                self.cur.execute(relation_form)
+        # then scan from database to find previous info
+        self.cur.execute("select post_time, update_time, default_name, " + ','.join(["name_" + k.replace('-', '_') for k, _ in self.languages.items()]) + f" from datapacks where id = '{did}'")
         res = self.cur.fetchall()
         exists = [j for i in res for j in i] if not res == None else []
-        if not exists.__len__() == 0:
-            self._incremental_update(info, exists) #incremental_update
+        if not exists.__len__() == 0: # has previous info
+            if self._incremental_update(info, exists): #incremental_update
+                print('this post had not been updated, so just skipped.')  # did not updated and skip it
+                del info
+                return str(did)
         if exists.__len__() == 0: # new element
             self._name_translate(info)
+        # if the datapack has been updated or do not exist, update or insert content etc.
         intro = pymysql.escape_string('\n'.join(info['summrization'])) #escape summaries
         content_raw = pymysql.escape_string(info['content_raw']) #escape content
         info["default_tags_str"] = ''.join(info["default_tags_strs"])
@@ -311,11 +331,6 @@ class datapack_db:
         source = '{info['source']}',
         update_time = '{info['update_time']}';'''
         self.cur.execute(datapack_insert)
-        assert not did == None
-        for tid in tids:
-            relation_form = f'''insert into datapack_tags (datapack_id, tag_id) 
-            values ('{did}', '{tid}');'''
-            self.cur.execute(relation_form)
         if not info['author_avatar'] in [None, '']:
             self.img_queue.append((info['author_avatar'], 'author', aid))
         if not info['cover_img'] in [None, '']:
@@ -329,7 +344,11 @@ class datapack_db:
             print(str(i + 1), '/', str(info_list.__len__()), ':', info_list[i]['link'], '.')
             info = info_list[i]
             try:
-                did = str(self._datapack_insert(info))
+                did = self._datapack_insert(info)
+                if did in self._datapack_removal:
+                    self._datapack_removal.remove(did)
+                self.db.commit()
+                print(did, ':', info['link'], 'has been imported into database successfully.')
             except FunctionTimedOut as e: # if timeout occurs, retry
                 print('database operation timeout')
                 self.retry_list.append(info)
@@ -337,19 +356,10 @@ class datapack_db:
             except Exception as e:
                 print('cannot handle this problem. please check \'/util/err/database.err\'')
                 self.LOG.log('database', e, link=info['link'])
-            if did in self._datapack_removal:
-                self._datapack_removal.remove(did)
-            self.db.commit()
-            print(did, ':', info['link'], 'has been imported into database successfully.')
-        self.cur.execute('''DELETE FROM datapack_tags
-        WHERE id NOT IN (
-            SELECT temp.min_id FROM (
-                SELECT MIN(id) min_id FROM datapack_tags
-                    GROUP BY datapack_id, tag_id
-                )AS temp
-        );
-        ''') # delete duplicated relation
-        print('end')
+        if self.retry_list.__len__() > 0:
+            print('end. but still have', str(self.retry_list.__len__()), 'to be retried.')
+        else:
+            print('end and done all successfully.')
     def download_img(self):
         self.total = 0
         def process(img_target):

@@ -169,7 +169,7 @@ class datapack_collector:
         pool.join()
         del self.current
         del self.total
-    def __retry_failed():
+    def __retry_failed(self):
         print(self.schema['id'], ': retry finished but', self.retry_list.__len__(), 'failed.')
         print('please check \'/util/err/post.err\'')
         for p in self.retry_list: # out put to log

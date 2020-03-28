@@ -22,11 +22,17 @@
                     |__________________________________________________________________________
                     |   Installed 'func_timeout'
                     |   Added retry for DB insert.
-                    |_______________________
-[F] determine whether the post needs to execute DB operation via its 'update_time'
-    |   if there's a record in DB & recorded 'update_time' equals the posts analyzed 'update_time.
-    |   then just skip.
-    |_____________________________________________________________________________________________
+                    |_____________________________
+                √ [B] artistic word (utf8mb4 error)
+                    |   Final Fix: use 'unicodedata' to convert to ascii.
+                    |____________________________________________________
+                √ [B] LOG did not work as excepted
+                    |   Final Fix: rename attributes 'type' to 'err_type'.
+                    |_____________________________________________________
+                √ [F] determine whether the post needs to execute DB operation via its 'update_time'
+                    |   if there's a record in DB & recorded 'update_time' equals the posts analyzed 'update_time.
+                    |   then just skip.
+                    |_____________________________________________________________________________________________
                 √ [F] the process of retry ended and log unhandled error and write in '.err' file.
                     |   when reach max 'retry' and still have error, just log it.
                     |   if it's a schema,       log the 'schema' & error.
@@ -35,6 +41,12 @@
                     |   if it's a download,     log the 'url' & 'local url' & error.
                     |   error in '.err' file should be solved manually.
                     |__________________________________________________________________________________________
+                √ [B] incorrect datapack-tag relation
+                    |   some datapacks have no tag.
+                    |______________________________
+                    |   Final Fix: relation form technic changes.
+                    |____________________________________________
+[F] hash img and update it.
 - WEB Bugs & Features
 [B] incorrect synonymous tag
     |   synonymous tags do not show.
