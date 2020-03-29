@@ -6,11 +6,13 @@
         <div class="bottom" style="--pillar: rgb(71, 33, 71);--pillar-shadow: rgba(86, 46, 86, 0.74);">
             <div class="pillar left" style="left:42px;"></div>
             <div class="pillar right" style="left:842px;"></div>
-            <div class="tag tag-{{.Tag.Type}}">{{.Tag.Tag | unescaped}}</div>
+            <div class="tag tag-{{.Tag.Type}}">{{.Tag.DefaultTag | unescaped}}</div>
         </div>
         <div class="element tag" id="{{.Tag.ID}}">
             <div class="info">
-                <div class="language stats">{{template "en/language_tag"}} : {{.Tag.DefaultLang}}</div>
+                {{if gt .Tag.Type 1}}
+                    <div class="language stats">{{template "en/language_tag"}} : {{.Tag.DefaultLang}}</div>
+                {{end}}
                 <div class="counter stats">{{template "en/counter_tag_msg"}} : {{.TotalCount}}</div>
             </div>
             {{if gt .SynonymousCount 0}}

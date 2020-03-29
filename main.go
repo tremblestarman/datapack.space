@@ -32,5 +32,5 @@ func main() {
 	r.GET("/guide", guide)
 	r.GET("/about", about)
 	r.POST("/thumb", thumbByID)
-	_ = r.Run(":8080")
+	_ = r.Run(":4080")
 }

@@ -335,7 +335,7 @@ func GetTag(language string, id string) *Tag {
 	}
 	// Query
 	sql.Model(&Tag{}).
-		Select("distinct tags.*, tags.default_tag as tag"). // Set Tag Name As Default
+		Select("distinct tags.*, tags." + tag + " as tag"). // Set Tag in desired language
 		Preload("Datapacks", func(db *gorm.DB) *gorm.DB {   // Preload Datapacks
 			return db.Select("*, datapacks." + name + " as name").Order("datapacks.post_time DESC") // Set Datapack Name & Set Order
 		}).

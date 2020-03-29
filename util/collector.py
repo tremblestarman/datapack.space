@@ -110,6 +110,8 @@ class datapack_collector:
             self.timeout = self.schema['timeout']
         if 'async_count' in self.schema:
             self.async_count = self.schema['async_count']
+        if 'retry' in self.schema:
+            self.retry = self.schema['retry']
         pool_dir = os.path.dirname(BASE_DIR) + '/util/post_pool'
         if not os.path.exists(pool_dir):
             os.mkdir(pool_dir)
