@@ -1,0 +1,110 @@
+{
+    "domain": "http://www.9minecraft.net/",
+    "id": "9minecraft",
+    "name": "9Minecraft",
+    "lang": "en",
+    "scan": {
+        "type": "normal",
+        "entrance": "http://www.9minecraft.net/category/minecraft-data-packs/amp/page/$p/",
+        "page_start": 1
+    },
+    "sleep": 1,
+    "timeout": 60,
+    "retry": 5,
+    "post_path": {
+        "h2.": {
+            "class": "amp-wp-title",
+            "a": {
+                "__entrance__": "href"
+            }
+        }
+    },
+    "post_type": "url",
+    "info_collect": {
+        "name": {
+            "h1": {
+                "class": "amp-wp-title",
+                "__name__": "."
+            }
+        },
+        "author_uid": "9minecraft",
+        "author_name": "9minecraft",
+        "author_avatar": "http://www.9minecraft.net/images/9minecraft.png",
+        "version": "undefined",
+        "game_version": {
+            "h1": {
+                "class": "amp-wp-title",
+                "__name__": "."
+            }
+        },
+        "tag": [],
+        "content_raw": {
+            "div": {
+                "class": "amp-wp-content the_content",
+                "__content__": "."
+            }
+        },
+        "content_filtered": "auto",
+        "cover_img": {
+            "figure": {
+                "class": "amp-wp-article-featured-image",
+                "amp-img": {
+                    "__amp-img__": "src"
+                }
+            }
+        },
+        "post_time": {
+            "meta": {
+                "property": "article:published_time",
+                "__time__": "content"
+            }
+        },
+        "update_time": {
+            "meta": {
+                "property": "article:modified_time",
+                "__time__": "content"
+            }
+        },
+        "$time_backup": {
+            "figure": {
+                "class": "amp-wp-article-featured-image",
+                "amp-img": {
+                    "__amp-img__": "src"
+                }
+            }
+        }
+    },
+    "info_refine": {
+        "game_version": {
+            "regex": {
+                "from": "1\\.(\\d+)",
+                "to": "1.%s"
+            }
+        },
+        "post_time": {
+            "remove": "\\+\\d\\d:\\d\\d",
+            "replace": {
+                "from": "T",
+                "to": " "
+            }
+        },
+        "update_time": {
+            "remove": "\\+\\d\\d:\\d\\d",
+            "replace": {
+                "from": "T",
+                "to": " "
+            }
+        },
+        "$time_backup": {
+            "regex": {
+                "from": "/uploads/(\\d+)/(\\d+)/",
+                "to": "%s-%s-01 12:00:00"
+            }
+        }
+    },
+    "info_adapt": {
+        "content_raw": "content_raw = '<link rel=\"stylesheet\" href=\"\/bin\/css\/9minecraft.css\" type=\"text\/css\"\/>' + content_raw",
+        "post_time": "if post_time in ['none','',None]:    post_time = time_backup",
+        "update_time": "if update_time in ['none','',None]:    update_time = time_backup"
+    }
+}

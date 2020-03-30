@@ -14,7 +14,7 @@ class translator:
     limit = 50
     current_time = 0
     timeout = 60
-    trans = Translator()
+    trans = Translator(service_urls=['translate.google.cn'])
     LOG = logger()
     def translate(self, text: str, lang: str):
         if self.current_time >= self.limit:
@@ -45,7 +45,7 @@ class translator:
                 self.LOG.log('translation', e, text=text, language=lang)
                 return text
 class datapack_db:
-    img_queue = []
+    img_queue = set()
     translated_tags = {}
     trans = translator()
     timeout = 5
@@ -332,9 +332,9 @@ class datapack_db:
         update_time = '{info['update_time']}';'''
         self.cur.execute(datapack_insert)
         if not info['author_avatar'] in [None, '']:
-            self.img_queue.append((info['author_avatar'], 'author', aid))
+            self.img_queue.add((info['author_avatar'], 'author', aid))
         if not info['cover_img'] in [None, '']:
-            self.img_queue.append((info['cover_img'], 'cover', did))
+            self.img_queue.add((info['cover_img'], 'cover', did))
         del info
         return str(did)
     def info_import(self, info_list: list):

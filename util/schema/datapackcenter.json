@@ -1,0 +1,137 @@
+{
+    "domain": "http://datapackcenter.com/",
+    "id": "dpc",
+    "name": "DatapackCenter",
+    "lang": "en",
+    "scan": {
+        "type": "normal",
+        "entrance": "https://datapackcenter.com/projects/categories/data-packs.2/?page=$p",
+        "page_start": 1
+    },
+    "sleep": 1,
+    "timeout": 90,
+    "retry": 5,
+    "post_path": {
+        "div.": {
+            "class": "structItem-title",
+            "a": {
+                "data-tp-primary": "on",
+                "__entrance__": "href"
+            }
+        }
+    },
+    "post_type": "url",
+    "info_collect": {
+        "name": {
+            "h1": {
+                "class": "p-title-value",
+                "__name__": "."
+            }
+        },
+        "author_uid": {
+            "a": {
+                "data-xf-init": "member-tooltip",
+                "__uid__": "data-user-id"
+            }
+        },
+        "author_name": {
+            "a": {
+                "data-xf-init": "member-tooltip",
+                "__name__": "."
+            }
+        },
+        "author_avatar": {
+            "a": {
+                "data-xf-init": "member-tooltip",
+                "__uid__": "data-user-id"
+            }
+        },
+        "version": {
+            "span": {
+                "class": "u-muted",
+                "__version__": "."
+            }
+        },
+        "game_version": {
+            "div": {
+                "class": "resourceBody-fields resourceBody-fields--before",
+                "__game_version__": "."
+            }
+        },
+        "tag": [],
+        "content_raw": {
+            "div": {
+                "class": "bbWrapper",
+                "__content__": "."
+            }
+        },
+        "content_filtered": "auto",
+        "cover_img": {
+            "span": {
+                "class": "avatar avatar--s",
+                "img": {
+                    "__img__": "src"
+                }
+            }
+        },
+        "post_time": {
+            "dl.3": {
+                "class": "pairs pairs--justified",
+                "time": {
+                    "__time__": "datetime"
+                }
+            }
+        },
+        "update_time": {
+            "dl.4": {
+                "class": "pairs pairs--justified",
+                "time": {
+                    "__time__": "datetime"
+                }
+            }
+        }
+    },
+    "info_refine": {
+        "name": {
+            "remove": [
+                "<h1 class=\"p-title-value\">",
+                "<span class=\".*\">0.1</span>\n</h1>"
+            ]
+        },
+        "author_avatar": {
+            "regex": {
+                "from": "(\\S+)",
+                "to": "https://datapackcenter.com/data/avatars/o/0/%s.jpg"
+            }
+        },
+        "game_version": {
+            "regex": {
+                "from": "\\<dt\\>Minecraft Version\\(s\\)\\</dt\\>\\s*\\<dd\\>\\s*1\\.(\\d+)",
+                "to": "1.%s"
+            }
+        },
+        "cover_img": {
+            "regex": {
+                "from": "(\\S+)",
+                "to": "https://datapackcenter.com%s"
+            }
+        },
+        "post_time": {
+            "remove": "\\+\\d\\d\\d\\d",
+            "replace": {
+                "from": "T",
+                "to": " "
+            }
+        },
+        "update_time": {
+            "remove": "\\+\\d\\d\\d\\d",
+            "replace": {
+                "from": "T",
+                "to": " "
+            }
+        }
+    },
+    "info_adapt": {
+        "content_raw": "content_raw = '<link rel=\"stylesheet\" href=\"\/bin\/css\/dpc.css\" type=\"text\/css\"\/>' + content_raw"
+    }
+}

@@ -118,7 +118,7 @@ class datapack_collector:
         def post_fill():
             self.__pool_fill()
             with open(BASE_DIR + '/post_pool/' + self.schema['id'] + '.pool', 'w+', encoding='utf-8') as f:
-                f.write('\n'.join(self.post_pool))
+                f.write('\n'.join([i for i in self.post_pool if not i in ['', None]]))
         if refill:
             post_fill()
         else:
@@ -127,10 +127,10 @@ class datapack_collector:
             if self.post_pool.__len__() == 0:
                 post_fill()
         print('totally got', self.post_pool.__len__(), 'from', self.schema['id'] + '.')
-    def analyze_all(self):
+    def analyze_all(self, interrupt = False):
         # first analyze
         print(self.schema['id'], ': start analyze.')
-        self.__async_analyze(self.post_pool[:self.async_count])
+        self.__async_analyze(self.post_pool[:self.async_count], interrupt)
         del self.post_pool[:self.async_count]
         print(self.schema['id'], ': got ', self.info_list.__len__(), '.')
         # pause
@@ -138,29 +138,34 @@ class datapack_collector:
             print(self.schema['id'], ': reach max async count, paused.\nnot finish yet. still have',
                   self.post_pool.__len__(), '.')
         else:
-            print(self.schema['id'], ': collect finished from.')
+            print(self.schema['id'], ': collect finished.')
         # retry
         if self.retry_list.__len__() > 0:
             for retry_count in range(1, self.retry + 1):
                 current_retry = self.retry_list.__len__()
-                print(self.schema['id'], ':', str(retry_count), 'retry. still have', current_retry, 'posts with err.')
-                self.__async_analyze(self.retry_list)
+                print(self.schema['id'], ':', str(retry_count), 'retry. still have', current_retry, 'posts with error.')
+                self.__async_analyze(self.retry_list, interrupt)
                 del self.retry_list[:current_retry]
                 if self.retry_list.__len__() == 0:
                     print(self.schema['id'], ': retry finished and analyzed successfully.')
                     break
             if self.retry_list.__len__() > 0:
                 self.__retry_failed()
-    def __async_analyze(self, target_list: list):
+    def __async_analyze(self, target_list: list, interrupt = False):
         def analyze(post):
-            try:
+            def _anl_():
                 if self.schema['post_type'] == 'url':
                     self.info_list.append(self.__post_analyze(post, self.schema['domain']))
                 else:
                     self.info_list.append(self.__post_analyze(post))
-            except:
-                print(post, ':', 'got error.')
-                self.retry_list.append(post)
+            if interrupt:
+                _anl_()
+            else:
+                try:
+                    _anl_()
+                except Exception as e:
+                    print(post, ':', 'got error :', e)
+                    self.retry_list.append(post)
             self.current += 1
             print('done', self.current, '/', str(self.total))
         self.current = 0
@@ -180,6 +185,15 @@ class datapack_collector:
     def __get_header(self):
         global headers
         return {'user-agent': random.choice(headers)}
+    def __setnext__(self, k: str, v):
+        n, i = k, 0
+        if '.' in k:
+            p = re.findall('^(.*)\.(.*)$', k)
+            if (p.__len__() > 0):
+                n = p[0][0]
+                i = int(p[0][1]) if p[0].__len__() > 1 and not p[0][1] == '' else -1
+        _next = (n, v, i)
+        return _next
     def __search(self, target, next: tuple):
         '''
         Use schema to find the target.
@@ -199,13 +213,7 @@ class datapack_collector:
         _loc = ''
         for k, v in next[1].items():
             if type(v) == dict:
-                n, i = k, 0
-                if '.' in k:
-                    p = re.findall('^(.*)\.(.*)$', k)
-                    if (p.__len__() > 0):
-                        n = p[0][0]
-                        i = int(p[0][1]) if p[0].__len__() > 1 and not p[0][1] == '' else -1
-                _next = (n, v, i)
+                _next = self.__setnext__(k, v)
             elif re.findall('^__.*__$', k).__len__() == 1:
                 _loc = v
             else:
@@ -325,7 +333,11 @@ class datapack_collector:
         '''
         def __pool_fill_one(html, page):
             bs = BeautifulSoup(html, 'lxml')
-            target_pool = self.__search(bs, list(self.schema['post_path'].items())[0])
+            for k, v in self.schema['post_path'].items():
+                _schem = (k, v)
+                break
+            _next = self.__setnext__(_schem[0], _schem[1])
+            target_pool = [i for i in self.__search(bs, _next) if not i in ['', None]]
             if not target_pool == None and not target_pool.__len__() == 0 and not (self.post_pool.__len__() > 0 and set(target_pool) <= set(self.post_pool)):
                 self.post_pool = list(set(self.post_pool) | set(target_pool))
                 print(page, ':', 'done.', 'got', target_pool.__len__(), 'elements.')
@@ -333,19 +345,33 @@ class datapack_collector:
             else:
                 return False
         if 'type' not in self.schema['scan'] or self.schema['scan']['type'] == 'normal':
-            page = 0 if 'page_start' not in self.schema['scan'] else self.schema['scan']['page_start']
-            page_inc = 1 if 'page_increment' not in self.schema['scan'] else self.schema['scan']['page_increment']
-            page_max = -1 if 'page_max' not in self.schema['scan'] else self.schema['scan']['page_max']
-            while True:
-                url = self.schema['scan']['entrance'].replace(r'$p', str(page))
-                print(page, ':', url, 'start..')
-                to_continue = __pool_fill_one(requests.get(url, headers=self.__get_header(), timeout=self.timeout).text, page)
-                if to_continue:
-                    if page_max == -1 or page < page_max:
-                        page += page_inc
-                    time.sleep(self.sleep)
-                else:
-                    break
+            def normal_start():
+                page = 0 if 'page_start' not in self.schema['scan'] else self.schema['scan']['page_start']
+                page_inc = 1 if 'page_increment' not in self.schema['scan'] else self.schema['scan']['page_increment']
+                page_max = -1 if 'page_max' not in self.schema['scan'] else self.schema['scan']['page_max']
+                while True:
+                    url = self.schema['scan']['entrance'].replace(r'$p', str(page))
+                    print(page, ':', url, 'start..')
+                    to_continue = __pool_fill_one(requests.get(url, headers=self.__get_header(), timeout=self.timeout).text, page)
+                    if to_continue:
+                        if page_max == -1 or page < page_max:
+                            page += page_inc
+                        time.sleep(self.sleep)
+                    else:
+                        break
+            try:
+                normal_start()
+            except Exception as e:
+                print('post find error :', e)
+                for i in range(1, 6):
+                    print('attempt: ', i, ' start.')
+                    try:
+                        normal_start()
+                        break
+                    except Exception as _e:
+                        print('post find error :', _e)
+                print('attempted but still have error. please check \'/util/err/schema.err\'')
+                self.LOG.log('schema', e, schema=self.schema['id'])
         elif self.schema['scan']['type'] == 'selenium':
             def selenium_start(driver):
                 page = 1
@@ -417,9 +443,9 @@ class datapack_collector:
                     try:
                         selenium_start(driver)
                         break
-                    except Exception as e:
+                    except Exception as _e:
                         driver.quit()
-                        print('selenium error :', e)
+                        print('selenium error :', _e)
                 print('attempted but still have error. please check \'/util/err/schema.err\'')
                 self.LOG.log('schema', e, schema=self.schema['id'])
             driver.quit()
@@ -446,7 +472,13 @@ class datapack_collector:
         print(post['link'], 'scanning..')
         for k, v in self.schema['info_collect'].items():
             if type(v) == dict:
-                post[k] = self.__search(bs, list(v.items())[0])
+                for _k, _v in v.items():
+                    _schem = (_k, _v)
+                    break
+                _next = self.__setnext__(_schem[0], _schem[1])
+                post[k] = self.__search(bs, _next)
+            else:
+                post[k] = v
         self.__post_refine(post)
         return post
     def __summary(self, post: dict):
@@ -482,7 +514,7 @@ class datapack_collector:
                 img['src'] = img['file']
         for a in bs.find_all('a'): # hide a
             a.name = 'hide_a'
-            if a.text == a['href']:
+            if 'href' in a and a.text == a['href']:
                 a.string = re.sub('[^\*]', '*', a.text)
             a['href'] = ''
         html = str(bs)
@@ -497,14 +529,22 @@ class datapack_collector:
             post:
                 The dict as a collection of all desired information in a post.
         '''
+        g = {}
+        for k, v in post.items():
+            if len(k) > 1 and k[0] == '$':
+                var = k.replace('$','').replace('.','')
+                if var == '':
+                    continue
+                g[var] = v
         for k, v in self.schema['info_adapt'].items():
             if not k in post:
                 continue
+            g[k] = post[k]
             if not type(v) == str:
                 continue
-            g = {k: post[k]}
             exec(self.schema['info_adapt'][k], g)
             post[k] = g[k]
+            del g[k]
     def __post_refine(self, post: dict):
         '''
         Refine the post.
@@ -517,13 +557,16 @@ class datapack_collector:
         #   - auto image select (the first image in 'content_raw')
         #   - auto content_filtered select (equals 'content_raw')
         #   - using "info_refine" to trim all info
-        #   - make 'game_version' and 'tag' be standard (to be list with no empty string, if empty then ['other'])
+        #   - make 'game_version' and 'tag' and list be standard (to be list with no empty string, if empty then ['other'])
         if not 'cover_img' in self.schema['info_collect'] or self.schema['info_collect']['cover_img'] == 'auto': # auto select cover
             post['cover_img'] = self.__search(BeautifulSoup(post['content_raw'], "lxml"), ('img', { '__img__': 'src' }))
         if not 'content_filtered' in self.schema['info_collect'] or self.schema['info_collect']['content_filtered'] == 'auto': # auto fill content_filtered
             post['content_filtered'] = post['content_raw']
         self.__trim(post)
         li = ['game_version', 'tag']
+        for k, v in post.items():
+            if len(k) > 2 and k[:2] == '$.':
+                li.append(k)
         for k, v in post.items():
             if v == None:
                 pass
@@ -534,16 +577,17 @@ class datapack_collector:
             elif not k in li and type(v) == list and v.__len__() > 0:
                 post[k] = v[0]
             elif not k in li and type(v) == list and v.__len__() == 0:
-                post[k] = None
+                post[k] = ''
         for k in li:
-            if post[k] == None:
+            if not k in post or not type(post[k]) == list:
                 post[k] = []
             post[k] = [i.lower() for i in post[k] if not i == '']
-            if post[k].__len__() == 0:
-                post[k] = ['other']
             post[k] = list(set(post[k]))
+        if post['game_version'].__len__() == 0:
+            post['game_version'] = ['other']
         ### adapt
         #   - using "info_adapt" to adapt all info
+        self.__content_hide(post)  # adapt raw html to hide some information
         self.__post_adapt(post)
         ### second refine
         #   - make 'content_filtered' be pure text
@@ -558,7 +602,6 @@ class datapack_collector:
         self.__summary(post)
         if post['summrization'].__len__() == 0:
             post['summrization'] = ['']
-        self.__content_hide(post)  # adapt raw html
         if post['author_uid'] in [None, 'auto', 'none']:
             post['author_uid'] = post['author_name']
         if post['post_time'] in [None, 'auto', 'none']:
