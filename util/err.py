@@ -1,5 +1,5 @@
 import os, datetime
-BASE_DIR = os.path.dirname(__file__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ERR_DIR = BASE_DIR + '/err'
 if not os.path.exists(ERR_DIR):
     os.mkdir(ERR_DIR)

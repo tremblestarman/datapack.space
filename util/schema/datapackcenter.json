@@ -75,19 +75,15 @@
             }
         },
         "post_time": {
-            "dl.3": {
-                "class": "pairs pairs--justified",
-                "time": {
-                    "__time__": "datetime"
-                }
+            "div": {
+                "class": "resourceSidebarGroup",
+                "__time__": "."
             }
         },
         "update_time": {
-            "dl.4": {
-                "class": "pairs pairs--justified",
-                "time": {
-                    "__time__": "datetime"
-                }
+            "div": {
+                "class": "resourceSidebarGroup",
+                "__time__": "."
             }
         }
     },
@@ -95,7 +91,7 @@
         "name": {
             "remove": [
                 "<h1 class=\"p-title-value\">",
-                "<span class=\".*\">0.1</span>\n</h1>"
+                "<span class=\".*\">.*</span>\n</h1>"
             ]
         },
         "author_avatar": {
@@ -117,13 +113,28 @@
             }
         },
         "post_time": {
-            "remove": "\\+\\d\\d\\d\\d",
+            "regexs": {
+                "from": "datetime\\=\"(.*)\\+\\d\\d\\d\\d\"",
+                "to": "%s|%s"
+            },
+            "regexs_": {
+                "from": "(.*)\\|",
+                "to": "%s"
+            },
             "replace": {
                 "from": "T",
                 "to": " "
             }
         },
         "update_time": {
+            "regexs": {
+                "from": "datetime\\=\"(.*)\\+\\d\\d\\d\\d\"",
+                "to": "%s|%s"
+            },
+            "regexs_": {
+                "from": "\\|(.*)",
+                "to": "%s"
+            },
             "remove": "\\+\\d\\d\\d\\d",
             "replace": {
                 "from": "T",
@@ -132,6 +143,7 @@
         }
     },
     "info_adapt": {
+        "name": "name = bs(name, \"lxml\").text.strip()",
         "content_raw": "content_raw = '<link rel=\"stylesheet\" href=\"\/bin\/css\/dpc.css\" type=\"text\/css\"\/>' + content_raw"
     }
 }

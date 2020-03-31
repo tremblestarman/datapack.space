@@ -46,13 +46,16 @@
                     |______________________________
                     |   Final Fix: relation form technic changes.
                     |____________________________________________
+[F] img block-list
+    |   build a block-list to prevent img download. like 'youtube'.
+    |______________________________________________________________
 - WEB Bugs & Features
-[B] incorrect synonymous tag
-    |   synonymous tags do not show.
-    |   source and version should not be distinguished by languages.
-    Solution: check the source code of this function and test it again.
-    |         if 'tag_type' = 0 or 1 (source or version), show all datapacks with synonymous tags.
-    |_____________________________________________________________________________________________
+                √ [B] incorrect synonymous tag
+                    |   synonymous tags do not show.
+                    |   source and version should not be distinguished by languages.
+                    Solution: check the source code of this function and test it again.
+                    |         if 'tag_type' = 0 or 1 (source or version), show all datapacks with synonymous tags.
+                    |_____________________________________________________________________________________________
 [F] a terminal tool based on commandline to do functional DB operation
     |   1. the most important: migration of all datebase. (write to files & read from files)
     |   2. basic changes of a column in a record.

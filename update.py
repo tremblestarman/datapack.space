@@ -2,7 +2,7 @@ import os, json
 from time import sleep
 from util.collector import datapack_collector
 from util.database import datapack_db
-BASE_DIR = os.path.dirname(__file__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 versions = set()
 sources = []
 DB = datapack_db()
@@ -16,6 +16,7 @@ for schema in os.listdir(BASE_DIR + '/util/schema'):
         DB.info_import(DC.info_list)
         DB.download_img()
         DC.info_list.clear()
+        print('still', DC.post_pool.__len__(), 'to be analyzed and inserted into database.')
         print('==== a package just have finished, sleep 10s to prevent being banned ====')
         sleep(10)
     versions = versions | DC.versions

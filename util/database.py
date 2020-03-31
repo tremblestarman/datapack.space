@@ -8,7 +8,7 @@ from func_timeout import func_set_timeout
 from emoji import demojize
 from util.err import logger
 filterwarnings('ignore',category=pymysql.Warning)
-BASE_DIR = os.path.dirname(__file__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 socket.setdefaulttimeout(30)
 class translator:
     limit = 50

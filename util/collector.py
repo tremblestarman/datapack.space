@@ -2,9 +2,10 @@
 '''
 Datapack Info Collector.
 '''
-import os, json, requests, lxml, re, bs4, random, time, datetime
+import os, json, requests, lxml, re, bs4, random, time, math, datetime
 from bs4 import BeautifulSoup, element
 from urllib import parse as urlparse
+from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver import ActionChains
@@ -14,7 +15,7 @@ from selenium.webdriver.common.by import By
 from textrank4zh import TextRank4Keyword, TextRank4Sentence
 from multiprocessing.dummy import Pool as thread_pool
 from util.err import logger
-BASE_DIR = os.path.dirname(__file__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 headers = [
     "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36",
@@ -274,7 +275,7 @@ class datapack_collector:
             if post[k] == None:
                 post[k] = ''
             for n, p in v.items():
-                if n == 'replace': # replace fields
+                if 'replace' in n: # replace fields
                     def rep(p):
                         post[k] = re.sub(p['from'], p['to'], post[k])
                     if p == list:
@@ -282,13 +283,19 @@ class datapack_collector:
                             rep(i)
                     else:
                         rep(p)
-                elif n == 'regex': # regex match and output using defined form
+                elif 'regex' in n or 'regex' in n: # regex match and output using defined form
                     r = re.compile(p['from'])
                     if type(post[k]) == list:
                         post[k] = ' '.join(post[k])
                     m = r.findall(post[k])
-                    post[k] = [p['to'] % m[i] for i in range(m.__len__())]
-                elif n == 'remove': # remove fields
+                    _n = int((len(p['to']) - len(p['to'].replace(r'%s',''))) / len(r'%s'))
+                    if _n > 1:
+                        post[k] = [p['to'] % tuple(m[i * _n: _n]) for i in range(math.floor(m.__len__() / _n))]
+                    else:
+                        post[k] = [p['to'] % m[i] for i in range(math.floor(m.__len__()))]
+                    if 'regexs' in n:
+                        post[k] = post[k][0] if post[k].__len__() > 0 else ''
+                elif 'remove' in n: # remove fields
                     def rem(p):
                         if type(p) == dict:
                             bs = BeautifulSoup(post[k], "lxml")
@@ -425,7 +432,8 @@ class datapack_collector:
                 options.add_argument('--disable-dev-shm-usage')
                 options.add_argument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36")
             elif self.schema['scan']['display'] == 'virtual':
-                from pyvirtualdisplay import Display
+                options.add_argument('--no-sandbox')
+                options.add_argument('--disable-gpu')
                 display = Display(visible=0, size=(800, 800))
                 display.start()
             capabilities = DesiredCapabilities.CHROME.copy()
@@ -449,6 +457,8 @@ class datapack_collector:
                 print('attempted but still have error. please check \'/util/err/schema.err\'')
                 self.LOG.log('schema', e, schema=self.schema['id'])
             driver.quit()
+            if self.schema['scan']['display'] == 'virtual':
+                display.stop()
             print('selenium closed.')
     def __post_analyze(self, content: str, domain: str = None):
         '''
@@ -475,8 +485,15 @@ class datapack_collector:
                 for _k, _v in v.items():
                     _schem = (_k, _v)
                     break
-                _next = self.__setnext__(_schem[0], _schem[1])
-                post[k] = self.__search(bs, _next)
+                if _k == 'selector':
+                    el = bs.select(_v)
+                    if self.schema['info_collect'][k]['content'] == '.':
+                        post[l] = el.string
+                    else:
+                        post[l] = el.get(self.schema['info_collect'][k]['content'])
+                else:    
+                    _next = self.__setnext__(_schem[0], _schem[1])
+                    post[k] = self.__search(bs, _next)
             else:
                 post[k] = v
         self.__post_refine(post)
@@ -529,7 +546,7 @@ class datapack_collector:
             post:
                 The dict as a collection of all desired information in a post.
         '''
-        g = {}
+        g = {'bs': BeautifulSoup}
         for k, v in post.items():
             if len(k) > 1 and k[0] == '$':
                 var = k.replace('$','').replace('.','')

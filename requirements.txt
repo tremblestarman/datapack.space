@@ -1,8 +1,10 @@
 bs4
 cryptography
 emoji
+func_timeout
 googletrans
 lxml
 pymysql
 pyvirtualdisplay
+selenium
 textrank4zh
