@@ -29,12 +29,12 @@ var name = flag.String("name", "", "the name of the language")
 
 func GetLanguages(parent string) *map[string]Language {
 	var languages map[string]Language
-	jstring, err := ioutil.ReadFile(parent + "\\util\\languages.json")
+	jString, err := ioutil.ReadFile(parent + "\\util\\languages.json")
 	if err != nil {
 		fmt.Println("languages.json: ", err)
 		os.Exit(1)
 	}
-	err = json.Unmarshal(jstring, &languages)
+	err = json.Unmarshal(jString, &languages)
 	if err != nil {
 		fmt.Println("languages.json -> map[Language] err: ", err)
 		os.Exit(1)
@@ -43,12 +43,12 @@ func GetLanguages(parent string) *map[string]Language {
 	return &languages
 }
 func WriteLanguage(parent string, languages *map[string]Language) {
-	jstring, err := json.Marshal(languages)
+	jString, err := json.Marshal(languages)
 	if err != nil {
 		fmt.Println("map[Language] -> languages.json err: ", err)
 		os.Exit(1)
 	}
-	err = ioutil.WriteFile(parent+"\\util\\languages.json", jstring, os.ModeAppend)
+	err = ioutil.WriteFile(parent+"\\util\\languages.json", jString, os.ModeAppend)
 	if err != nil {
 		fmt.Println("languages.json: ", err)
 		os.Exit(1)
@@ -59,24 +59,20 @@ func FileCopy(src, dst string, id string) error {
 	var srcfd *os.File
 	var dstfd *os.File
 	var srcinfo os.FileInfo
-
 	if srcfd, err = os.Open(src); err != nil {
 		return err
 	}
 	defer srcfd.Close()
-
 	if dstfd, err = os.Create(dst); err != nil {
 		return err
 	}
 	defer dstfd.Close()
-
 	if _, err = io.Copy(dstfd, srcfd); err != nil {
 		return err
 	}
 	if srcinfo, err = os.Stat(src); err != nil {
 		return err
 	}
-
 	tmpl, err := ioutil.ReadFile(dst)
 	if err != nil {
 		fmt.Println(dst+": ", err)
@@ -177,7 +173,7 @@ Options:
 		}
 		var updates []string
 		if *a {
-			for i, _ := range *languages {
+			for i := range *languages {
 				updates = append(updates, i)
 			}
 		} else {
@@ -239,8 +235,8 @@ Options:
 	re, _ = regexp.Compile("\\s*$")
 	sAttributes = re.ReplaceAllString(sAttributes, "")
 	var sGenerated []string
-	for i, _ := range *languages {
-		sGenerated = append(sGenerated, "\ntemplates/" + strings.ReplaceAll(i, "-", "_") + "/* linguist-generated")
+	for i := range *languages {
+		sGenerated = append(sGenerated, "\ntemplates/"+strings.ReplaceAll(i, "-", "_")+"/* linguist-generated")
 	}
 	gitAttributes = []byte(sAttributes + strings.Join(sGenerated, ""))
 	err = ioutil.WriteFile(parent+"\\.gitattributes", gitAttributes, os.ModeAppend)

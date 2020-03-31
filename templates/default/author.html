@@ -24,7 +24,7 @@
             <div class="datapacks result">
                 {{range .Author.Datapacks}}
                     <div class="datapack-short">
-                        <div class="name" onclick="jump_datapack('{{.ID}}')">{{.Name}}</div>
+                        <div class="name" onclick="jump_datapack('{{.ID}}')">{{.Name | unescaped}}</div>
                         <div class="tags">
                         {{range .Tags}}
                             <div class="tag tag-{{.Type}}" onclick="jump_tag({{.ID}})">{{.Tag | unescaped}}</div>

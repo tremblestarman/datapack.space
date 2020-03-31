@@ -46,9 +46,9 @@
                     |______________________________
                     |   Final Fix: relation form technic changes.
                     |____________________________________________
-[F] img block-list
-    |   build a block-list to prevent img download. like 'youtube'.
-    |______________________________________________________________
+                √ [F] img block-list
+                    |   build a block-list to prevent img download. like 'youtube'.
+                    |______________________________________________________________
 - WEB Bugs & Features
                 √ [B] incorrect synonymous tag
                     |   synonymous tags do not show.
@@ -56,9 +56,12 @@
                     Solution: check the source code of this function and test it again.
                     |         if 'tag_type' = 0 or 1 (source or version), show all datapacks with synonymous tags.
                     |_____________________________________________________________________________________________
+[F] a schema check
+    |   Just check whether the schema is legal.
+    |__________________________________________
 [F] a terminal tool based on commandline to do functional DB operation
-    |   1. the most important: migration of all datebase. (write to files & read from files)
-    |   2. basic changes of a column in a record.
-    |   3. combine author, datapack.
-    |   4. mark authorized post.
+    |   basic get of record
+    |   basic changes of a column in a record.
+    |   combine author, datapack. (via table 'author_authors', table 'datapack_datapacks')
+    |   mark authorized post.
     |_______________________________________________________________________________________

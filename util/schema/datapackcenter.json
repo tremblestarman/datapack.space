@@ -143,7 +143,6 @@
         }
     },
     "info_adapt": {
-        "name": "name = bs(name, \"lxml\").text.strip()",
         "content_raw": "content_raw = '<link rel=\"stylesheet\" href=\"\/bin\/css\/dpc.css\" type=\"text\/css\"\/>' + content_raw"
     }
 }

@@ -1,5 +1,10 @@
+#!/usr/bin/python3
+'''
+Write Datapack into Mysql Database.
+'''
 import pymysql, json, os, uuid, urllib, socket, time, unicodedata
 from datetime import datetime
+from urllib.parse import urlparse
 from warnings import filterwarnings
 from googletrans import Translator
 from multiprocessing.dummy import Pool as thread_pool
@@ -11,6 +16,15 @@ filterwarnings('ignore',category=pymysql.Warning)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 socket.setdefaulttimeout(30)
 class translator:
+    '''
+    The Translator.
+    
+    Args:
+        limit:
+            To prevent getting banned by api, request limited times and sleep.
+        timeout:
+            Duration of sleep.
+    '''
     limit = 50
     current_time = 0
     timeout = 60
@@ -21,23 +35,23 @@ class translator:
             print('sleep to prevent being banned. (wait 1 minute')
             time.sleep(self.timeout)
             self.current_time = 0
-        self.current_time += 1
+        self.current_time += 1 # times add 1
         try:
             result = self.trans.translate(text, dest=lang).text
             return result
-        except Exception as e:
+        except Exception as e: # may be caused by network or format of encoding.
             count = 1
             print(f"- translate '{text}' to '{lang}' error:", e)
             text = demojize(text) # if error, then demojize it
-            text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8') # and decode with normal letters
+            text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8') # and decode it with normal letters
             while count <= 5:
                 print('error might caused by being banned or slow network speed.\n(wait 15s to be unbanned or to fix network problem.')
                 time.sleep(15)
                 try:
                     result = self.trans.translate(text, dest=lang).text
                     return result
-                except Exception as e:
-                    print(f"- translate '{text}' to '{lang}' error:", e)
+                except Exception as _e:
+                    print(f"- translate '{text}' to '{lang}' error:", _e)
                     print('- reloading for %d time' % count if count == 1 else '- reloading for %d times' % count)
                     count += 1
             if count > 5:
@@ -45,13 +59,40 @@ class translator:
                 self.LOG.log('translation', e, text=text, language=lang)
                 return text
 class datapack_db:
+    '''
+    Datapack operations.
+    
+    Args:
+        img_queue:
+            images to be downloaded asyncly.
+        img_blocked:
+            Block some domains so that it can skip them.
+        timeout:
+            GET request time out for images.
+        translated_tags:
+            Store all translated tags, so as not to translate it again.
+        trans:
+            Translator.
+        retry_list:
+            If function timeout, then retry it in the next turn.
+    '''
     img_queue = set()
+    img_blocked = ['img.youtube.com']
+    timeout = 5
     translated_tags = {}
     trans = translator()
-    timeout = 5
     retry_list = [] # retry buffer
     LOG = logger()
     def __init__(self):
+        '''
+        Connect and Preload.
+
+        If there's no database named 'datapack_collection', create it.
+
+        If there's no table to store infomation, build them.
+
+        Reset some statistics and re-calculate.
+        '''
         try:
             with open(BASE_DIR + '/auth.json', 'r', encoding='utf-8') as f:
                 auth = json.loads(f.read())
@@ -116,13 +157,12 @@ class datapack_db:
                 tag_id VARCHAR(36) NOT NULL,
                 PRIMARY KEY (id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
-            self.cur.execute(tag_info)
+            self.cur.execute(tag_info) # create tables
             self.cur.execute(author_info)
             self.cur.execute(datapack_info)
             self.cur.execute(datapack_tag)
             print('connect successfully')
-            # add colums
-            def alter(table: str, col: str, type: str):
+            def alter(table: str, col: str, type: str): # add colums
                 for k, _ in self.languages.items():
                     operated = True
                     try:
@@ -135,7 +175,7 @@ class datapack_db:
             alter('datapacks', 'name', 'TINYTEXT')
             alter('datapacks', 'tags_str', 'TEXT')
             alter('tags', 'tag', 'TINYTEXT')
-            self.cur.execute('update tags set quotation = 0;')
+            self.cur.execute('update tags set quotation = 0;') # reset quotation
             # preload
             self.cur.execute('select id from datapacks')
             res = self.cur.fetchall()
@@ -146,6 +186,9 @@ class datapack_db:
         except Exception as e:
             print('connect error:', e)
     def _author_insert(self, info: dict):
+        '''
+        Insert Author from info_dict to database.
+        '''
         aid = uuid.uuid3(uuid.NAMESPACE_DNS, info['author_uid'])
         info['author_name'] = pymysql.escape_string(info['author_name'])
         author_insert = f'''insert into authors (id, author_uid, author_name, avatar) 
@@ -177,6 +220,9 @@ class datapack_db:
             i += 1
         return translated
     def _tag_insert(self, info: dict):
+        '''
+        Insert Tag from info_dict to database.
+        '''
         tag_sort = [info['source'], info['game_version'], info['tag'], info['keywords']]
         info["default_tags_strs"] = []
         for k, _ in self.languages.items():
@@ -213,13 +259,19 @@ class datapack_db:
             self.translated_tags[str(tid)] = translated
             return str(tid)
         result = []
-        for i in range(0, 4):
+        for i in range(0, 4): # for each tag type
             if type(tag_sort[i]) == list:
                 result += [__exe(j, i) for j in tag_sort[i]]
             else:
                 result.append(__exe(tag_sort[i], i))
         return result
     def _img_save(self, url: str, _dir: str, id):
+        '''
+        Save an image from url to local.
+        '''
+        if urlparse(url).netloc in self.img_blocked:
+            print(url, ': had been banned from local. skipped.')
+            return f'/{_dir}/{str(id)}.png'
         img_dir = os.path.dirname(BASE_DIR) + '/bin/img/' + _dir
         if not os.path.exists(img_dir):
             os.mkdir(img_dir)
@@ -280,6 +332,9 @@ class datapack_db:
         return False
     @func_set_timeout(600) # set timeout for 10 minutes
     def _datapack_insert(self, info: dict):
+        '''
+        Insert Datapack from info_dict to database.
+        '''
         did = uuid.uuid3(uuid.NAMESPACE_DNS, info['link']) # generate did
         assert not did == None
         # update author info along with his or her avatar
@@ -338,6 +393,9 @@ class datapack_db:
         del info
         return str(did)
     def info_import(self, info_list: list):
+        '''
+        Import information from 'info_list' to database.
+        '''
         info_list = self.retry_list + info_list # retry
         self.retry_list.clear()
         for i in range(0, info_list.__len__()):
@@ -361,6 +419,9 @@ class datapack_db:
         else:
             print('end and done all successfully.')
     def download_img(self):
+        '''
+        Download all images in 'img_queue'.
+        '''
         self.total = 0
         def process(img_target):
             try:
@@ -376,6 +437,9 @@ class datapack_db:
         del self.total
         self.img_queue.clear()
     def info_delete_nonexistent(self):
+        '''
+        Delete datapacks in database that do not exist.
+        '''
         if self.retry_list.__len__() > 0: # still have to retry
             for info in self.retry_list:
                 print('retried every time but failed. please check \'/util/err/database.err\'')
@@ -389,6 +453,9 @@ class datapack_db:
             self._img_remove('cover', rem)
             print(rem, 'has been deleted.')
     def reset(self):
+        '''
+        Reset database. (Destructive)
+        '''
         self.cur.execute('drop table if exists datapacks, tags, authors, datapack_tags;')
         print('reseted')
     def __del__(self):

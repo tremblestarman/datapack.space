@@ -9,6 +9,17 @@ class logger:
     Output error to .err file in '/util/err'
     '''
     def log(self, err_type: str, err: Exception, **kwargs):
+        '''
+        Log to file.
+        
+        Args:
+            err_type:
+                Type of the eror. (to name and classify '.err' file)
+            err:
+                Exception object.
+            **kwargs:
+                Addtional information.
+        '''
         with open(ERR_DIR + '/' + err_type + '.err', 'a+', encoding='utf-8') as f:
             f.write('--------\n')
             f.write('At ' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ';\n')

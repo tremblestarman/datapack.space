@@ -38,18 +38,19 @@ class datapack_collector:
     '''
     Info Collector following a certain schema.
 
-    Args:
+    Initialization Args:
         schema:
             The schema to be followed. (dict or .json file path)
         refill:
-            refill 'post_pool.' 
+            refill 'post_pool'.
     Attributes:
         post_pool:
-            Post link. (urls)
-        post_pool:
-            Post link which got error. (urls)
+            Post links. (urls)
+        retry_pool:
+            Post links which got error. (urls)
         info_list:
             Infomation collected via the given schema.
+            each element is an info_dict.
             STRUCT:
             {
                 "link":         # url or domain#xx if embedded in the webpage,
@@ -129,6 +130,13 @@ class datapack_collector:
                 post_fill()
         print('totally got', self.post_pool.__len__(), 'from', self.schema['id'] + '.')
     def analyze_all(self, interrupt = False):
+        '''
+        Analyze posts in 'post_pool'. Only analyze first few posts not exceeding 'async_count'.
+
+        Args:
+            interrupt: 
+                for Debug, which means halt when error occurs.
+        '''
         # first analyze
         print(self.schema['id'], ': start analyze.')
         self.__async_analyze(self.post_pool[:self.async_count], interrupt)
@@ -201,12 +209,12 @@ class datapack_collector:
 
         Args:
             target:
-                beatifulsoup.
+                A BeatifulSoup object.
             next:
-                a tuple with 2 or 3 elements. (str, dict, [int])
-                str is the html element name.
-                dict is the schema to be followed. (html-structure-like dict)
-                int is the index to be selected.
+                A tuple with 2 or 3 elements. (str, dict, [int])
+                - str is the html element name.
+                - dict is the schema to be followed. (html-structure-like dict)
+                - int is the index to be selected.
         '''
         if target == None:
             return None
@@ -634,6 +642,16 @@ class datapack_collector:
         post['default_tag'] = post['tag']
         post['name_' + self.schema['lang']] = post['name']
         self.versions = self.versions | set(post['game_version'])
+    def peek():
+        '''
+        Test tool.
+
+        Return:
+            The first info_dict in 'info_list'.
+        '''
+        if self.info_list.__len__() > 0:
+            return self.info_list[0]
+        return {}
     def __del__(self):
         if self.retry_list.__len__() > 0:
             self.__retry_failed()

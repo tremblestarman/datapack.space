@@ -1034,7 +1034,6 @@ input.search:focus {
 .tags .tag, .tag-container .tag {
     float: left;
     line-height: 8px;
-    height: 8px;
     padding: 4px;
     margin-left: 5px;
     margin-top: 10px;
