@@ -28,6 +28,12 @@
                 "__name__": "."
             }
         },
+        "$name_backup": {
+            "h1": {
+                "class": "p-title-value",
+                "__name__": "."
+            }
+        },
         "author_uid": {
             "a": {
                 "data-xf-init": "member-tooltip",
@@ -89,10 +95,11 @@
     },
     "info_refine": {
         "name": {
-            "remove": [
-                "<h1 class=\"p-title-value\">",
-                "<span class=\".*\">.*</span>\n</h1>"
-            ]
+            "remove": "\\<span.*\\>.*\\</span\\>",
+            "regexs": {
+                "from": "\\>(\\s*.*\\s*)\\</h1\\>",
+                "to": "%s"
+            }
         },
         "author_avatar": {
             "regex": {
@@ -143,6 +150,7 @@
         }
     },
     "info_adapt": {
+        "name": "if name == '':    name = name_backup",
         "content_raw": "content_raw = '<link rel=\"stylesheet\" href=\"\/bin\/css\/dpc.css\" type=\"text\/css\"\/>' + content_raw"
     }
 }

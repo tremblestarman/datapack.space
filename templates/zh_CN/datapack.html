@@ -1,6 +1,6 @@
 {{define "zh_CN/datapack.html"}}
 {{template "zh_CN/header" .}}
-    <div class="shulker-shell"><div class="shell-part" onclick="jump('{{.Datapack.Link}}', '_blank')" title="{{template "zh_CN/goto_link_msg"}}">{{template "zh_CN/goto_link_msg"}}</div></div>
+    <div class="shulker-shell"><div class="shell-part" onclick="jump('{{.Datapack.Link}}', '_blank')" title="{{template "zh_CN/goto_link_msg"}}">{{template "icon/link"}}</div></div>
     <div class="datapack-unique"style="--pillar: rgb(124, 92, 124); --pillar-shadow: rgba(172, 123, 172, 0.74);">
         <div class="pillar left"></div>
         <div class="pillar right"></div>
@@ -12,7 +12,7 @@
             {{end}}>
                 <img {{if .Datapack.CoverExists}}src="/bin/img/cover/{{.Datapack.ID}}.png"{{end}} alt=""/>
                 <div class="mask closed" onclick="glass_pane_close()"></div>
-                <div class="thumb mask-attach" onclick="thumb('datapacks','{{.ID}}');" title="{{template "zh_CN/end_crystal_msg"}} : {{.Datapack.Thumb}}" style="opacity: 0;"></div>
+                <div class="thumb mask-attach" onclick="thumb('datapacks','{{.Datapack.ID}}');" title="{{template "zh_CN/end_crystal_msg"}} : {{.Datapack.Thumb}}" style="opacity: 0;"></div>
                 <div class="goto mask-attach" onclick="jump('{{.Datapack.Link}}', '_blank')" style="opacity: 0;"></div>
             </div>
             <div class="info">

@@ -49,6 +49,17 @@
                 √ [F] img block-list
                     |   build a block-list to prevent img download. like 'youtube'.
                     |______________________________________________________________
+                √ [B] time is empty
+                    |   time = ''
+                    |_______________________________________
+                    |   Final Fix: left out empty when tagging time;
+                    |              fixed muti-match in 'regex'.
+                    |_______________________________________________
+                √ [B] datapackcenter.json
+                    |   got datapack name with wrong styles.
+                    |_______________________________________
+                    |   Final Fix: upgraded regex match.
+                    |___________________________________
 - WEB Bugs & Features
                 √ [B] incorrect synonymous tag
                     |   synonymous tags do not show.
@@ -60,9 +71,18 @@
                     |   Just check whether the schema is legal.
                     |__________________________________________
 [B] custom css went wrong
+                √ [B] <html lang='xxx'>
+                    |   In language.exe.
+                    |___________________
 [F] shadeless style
-[F] mobile responsive mode
-[F] simplifiied style
+    |   Shadeless and modify color collocation.
+    |   Attach style to cookie.
+    |__________________________________________
+[F] simplified style
+[F] responsive mode
+    |   √ Width < 996px
+    |     Mobile
+    |__________________
 [F] a terminal tool based on commandline to do functional DB operation
     |   basic get of record
     |   basic changes of a column in a record.

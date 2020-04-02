@@ -313,7 +313,7 @@ class datapack_db:
             if k == info['default_lang']: # default language
                 continue
             if translate_all or pre_names[i] == None or pre_names[i] == '':
-                if 'name_' + k in info and info['name_' + k] not in ['', 'auto']:
+                if 'name_' + k in info and info['name_' + k] not in [None, 'auto', 'none', '']:
                     continue
                 try:
                     info['name_' + k] = self.trans.translate(info['default_name'], k).upper()
@@ -386,9 +386,9 @@ class datapack_db:
         source = '{info['source']}',
         update_time = '{info['update_time']}';'''
         self.cur.execute(datapack_insert)
-        if not info['author_avatar'] in [None, '']:
+        if not info['author_avatar'] in [None, 'auto', 'none', '']:
             self.img_queue.add((info['author_avatar'], 'author', aid))
-        if not info['cover_img'] in [None, '']:
+        if not info['cover_img'] in [None, 'auto', 'none', '']:
             self.img_queue.add((info['cover_img'], 'cover', did))
         del info
         return str(did)

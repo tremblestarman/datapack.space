@@ -426,6 +426,8 @@ function unfold_datapack(uid) {
     var attachments = objs[2];
     //cover
     setTimeout(function() {
+        cover.style.left = "2px";
+        cover.style.top = "0";
         cover.style.width = "652px";
         cover.style.height = "320px";
     }, 500);
@@ -456,13 +458,13 @@ function unfold_datapack(uid) {
     //generic
     intro_height = Number(window.getComputedStyle(intro).getPropertyValue("height").replace("px",""));
     attachments_height = Number(window.getComputedStyle(attachments).getPropertyValue("height").replace("px",""));
-    attachments.style.top = (320 + intro_height) + "px";
+    attachments.style.top = (320 + intro_height - 2) + "px";
     datapack.style.height = (320 + intro_height + attachments_height) + "px";
     setTimeout(function() {
         //refine height
         intro_height = Number(window.getComputedStyle(intro).getPropertyValue("height").replace("px",""));
         attachments_height = Number(window.getComputedStyle(attachments).getPropertyValue("height").replace("px",""));
-        attachments.style.top = (320 + intro_height) + "px";
+        attachments.style.top = (320 + intro_height - 2) + "px";
         datapack.style.height = (320 + intro_height + attachments_height) + "px";
     }, 1000);
 }
@@ -476,15 +478,17 @@ function fold_datapack(uid) {
     setTimeout(function() {
         cover.children[1].style.opacity = "1";
     }, 500);
-    cover.style.width = "216px";
-    cover.style.height = "216px";
+    cover.style.width = "180px";
+    cover.style.height = "180px";
+    cover.style.left = "13px";
+    cover.style.top = "20px";
     //intro
     intro.style.height = "176px";
     setTimeout(function() {
         intro.style.top = "0";
         intro.children[1].style.height = "128px";
     }, 500);
-    intro.style.left = "220px";
+    intro.style.left = "207px";
     intro.style.width = "436px";
     intro.children[0].style.width = "98%";
     intro.children[1].style.width = "422px";
@@ -493,7 +497,7 @@ function fold_datapack(uid) {
         if (attachments.children[1].children[i].classList.contains("tag-2") || attachments.children[1].children[i].classList.contains("tag-3"))
             attachments.children[1].children[i].classList.add("invisible");
     }
-    attachments.style.left = "220px";
+    attachments.style.left = "207px";
     attachments.style.width = "436px";
     attachments.children[1].style.height = "40px";
     attachments.children[1].style.width = "276px";
@@ -503,7 +507,7 @@ function fold_datapack(uid) {
     }, 500);
     //generic
     setTimeout(function() {
-        attachments.style.top = "178px";
+        attachments.style.top = "176px";
         datapack.style.height = "216px";
     }, 1000);
 }

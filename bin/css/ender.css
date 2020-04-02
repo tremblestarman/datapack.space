@@ -461,6 +461,12 @@ svg.button:active {
 .bottom .pillar.right {
     left: 860px;
 }
+.bottom .pillar.left.pin {
+    left: 42px;
+}
+.bottom .pillar.right.pin {
+    left: 842px;
+}
 .element {
     background: rgb(221,228,165);
     width: 652px;
@@ -578,6 +584,7 @@ svg.button:active {
     -moz-transition: all 0.5s;
     -webkit-transition: all 0.5s;
     -o-transition: all 0.5s;
+    z-index: 1;
 }
 .page_turner .gear:hover {
     cursor: pointer;
@@ -845,8 +852,10 @@ input.search:focus {
     background-position: center center;
     background-size: auto 80%;
     position: absolute;
-    width: 216px;
-    height: 216px;
+    width: 180px;
+    height: 180px;
+    left: 13px;
+    top: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -912,7 +921,7 @@ input.search:focus {
 .datapack .info {
     position: absolute;
     top: 0;
-    left: 220px;
+    left: 207px;
     width: 436px;
     height: 176px;
     transition: all 0.5s;
@@ -929,20 +938,21 @@ input.search:focus {
 .info .name {
     width: 98%;
     position: relative;
-    margin: 0 auto;
     text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    height: 36px;
-    line-height: 36px;
-    font-size: 28px;
-    text-shadow: 0 0 12px #202020;
+    margin: 6px auto 4px auto;
+    height: 24px;
+    line-height: 22px;
+    font-size: 20px;
+    color: rgba(16, 16, 16, 0.8);
+    font-weight: 800;
     z-index: 20;
 }
 .name:hover {
     color: #202020;
-    text-shadow: 0 0 6px #202020;
+    text-shadow: 0 0 6px rgba(32,32,32,0.75);
     cursor: pointer;
 }
 .info .intro {
@@ -966,6 +976,7 @@ input.search:focus {
 .intro .text {
     display: inline-block;
     white-space: pre-wrap;
+    font-size: 0.965em;
 }
 .intro .time {
     margin: 0 auto;
@@ -980,9 +991,9 @@ input.search:focus {
 }
 .datapack .attachments {
     position: absolute;
-    left: 220px;
+    left: 207px;
     width: 436px;
-    top: 178px;
+    top: 176px;
     height: 40px;
     transition: all 0.5s;
     -moz-transition: all 0.5s;
@@ -1560,3 +1571,224 @@ hide_a:hover {
     margin: 0.5em 0;
 }
 /* About */
+
+/* Responsive */
+/* low resolution 800px ~ 996px */
+@media only screen and (min-width: 800px) and (max-width: 996px) {
+    /* Layout */
+    .page_turner {
+        width: 800px;
+        left: -40px;
+    }
+    .utter {
+        width: 720px;
+    }
+    .page_turner .pillar.right {
+        left: 724px;
+    }
+    .pillar.right {
+        left: 700px;
+    }
+    .bottom {
+        width: 754px;
+        left: -16px;
+    }
+    .bottom .pillar.right {
+        left: 716px;
+    }
+    .bottom .pillar.left.pin {
+        left: 10px;
+    }
+    .bottom .pillar.right.pin {
+        left: 730px;
+    }
+    /* Options */
+    .options {
+        width: 720px;
+    }
+    .search.normal {
+        width: 520px;
+    }
+    .magnify {
+        left: 608px;
+    }
+    .datapack-palette .magnify {
+        left: 590px;
+    }
+    .tri {
+        transform: rotateY(0deg);
+        left: 628px;
+    }
+    div.select-menu {
+        margin: 0 0;
+    }
+    /* Datapack */
+    .shulker-shell {
+        width: 800px;
+    }
+    .shulker-shell .shell-part {
+        left: 200px;
+    }
+    .shulker-shell .shell-part.right {
+        width: 200px;
+        height: 64px;
+        left: 600px;
+        top: -12px;
+    }
+}
+/* Mobile */
+@media only screen and (max-device-width: 600px) {
+    .page_turner {
+        width: 960px;
+        left: -60px;
+        height: 96px;
+    }
+    .utter {
+        width: 840px;
+    }
+    .page_turner .pillar.right {
+        left: 884px;
+    }
+    .page_turner .turn {
+        margin-top: 24px;
+        transform: scale(2);
+    }
+    .pillar.right {
+        left: 822px;
+    }
+    .bottom {
+        width: 900px;
+        left: -30px;
+    }
+    .bottom .more {
+        display: none;
+    }
+    .bottom .pillar.right {
+        left: 882px;
+    }
+    .bottom .pillar.left.pin {
+        left: 44px;
+    }
+    .bottom .pillar.right.pin {
+        left: 804px;
+    }
+    /* Page-turner */
+    .page_turner .gear {
+        top: 24px;
+        left: 128px;
+        transform: scale(2);
+    }
+    .page_turner .option-shower {
+        height: 96px;
+        width: 96px;
+        left: 128px;
+        border-radius: 48px;
+    }
+    @keyframes option-close-m {
+        0% {
+            height: 96px;
+            width: 96px;
+            left: 102px;
+            top: 0;
+            box-shadow: 0 0 40px 20px var(--background-1) inset;
+        }
+        100% {
+            height: 72px;
+            width: 72px;
+            left: 102px;
+            top: 10px;
+            box-shadow: 0 0 30px 16px var(--background-3) inset;
+        }
+    }
+    @keyframes option-show-m {
+        0% {
+            height: 72px;
+            width: 72px;
+            left: 102px;
+            top: 10px;
+            box-shadow: 0 0 30px 16px var(--background-3) inset;
+        }
+        100% {
+            height: 96px;
+            width: 96px;
+            left: 102px;
+            top: 0;
+            box-shadow: 0 0 40px 20px var(--background-1) inset;
+        }
+    }
+    .option-shower.show {
+        animation: option-show-m 0.5s forwards;
+    }
+    .option-shower.close {
+        animation: option-close-m 0.5s forwards;
+    }
+    .page-info {
+        margin-top:12px;
+        height: 72px;
+        line-height: 72px;
+        font-size: 1.6em;
+        width: 720px;
+        margin-left: -360px;
+    }
+    .page-goto {
+        width: 80px;
+        height: 64px;
+        line-height: 64px;
+        font-size: 1em;
+    }
+    .page-info span {
+        font-size: 1em;
+    }
+    /* Options */
+    .options {
+        width: 840px;
+    }
+    .options.unfolded {
+        height: 100px;
+    }
+    .options.unfolded#datapack {
+        height: 136px;
+    }
+    .options.unfolded.accurate#datapack {
+        height: 226px;
+    }
+    .line {
+        margin-bottom: 52px;
+    }
+    .search-bar {
+        height: 108px
+    }
+    .search.normal {
+        width: 600px;
+        height: 72px;
+    }
+    .datapack-palette .search.normal {
+        left: 40px
+    }
+    .s-button, .s-button:hover, .s-button:active {
+        height: 36px;
+        width: 36px;
+        transform: scale(2);
+    }
+    .magnify {
+        left: 644px;
+    }
+    .datapack-palette .magnify {
+        top: 48px;
+        left: 668px;
+    }
+    .magnify.accurate {
+        left: 382px;
+    }
+    .tri, .tri:hover, .tri:active {
+        top: 48px;
+        transform: scale(2) rotateY(0deg);
+        left: 742px;
+    }
+    .tri.accurate, .tri.accurate:hover, .tri.accurate:active {
+        transform: scale(2) rotateY(180deg);
+    }
+    div.select-menu {
+        margin: 0 0;
+    }
+}

@@ -96,7 +96,7 @@
             }
         },
         "$time_backup": {
-            "regex": {
+            "regexs": {
                 "from": "/uploads/(\\d+)/(\\d+)/",
                 "to": "%s-%s-01 12:00:00"
             }

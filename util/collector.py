@@ -291,11 +291,17 @@ class datapack_collector:
                             rep(i)
                     else:
                         rep(p)
-                elif 'regex' in n or 'regex' in n: # regex match and output using defined form
+                elif 'regex' in n: # regex match and output using defined form
                     r = re.compile(p['from'])
                     if type(post[k]) == list:
                         post[k] = ' '.join(post[k])
-                    m = r.findall(post[k])
+                    _m = r.findall(post[k])
+                    m = []
+                    for _ in _m:
+                        if type(_) == tuple:
+                            m += list(_)
+                        else:
+                            m.append(_)
                     _n = int((len(p['to']) - len(p['to'].replace(r'%s',''))) / len(r'%s'))
                     if _n > 1:
                         post[k] = [p['to'] % tuple(m[i * _n: _n]) for i in range(math.floor(m.__len__() / _n))]
@@ -627,14 +633,14 @@ class datapack_collector:
         self.__summary(post)
         if post['summary'].__len__() == 0:
             post['summary'] = ['']
-        if post['author_uid'] in [None, 'auto', 'none']:
+        if post['author_uid'] in [None, 'auto', 'none', '']:
             post['author_uid'] = post['author_name']
-        if post['post_time'] in [None, 'auto', 'none']:
-            if post['update_time'] in [None, 'auto', 'none']:
+        if post['post_time'] in [None, 'auto', 'none', '']:
+            if post['update_time'] in [None, 'auto', 'none', '']:
                 post['post_time'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             else:
                 post['post_time'] = post['update_time']
-        if post['update_time'] in [None, 'auto', 'none']:
+        if post['update_time'] in [None, 'auto', 'none', '']:
             post['update_time'] = post['post_time']      
         post['source'] = self.schema['id'] # set source
         post['default_lang'] = self.schema['lang'] # lang

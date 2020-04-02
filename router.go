@@ -86,7 +86,9 @@ func renderAuthor(c *gin.Context, language string, author *Author) {
 	lastUpdateTime := ""
 	for i := 0; i < len(author.Datapacks); i++ {
 		author.Datapacks[i].Initialize() // Initialize
-		sourcesMap[author.Datapacks[i].Source] = author.Datapacks[i].Tags[0]
+		if len(author.Datapacks[i].Tags) > 0 {
+			sourcesMap[author.Datapacks[i].Source] = author.Datapacks[i].Tags[0]
+		}
 		if author.Datapacks[i].UpdateTimeString > lastUpdateTime {
 			lastUpdateTime = author.Datapacks[i].UpdateTimeString
 		}

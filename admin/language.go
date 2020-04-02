@@ -77,6 +77,11 @@ func FileCopy(src, dst string, id string) error {
 	if err != nil {
 		fmt.Println(dst+": ", err)
 	}
+	_, fileName := filepath.Split(dst)
+	if fileName == "common.tmpl" {
+		lang := strings.Split(id, "-")[0]
+		tmpl = bytes.ReplaceAll(tmpl, []byte("<html lang=\"zh\">"), []byte("<html lang=\""+lang+"\">"))
+	}
 	err = ioutil.WriteFile(dst, bytes.ReplaceAll(tmpl, []byte("default/"), []byte(strings.ReplaceAll(id, "-", "_")+"/")), os.ModeAppend)
 	if err != nil {
 		fmt.Println(dst+": ", err)
