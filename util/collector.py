@@ -69,7 +69,7 @@ class datapack_collector:
                 "post_time"     # the post time, (can be auto),
                 "update_time"   # the last update time, (can be auto),
                 "keywords"      # keywords in content,
-                "summarization" # summrization of content
+                "summarization" # summary of content
             }
         versions:
             All game versions detected.
@@ -520,7 +520,7 @@ class datapack_collector:
         post['keywords'] = [i.word for i in trw.get_keywords(3)]
         trs = TextRank4Sentence()
         trs.analyze(post['content_filtered'], lower=True)
-        post['summrization'] = [i.sentence for i in trs.get_key_sentences(2)]
+        post['summary'] = [i.sentence for i in trs.get_key_sentences(2)]
     def __content_hide(self, post:dict):
         '''
         To make raw content adapat external environment, using adapater function defined in schema.
@@ -612,7 +612,7 @@ class datapack_collector:
             post['game_version'] = ['other']
         ### adapt
         #   - using "info_adapt" to adapt all info
-        self.__content_hide(post)  # adapt raw html to hide some information
+        self.__content_hide(post) # adapt raw html and hide some information
         self.__post_adapt(post)
         ### second refine
         #   - make 'content_filtered' be pure text
@@ -625,8 +625,8 @@ class datapack_collector:
         if 'content_filtered' in post:
             post['content_filtered'] = BeautifulSoup(post['content_filtered'], "lxml").get_text()
         self.__summary(post)
-        if post['summrization'].__len__() == 0:
-            post['summrization'] = ['']
+        if post['summary'].__len__() == 0:
+            post['summary'] = ['']
         if post['author_uid'] in [None, 'auto', 'none']:
             post['author_uid'] = post['author_name']
         if post['post_time'] in [None, 'auto', 'none']:

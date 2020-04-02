@@ -363,7 +363,7 @@ class datapack_db:
         if exists.__len__() == 0: # new element
             self._name_translate(info)
         # if the datapack has been updated or do not exist, update or insert content etc.
-        intro = pymysql.escape_string('\n'.join(info['summrization'])) #escape summaries
+        intro = pymysql.escape_string('\n'.join(info['summary'])) #escape summaries
         content_raw = pymysql.escape_string(info['content_raw']) #escape content
         info["default_tags_str"] = ''.join(info["default_tags_strs"])
         info["default_name"] = pymysql.escape_string(info["default_name"])

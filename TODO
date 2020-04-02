@@ -56,9 +56,13 @@
                     Solution: check the source code of this function and test it again.
                     |         if 'tag_type' = 0 or 1 (source or version), show all datapacks with synonymous tags.
                     |_____________________________________________________________________________________________
-[F] a schema check
-    |   Just check whether the schema is legal.
-    |__________________________________________
+                √ [F] a schema check
+                    |   Just check whether the schema is legal.
+                    |__________________________________________
+[B] custom css went wrong
+[F] shadeless style
+[F] mobile responsive mode
+[F] simplifiied style
 [F] a terminal tool based on commandline to do functional DB operation
     |   basic get of record
     |   basic changes of a column in a record.

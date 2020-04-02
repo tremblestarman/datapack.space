@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -36,6 +37,10 @@ type Scan struct {
 	Display       string `json:"display"`
 	NextXPath     string `json:"next_xpath"`
 }
+
+var infoList []string
+var errorList []string
+var localParams map[string]bool
 
 func MapOrString(i interface{}) string {
 	switch i.(type) {
@@ -117,8 +122,8 @@ func (scan *Scan) CheckScanner() {
 		infoList = append(infoList, "  -- \"scan.page_max\":\n"+strconv.Itoa(scan.PageMax))
 	} else if scan.Type == "selenium" {
 		infoList = append(infoList, "  -- *\"scan.type\":\n"+scan.Type)
-		if scan.Display != "" {
-			scan.Display = "windows"
+		if scan.Display == "" {
+			scan.Display = "window"
 		}
 		if scan.Display != "window" && scan.Display != "virtual" && scan.Display != "headless" {
 			errorList = append(errorList, "  -- *\"scan.display\":\nInvalid value. (Must be 'window', 'virtual', 'headless')")
@@ -134,15 +139,12 @@ func (scan *Scan) CheckScanner() {
 		errorList = append(errorList, "  -- *\"scan.type\":\nInvalid value. (Must be 'normal' or 'selenium')")
 	}
 }
-
-var localParams map[string]bool
-
 func (schema *Schema) CheckSelectors() {
 	localParams = make(map[string]bool)
 	if len(schema.InfoCollect) > 0 {
 		hasError := false
 		for k, _ := range schema.InfoCollect {
-			hasError = false /////////
+			hasError = false
 			if len(k) > 0 && k[0] == '$' {
 				localParams[k] = true
 			} else {
@@ -157,6 +159,8 @@ func (schema *Schema) CheckSelectors() {
 	} else {
 		errorList = append(errorList, "- *\"info_collect\":\nShould not be empty.")
 	}
+	//default params
+	localParams["link"] = false
 }
 func (schema *Schema) CheckRefiners() {
 	if len(schema.InfoCollect) > 0 {
@@ -189,11 +193,14 @@ func (schema *Schema) CheckRefiners() {
 			infoList = append(infoList, "- *\"info_refine\":\nNo error.")
 		}
 	}
+	//default param
+	localParams["keywords"] = false
+	localParams["summary"] = false
 }
 func (schema *Schema) CheckAdaptors() {
 	if len(schema.InfoCollect) > 0 {
 		hasError := false
-		for k, v := range schema.InfoRefine {
+		for k, v := range schema.InfoAdapt {
 			if _, ok := localParams[k]; ok {
 				_type := MapOrString(v)
 				if _type != "string" {
@@ -214,8 +221,9 @@ func (schema *Schema) CheckAdaptors() {
 	}
 }
 
-var infoList []string
-var errorList []string
+var schemaName = flag.String("n", "", "the name of the schema.")
+var showInfo = flag.Bool("i", false, "show all analyzed information.")
+var showVar = flag.Bool("v", false, "show custom variables.")
 
 func main() {
 	// Open
@@ -224,6 +232,18 @@ func main() {
 		fmt.Println(err)
 	}
 	var schema Schema
+	// Get param
+	flag.Usage = func() {
+		_, err := fmt.Fprintf(os.Stderr, `schema_check:
+Usage: schema_check -n [schema] [-i] [-v]
+Options:
+`)
+		if err != nil {
+			panic(err)
+		}
+		flag.PrintDefaults()
+	}
+	flag.Parse()
 	// set default
 	schema.Sleep = 0.5
 	schema.Timeout = 5
@@ -231,25 +251,51 @@ func main() {
 	schema.Retry = 2
 	schema.Scan.PageStart = 0
 	schema.Scan.PageIncrement = 1
-	schema.Scan.PageMax = -1 //os.Args[1]
+	schema.Scan.PageMax = -1
+	if *schemaName == "" {
+		fmt.Println("schema name should not be empty.")
+		os.Exit(1)
+	}
 	// read json
-	jString, err := ioutil.ReadFile(parent + "\\util\\schema\\" + "datapackcenter" + ".json")
+	jString, err := ioutil.ReadFile(parent + "\\util\\schema\\" + *schemaName + ".json")
 	if err != nil {
-		fmt.Println("open schema '"+"mcbbs"+"' error :", err)
+		fmt.Println("open schema '" + *schemaName + "' error :", err)
 		os.Exit(1)
 	}
 	err = json.Unmarshal(jString, &schema)
 	if err != nil {
-		fmt.Println("schema '"+"mcbbs"+"' format error :", err)
+		fmt.Println("schema '" + *schemaName + "' format error :", err)
 		os.Exit(1)
 	}
 	// Analyze
+	fmt.Println("start analyzing:", parent + "\\util\\schema\\" + *schemaName + ".json")
 	schema.CheckSchema()
-	for _, e := range errorList {
-		fmt.Println(e)
+	if *showInfo {
+		fmt.Println("==== Analyzed Information ====")
+		for _, i := range infoList {
+			fmt.Println(i)
+		}
 	}
-	fmt.Println("========")
-	for _, i := range infoList {
-		fmt.Println(i)
+	if *showVar {
+		fmt.Println("==== Custom Variables ====")
+		hasCustom := false
+		for k, v := range localParams {
+			if v {
+				fmt.Print("'" + strings.ReplaceAll(strings.ReplaceAll(k, "$", ""), ".", "") + "', ")
+				hasCustom = true
+			}
+		}
+		if !hasCustom {
+			fmt.Print("no custom variable")
+		}
+		fmt.Println()
+	}
+	fmt.Println("==== Error ====")
+	if len(errorList) > 0 {
+		for _, e := range errorList {
+			fmt.Println(e)
+		}
+	} else {
+		fmt.Println("no error. great!")
 	}
 }
