@@ -1,4 +1,4 @@
-/*basic*/
+/* Generic */
 @font-face {
     font-family: Minecraft;
     src: url('../font/Minecraft.eot'); /* IE9 Compat Modes */
@@ -268,7 +268,7 @@ svg.button:active {
 .back-to-top:active {
     opacity: 1;
 }
-/* navigate */
+/* Navigate */
 .navi-bar {
     width: 0;
     position: relative;
@@ -364,7 +364,7 @@ svg.button:active {
     height: 23px;
     width: 23px;
 }
-/* page utter */
+/* Page utter */
 .utter {
     margin: 0 auto;
     padding: 0 10px 10px 10px;
@@ -479,7 +479,7 @@ svg.button:active {
     -webkit-transition: height 0.5s;
     -o-transition: height 0.5s;
 }
-/* page turner */
+/* Page turner */
 .page_turner {
     height: 48px;
     width: 992px;
@@ -638,7 +638,7 @@ svg.button:active {
         box-shadow: 0 0 20px 10px var(--background-1) inset;
     }
 }
-/* options */
+/* Options */
 .options {
     position: relative;
     background: var(--option-background);
@@ -843,7 +843,7 @@ input.search:focus {
     left: 32px;
     overflow: hidden;
 }
-/* datapacks */
+/* Datapacks */
 .datapack {
     height: 216px;
 }
@@ -988,6 +988,9 @@ input.search:focus {
     height: 14px;
     font-size: 10px;
     color: #AAAAAA;
+}
+.intro .mobile-time {
+    display:none;
 }
 .datapack .attachments {
     position: absolute;
@@ -1141,6 +1144,15 @@ input.search:focus {
     cursor: pointer;
     background: rgb(138,101,138);
     box-shadow: 0 0 12px 6px rgba(48,48,48,0.2);
+}
+.link-button {
+    margin-top: 14px;
+}
+span .link-button {
+    margin-top: 0;
+    height: 24px;
+    width: 24px;
+    float: right;
 }
 .datapack-unique .text {
     width: 636px;
@@ -1573,7 +1585,7 @@ hide_a:hover {
 /* About */
 
 /* Responsive */
-/* low resolution 800px ~ 996px */
+/* Low resolution 800px ~ 996px */
 @media only screen and (min-width: 800px) and (max-width: 996px) {
     /* Layout */
     .page_turner {
@@ -1630,14 +1642,11 @@ hide_a:hover {
         left: 200px;
     }
     .shulker-shell .shell-part.right {
-        width: 200px;
-        height: 64px;
         left: 600px;
-        top: -12px;
     }
 }
-/* Mobile */
-@media only screen and (max-device-width: 600px) {
+/* Mobile or Large Screen*/
+@media only screen and (max-device-width: 600px), (min-device-width: 2160px) {
     .page_turner {
         width: 960px;
         left: -60px;
@@ -1671,6 +1680,43 @@ hide_a:hover {
     }
     .bottom .pillar.right.pin {
         left: 804px;
+    }
+    /* Navigate */
+    .navi-bar {
+        height: 20px;
+    }
+    .navi-bar.folded {
+        height: 20px;
+    }
+    .navi-bar.unfolded {
+        height: 96px;
+    }
+    .navi-bar.unfolded.sub {
+        height: 176px;
+    }
+    .sub-bar {
+        top: 80px;
+        height: 96px;
+    }
+    .navi-bar .selection {
+        height: 20px;
+    }
+    .navi {
+        height: 80px;
+        line-height: 80px;
+        margin-right: 40px;
+        padding-right: 16px;
+        font-size: 40px;
+    }
+    .ico {
+        height: 80px;
+        width: 80px;
+    }
+    .ico img {
+        left: 16px;
+        top: 6px;
+        height: 46px;
+        width: 46px;
     }
     /* Page-turner */
     .page_turner .gear {
@@ -1743,14 +1789,30 @@ hide_a:hover {
     .options {
         width: 840px;
     }
+    .options.folded {
+        transition: all 0.5s ease-in;
+        -moz-transition: all 0.5s ease-in;
+        -webkit-transition: all 0.5s ease-in;
+        -o-transition: all 0.5s ease-in;
+    }
     .options.unfolded {
         height: 100px;
+        transition: all 0.35s ease-out;
+        -moz-transition: all 0.35s ease-out;
+        -webkit-transition: all 0.35s ease-out;
+        -o-transition: all 0.35s ease-out;
     }
     .options.unfolded#datapack {
-        height: 136px;
+        height: 340px;
+    }
+    .options.folded#datapack {
+        transition: all 1.1s cubic-bezier(0.92, 0.18, 0.52, 0.74);
+        -moz-transition: all 1.1s cubic-bezier(0.92, 0.18, 0.52, 0.74);
+        -webkit-transition: all 1.1s cubic-bezier(0.92, 0.18, 0.52, 0.74);
+        -o-transition: all 1.1s cubic-bezier(0.92, 0.18, 0.52, 0.74);
     }
     .options.unfolded.accurate#datapack {
-        height: 226px;
+        height: 570px;
     }
     .line {
         margin-bottom: 52px;
@@ -1758,9 +1820,29 @@ hide_a:hover {
     .search-bar {
         height: 108px
     }
+    .search-bar.unfolded {
+        padding-top:20px;
+        height: 336px;
+        width: 800px;
+    }
+    input.search, label.lab {
+        height: 64px;
+        line-height: 64px;
+    }
+    input.search {
+        font-size: 2em;
+    }
+    label.lab {
+        width: 200px;
+        font-size: 1.8em;
+    }
+    .search.accurate, .search.accurate.double {
+        width: 500px;
+    }
     .search.normal {
         width: 600px;
         height: 72px;
+        font-size: 2em;
     }
     .datapack-palette .search.normal {
         left: 40px
@@ -1788,7 +1870,144 @@ hide_a:hover {
     .tri.accurate, .tri.accurate:hover, .tri.accurate:active {
         transform: scale(2) rotateY(180deg);
     }
+    .combo-list {
+        display: flex;
+        justify-content: left;
+        align-items: center;
+        overflow: visible;
+        height: 200px;
+        flex-wrap: wrap;
+        width: 720px;
+        left: 180px;
+    }
     div.select-menu {
-        margin: 0 0;
+        transform: scale(2);
+        display: block;
+        margin: 12px 200px 24px 0;
+    }
+    /* Datapack */
+    .element {
+        width: 760px;
+    }
+    .datapack {
+        height: auto;
+    }
+    .datapack .cover {
+        position: relative;
+    }
+    .datapack .attachments {
+        position: relative;
+    }
+    .datapack .cover {
+        left: 12px;
+        top: 12px;
+        width: 240px;
+        height: 240px;
+    }
+    .datapack .info {
+        position: absolute;
+        left: 268px;
+        top: 12px;
+        width: 480px;
+        height: 240px;
+    }
+    .info .name {
+        width: 472px;
+        height: 56px;
+        line-height: 56px;
+        font-size: 2.375em;
+        font-weight: 600;
+        text-align: left;
+    }
+    .info .intro {
+        border-top-color: rgba(128,128,128,0.3);
+        border-top-style: solid;
+        border-top-width: 2px;
+        width: 472px;
+        height: 80px;
+        box-shadow: none;
+        display: flex;
+        flex-wrap: wrap-reverse;
+        padding: 8px 0;
+        margin-top: 94px;
+    }
+    .intro .time {
+        display: none;
+    }
+    .intro .mobile-time {
+        display: block;
+        margin: 0 auto;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 98%;
+        height: 40px;
+        line-height: 40px;
+        font-size: 2.1em;
+        color: #666666;
+    }
+    .mobile-time span {
+        float: right;
+    }
+    .intro .text {
+        display: none;
+    }
+    .datapack  .attachments {
+        border-top-color: rgba(128,128,128,0.3);
+        border-top-style: solid;
+        border-top-width: 2px;
+        top: 0;
+        margin-top: 24px;
+        left: 2px;
+        width: 758px;
+        height: 84px;
+    }
+    .attachments .author {
+        width: 256px;
+        height: 80px;
+    }
+    .datapack .avatar {
+        height: 68px;
+        width: 68px;
+        margin-top: 6px;
+        padding-top: 4px;
+        padding-left: 4px;
+    }
+    .datapack .avatar img {
+        height: 64px;
+    }
+    .datapack .author .name {
+        width: 174px;
+        text-align: left;
+        height: 68px;
+        line-height: 68px;
+        margin: 8px 0 0 0;
+        padding-left: 8px;
+        font-size: 24px;
+    }
+    .attachments .tags {
+        width: 432px;
+        height: 80px;
+    }
+    .tags .tag, .tag-container .tag {
+        line-height: 20px;
+        padding: 8px;
+        margin-left: 10px;
+        margin-top: 24px;
+        font-size: 24px;
+    }
+    .shulker-shell {
+        width: 938px;
+    }
+    .shulker-shell .shell-part {
+        left: 280px;
+    }
+    .shulker-shell .shell-part.right {
+        left: 738px;
+    }
+    span .link-button {
+        margin-top: 4px;
+        height: 48px;
+        width: 48px;
     }
 }

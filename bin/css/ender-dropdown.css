@@ -148,6 +148,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     border-bottom: 2px solid var(--icon);
     bottom: 1px;
 }
+.select-menu.open {
+    z-index: 10010;
+}
 .select-menu:not(.open) > ul {
     opacity: 0;
     pointer-events: none;

@@ -98,6 +98,8 @@ func (d *Datapack) Initialize() {
 	d.PostTimeString = d.PostTime.Format("2006-01-02 15:04:05")
 	d.UpdateTimeString = d.UpdateTime.Format("2006-01-02 15:04:05")
 	d.Intro = "    " + strings.ReplaceAll(d.Intro, "\n", ".\n    ") + "."
+	d.Intro = strings.ReplaceAll(d.Intro, "<", "＜") // '<' and '>', which confuse function 'unescape'
+	d.Intro = strings.ReplaceAll(d.Intro, ">", "＞") // replace '<>' with unicode '＜＞'
 	d.CoverExists, _ = PathExists("bin/img/cover/" + d.ID + ".png")
 }
 func KeyWordHighlight(raw *string, keywordsReg string) int {
@@ -335,8 +337,8 @@ func GetTag(language string, id string) *Tag {
 	}
 	// Query
 	sql.Model(&Tag{}).
-		Select("distinct tags.*, tags." + tag + " as tag"). // Set Tag in desired language
-		Preload("Datapacks", func(db *gorm.DB) *gorm.DB {   // Preload Datapacks
+		Select("distinct tags.*, tags."+tag+" as tag").   // Set Tag in desired language
+		Preload("Datapacks", func(db *gorm.DB) *gorm.DB { // Preload Datapacks
 			return db.Select("*, datapacks." + name + " as name").Order("datapacks.post_time DESC") // Set Datapack Name & Set Order
 		}).
 		Preload("Datapacks.Tags", func(db *gorm.DB) *gorm.DB { // Preload Datapacks.Tags

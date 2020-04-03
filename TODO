@@ -67,13 +67,23 @@
                     Solution: check the source code of this function and test it again.
                     |         if 'tag_type' = 0 or 1 (source or version), show all datapacks with synonymous tags.
                     |_____________________________________________________________________________________________
+                    |   Final Fix: not a bug and works well when changing into other languages.
+                    |__________________________________________________________________________
                 √ [F] a schema check
                     |   Just check whether the schema is legal.
                     |__________________________________________
-[B] custom css went wrong
+                √ [B] unescape bug occurs in origin content
+                    |   '<' in origin content confuses 'unescape' function to treat it as a tag.
+                    |___________________________________________________________________________
+                    |   Final Fix: replace '<' with '＜'.
+                    |____________________________________
                 √ [B] <html lang='xxx'>
                     |   In language.exe.
                     |___________________
+[F] Adapt to touch
+    |   touchmove to turn page
+    |   when page umber change, turn page means goto page.
+    |_____________________________________________________
 [F] shadeless style
     |   Shadeless and modify color collocation.
     |   Attach style to cookie.
@@ -81,7 +91,7 @@
 [F] simplified style
 [F] responsive mode
     |   √ Width < 996px
-    |     Mobile
+    |     Mobile (WIP,40%)
     |__________________
 [F] a terminal tool based on commandline to do functional DB operation
     |   basic get of record

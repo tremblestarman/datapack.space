@@ -418,7 +418,49 @@ function show_datapack(uid) {
         }, 1000);
     }
 }
+function adapt_screen_datapack(uid) {
+    var datapack = document.getElementById(uid);
+    objs = datapack.children;
+    var cover = objs[0];
+    var info = objs[1];
+    var attachments = objs[2];
+    // Cover
+    cover.style.left = "2px";
+    cover.style.width = "758px";
+    cover.style.height = "400px";
+    // Intro
+    info.style.position = "relative";
+    info.style.left = "2px";
+    info.style.top = "12px";
+    info.style.width = "758px";
+    info.style.height = "auto";
+    info.children[0].style.width = "758px";
+    info.children[0].style.textAlign = "center";
+    var intro = info.children[1];
+    intro.style.width = "758px";
+    intro.style.height = "auto";
+    intro.style.display = "block";
+    intro.style.marginTop = "12px";
+    intro.children[0].style.display = "block";
+    intro.children[1].style.display = "block";
+    intro.children[1].style.width = "758px";
+    // Tags
+    for (i = 0; i < attachments.children[1].children.length; i++) {
+        if (attachments.children[1].children[i].classList.contains("tag-2") || attachments.children[1].children[i].classList.contains("tag-3"))
+            attachments.children[1].children[i].classList.remove("invisible");
+    }
+    attachments.style.height = "auto";
+    attachments.children[1].style.height = "auto";
+    attachments.children[0].style.marginBottom = "4px";
+    attachments.children[1].style.marginBottom = "14px";
+    attachments.children[1].style.width = "758px";
+    attachments.children[1].style.borderTop = "rgba(128,128,128,0.3) solid 2px";
+}
 function unfold_datapack(uid) {
+    if (window.screen.width <= 600 || window.screen.width >= 2160) {
+        adapt_screen_datapack(uid);
+        return
+    }
     var datapack = document.getElementById(uid);
     objs = datapack.children;
     var cover = objs[0];
