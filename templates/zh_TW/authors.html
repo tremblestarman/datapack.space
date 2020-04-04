@@ -88,6 +88,7 @@
     </style>
     <script>
         option_authors_default();
+        enablePageFlip = true; // Enable Gesture
 
         let end_crystal = document.getElementById("end_crystal");
         let line = document.createElement("div"),
@@ -113,6 +114,9 @@
             return modifyLineElement(sx, y, c, alpha);
         }
         function updateLine(target) {
+            if (window.screen.width <= 600 || window.screen.width >= 2160) {
+                return
+            } // Mobile
             function getElementTop(element) {
                 var actTop = element.offsetTop;
                 var current = element.offsetParent;
@@ -135,6 +139,9 @@
             });
         }
         function removeLine() {
+            if (window.screen.width <= 600 || window.screen.width >= 2160) {
+                return
+            } // Mobile
             event.currentTarget.children[1].classList.remove('show');
             event.currentTarget.children[2].classList.remove('show');
             cancelAnimationFrame(timer);

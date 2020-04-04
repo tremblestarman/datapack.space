@@ -232,6 +232,8 @@ function search_tags() {
 }
 
 function next_page() {
+    let next_button = document.getElementsByClassName("turn right");
+    if (next_button.length === 0) return;
     page = 1;
     if (GetQueryString("p") != null)
         page = Number(GetQueryString("p"));
@@ -244,6 +246,8 @@ function next_page() {
     },500);
 }
 function last_page() {
+    let last_button = document.getElementsByClassName("turn left");
+    if (last_button.length === 0) return;
     page = 1;
     if (GetQueryString("p") != null)
         page = Number(GetQueryString("p"));
@@ -344,7 +348,7 @@ function page_rotate_back() {
 }
 
 function show_navi_bar() {
-    var bar = event.currentTarget.parentNode;
+    var bar = document.getElementById("navi-selector").parentNode;
     if (bar.classList.contains("unfolded")) { // fold it
         bar.classList.replace("unfolded", "folded");
         bar.classList.remove("sub");
@@ -460,7 +464,7 @@ function unfold_datapack(uid) {
     if (window.screen.width <= 600 || window.screen.width >= 2160) {
         adapt_screen_datapack(uid);
         return
-    }
+    } // Mobile
     var datapack = document.getElementById(uid);
     objs = datapack.children;
     var cover = objs[0];
@@ -574,3 +578,28 @@ function thumb(table, id) {
     http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
     http.send(params);
 }
+
+/* Gesture */
+let enablePageFlip = false, atTop = false;
+let touch_last_x = 0, touch_last_y = 0,
+    touch_vertical_sensitivity = 150
+    touch_horizontal_sensitivity = 400;
+if (window.screen.width <= 600 || window.screen.width >= 2160) {
+    document.addEventListener('touchstart', function (e){
+        let oTop = document.body.scrollTop || document.documentElement.scrollTop;
+        atTop = oTop <= 0;
+        touch_last_x = e.touches[0].clientX;
+        touch_last_y = e.touches[0].clientY;
+    }, false);
+    document.addEventListener('touchend', function(e) {
+        let currentX = e.changedTouches[0].clientX,
+            currentY = e.changedTouches[0].clientY;
+        if (atTop && currentY - touch_last_y >= touch_vertical_sensitivity) { // Show Navigation Gesture
+            show_navi_bar();
+        } else if (enablePageFlip && currentX - touch_last_x >= touch_horizontal_sensitivity) { // Last Page
+            last_page();
+        } else if (enablePageFlip && touch_last_x - currentX >= touch_horizontal_sensitivity) { // Next Page
+            next_page();
+        }
+    }, false);
+} // Mobile

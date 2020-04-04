@@ -1673,13 +1673,13 @@ hide_a:hover {
         display: none;
     }
     .bottom .pillar.right {
-        left: 882px;
+        left: 862px;
     }
     .bottom .pillar.left.pin {
-        left: 44px;
+        left: 24px;
     }
     .bottom .pillar.right.pin {
-        left: 804px;
+        left: 864px;
     }
     /* Navigate */
     .navi-bar {
@@ -1990,11 +1990,13 @@ hide_a:hover {
         height: 80px;
     }
     .tags .tag, .tag-container .tag {
-        line-height: 20px;
         padding: 8px;
         margin-left: 10px;
         margin-top: 24px;
         font-size: 24px;
+    }
+    .tags .tag {
+        line-height: 20px;
     }
     .shulker-shell {
         width: 938px;
@@ -2009,5 +2011,125 @@ hide_a:hover {
         margin-top: 4px;
         height: 48px;
         width: 48px;
+    }
+    /* Author */
+    .author-container {
+        width: 780px;
+    }
+    .author-container .author {
+        height: 144px;
+        width: 240px;
+    }
+    em.anchor {
+        display: none;
+    }
+    .author-container .avatar {
+        top: 32px;
+        margin: 4px;
+        width: 96px;
+        height: 96px;
+    }
+    .author-container .avatar img {
+        height: 96px;
+    }
+    .author-container .name {
+        height: 32px;
+        font-size: 24px;
+        padding-left: 8px;
+    }
+    .author.element {
+        width: 780px;
+        padding: 4px;
+    }
+    .author-unique .info {
+        height: 256px;
+    }
+    .author-unique .avatar {
+        width: 248px;
+        height: 248px;
+        padding: 8px;
+    }
+    .author-unique .avatar img {
+        width: 240px;
+        height: 240px;
+    }
+    .author-unique .info .name {
+        left: 256px;
+        height: 72px;
+        padding: 8px 16px;
+    }
+    .author-unique .info .counter, .author-unique .info .last-update {
+        left: 256px;
+        top: 76px;
+        height: 40px;
+        font-size: 24px;
+        padding: 8px 16px;
+    }
+    .author-unique .info .last-update {
+        top: 108px;
+    }
+    .author-unique .info .tag {
+        bottom: 8px;
+        left: 256px;
+        line-height: 16px;
+        height: 16px;
+        padding: 8px;
+        font-size: 24px;
+    }
+    .datapack-short {
+        border-top-width: 2px;
+        height: 96px;
+        flex-wrap: wrap;
+    }
+    .datapack-short .name {
+        height: 40px;
+        width: 100%;
+        line-height: 40px;
+        margin-left: 16px;
+        font-size: 28px;
+        text-shadow: 0 0 3px rgba(32,32,32,0.3);
+    }
+    .datapack-short .tags {
+        height: 56px;
+        width: 100%;
+        margin-left: 4px;
+    }
+    .datapack-short .tag {
+        margin-top: 8px;
+    }
+    .datapack-short ._goto {
+        display: none;
+    }
+    /* Tag */
+    .tag-container, .tag-container .grid {
+        width: 780px;
+    }
+    .bottom .tag {
+        height: 36px;
+        line-height: 36px;
+        padding: 0 8px;
+        font-size: 28px;
+    }
+    .tag-unique .info {
+        height: 56px;
+    }
+    .tag-unique .info .stats {
+        height: 40px;
+        line-height: 40px;
+        font-size: 20px;
+    }
+    /* Language */
+    .languages {
+        width : 600px;
+    }
+    .languages .language {
+        height: 96px;
+        width: 360px;
+        line-height: 96px;
+        font-size: 48px;
+        margin: 20px;
+    }
+    .languages .language:hover {
+        font-size: 56px;
     }
 }

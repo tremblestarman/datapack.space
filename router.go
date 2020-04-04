@@ -122,16 +122,22 @@ func renderTags(c *gin.Context, page int, total int, language string, tags *[]Ta
 	})
 }
 func renderTag(c *gin.Context, language string, tag *Tag) {
-	synonymous := tag.GetSynonymousTag(language)
-	c.HTML(http.StatusOK, language+"/tag.html", gin.H{
-		//domain
-		"Domain": tag.Tag,
-		//result-related
-		"Tag":             tag,
-		"TotalCount":      len(tag.Datapacks),
-		"Synonymous":      synonymous,
-		"SynonymousCount": len(*synonymous),
-	})
+	if tag.Type == 0 {
+		c.Redirect(http.StatusMovedPermanently, "/search?source="+tag.DefaultTag)
+	} else if tag.Type == 1 {
+		c.Redirect(http.StatusMovedPermanently, "/search?version="+tag.DefaultTag)
+	} else {
+		synonymous := tag.GetSynonymousTag(language)
+		c.HTML(http.StatusOK, language+"/tag.html", gin.H{
+			//domain
+			"Domain": tag.Tag,
+			//result-related
+			"Tag":             tag,
+			"TotalCount":      len(tag.Datapacks),
+			"Synonymous":      synonymous,
+			"SynonymousCount": len(*synonymous),
+		})
+	}
 }
 
 func thumbByID(c *gin.Context) {

@@ -16,7 +16,7 @@
                 <div class="goto mask-attach" onclick="jump('{{.Datapack.Link}}', '_blank')" style="opacity: 0;"></div>
             </div>
             <div class="info">
-                <div class="name" onclick="jump('{{.Datapack.Link}}', '_blank')">{{.Datapack.Name | unescaped}}</div>
+                <div class="name" onclick="jump('{{.Datapack.Link}}', '_blank')">{{.Datapack.Name | unescaped}}<span>{{template "icon/link"}}</span></div>
                 <div class="intro">
                     <div class="time">{{template "zh_TW/post_at_msg"}} {{.Datapack.PostTimeString}} , {{template "zh_TW/update_at_msg"}} {{.Datapack.UpdateTimeString}}</div>
                     <div class="text">{{.Datapack.FullContent | unescaped}}</div>
@@ -58,6 +58,9 @@
                     let attachments = objs[2];
                     let intro_height = Number(window.getComputedStyle(intro).getPropertyValue("height").replace("px",""));
                     let attachments_height = Number(window.getComputedStyle(attachments).getPropertyValue("height").replace("px",""));
+                    if (window.screen.width <= 600 || window.screen.width >= 2160) {
+                        break;
+                    }
                     attachments.style.top = (320 + intro_height) + "px";
                     datapack.style.height = (320 + intro_height + attachments_height) + "px";
                     break;

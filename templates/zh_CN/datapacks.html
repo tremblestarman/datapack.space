@@ -45,7 +45,7 @@
                 <div class="element datapack" id="{{.ID}}">
                     <div class="cover"
                     {{if ne .CoverExists true}}
-                        style="background-image: url('bin/img/css/datapack_default.png');"
+                        style="background-image: url('/bin/img/css/datapack_default.png');"
                     {{end}}>
                         <img {{if .CoverExists}}src="bin/img/cover/{{.ID}}.png"{{end}} alt=""/>
                         <div class="mask closed" onclick="glass_pane_close()"></div>
@@ -55,6 +55,8 @@
                     <div class="info">
                         <div class="name" onclick="jump_datapack('{{.ID}}')">{{.Name | unescaped}}</div>
                         <div class="intro">
+                            <div class="mobile-time">{{template "zh_CN/post_at_msg"}} <span>{{.PostTimeString}}</span></div>
+                            <div class="mobile-time">{{template "zh_CN/update_at_msg"}} <span>{{.UpdateTimeString}}</span></div>
                             <div class="time">{{template "zh_CN/post_at_msg"}} {{.PostTimeString}} , {{template "zh_CN/update_at_msg"}} {{.UpdateTimeString}}</div>
                             <div class="text">{{.Intro | unescaped}}</div>
                         </div>
@@ -73,7 +75,6 @@
                             {{end}}
                         {{end}}
                         </div>
-                        <div class="thumb"></div>
                     </div>
                 </div>
             {{end}}
@@ -88,5 +89,6 @@
     {{end}}
     </div>
     <link rel="stylesheet" href="/bin/css/noise.css" type="text/css"/>
+    <script>enablePageFlip = true; // Enable Gesture</script>
 {{template "zh_CN/footer"}}
 {{end}}

@@ -335,6 +335,12 @@ func GetTag(language string, id string) *Tag {
 	if language != "" && language != "default" {
 		name, tag = "name_"+language, "tag_"+language
 	}
+	sql.Model(&Tag{}).
+		Where("tags.id = '" + id + "'"). // Find Tag Id
+		First(&tags)                     // FindOne
+	if len(tags) > 0 && tags[0].Type < 2 { // Got Tag of Source or Version
+		return &(tags[0])
+	}
 	// Query
 	sql.Model(&Tag{}).
 		Select("distinct tags.*, tags."+tag+" as tag").   // Set Tag in desired language

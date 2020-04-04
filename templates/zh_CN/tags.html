@@ -45,6 +45,13 @@
     <script src="/bin/js/masonry.min.js"></script>
     <script>
         option_tags_default();
+        enablePageFlip = true; // Enable Gesture
+
+        let diff = 10, offset = 6;
+        if (window.screen.width <= 600 || window.screen.width >= 2160) {
+            diff = 5; offset = 40;
+        } // Mobile
+        let pdiff = 100 / diff;
         var elements = document.getElementsByClassName('tag');
         let min = elements[0].getAttribute("weight"),
             max = elements[0].getAttribute("weight");
@@ -53,11 +60,11 @@
             if (min > w) min = w;
             if (max < w) max = w;
         });
-        let delta = (max - min) / 9;
-        delta = (delta < 10) ? 1 : delta;
+        let delta = (max - min + 1) / (diff - 1);
+        delta = (delta < 1) ? 1 : delta;
         for (let i = elements.length - 1; i >= 0; i--) {
             let w = Number.parseInt(elements[i].getAttribute("weight"));
-            elements[i].style.setProperty('--w', 'calc(' + (10 * Math.floor((w - min) / delta) + 10).toString() + '% - 6px)');
+            elements[i].style.setProperty('--w', 'calc(' + (pdiff * Math.ceil((w - min) / delta) + pdiff).toString() + '% - ' + offset + 'px)');
         }
         var msnry = new Masonry('.grid', {
             itemSelector: '.tag',

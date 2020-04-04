@@ -80,19 +80,20 @@
                 √ [B] <html lang='xxx'>
                     |   In language.exe.
                     |___________________
-[F] Adapt to touch
-    |   touchmove to turn page
-    |   when page umber change, turn page means goto page.
-    |_____________________________________________________
+                √ [F] Associate sources and versions with '/search' instead of '/tag'
+                √ [F] Adapt to touch
+                    |   touchmove to turn page
+                    |   when page umber change, turn page means goto page.
+                    |_____________________________________________________
 [F] shadeless style
     |   Shadeless and modify color collocation.
     |   Attach style to cookie.
     |__________________________________________
 [F] simplified style
-[F] responsive mode
-    |   √ Width < 996px
-    |     Mobile (WIP,40%)
-    |__________________
+                √ (except 'guide' and 'about') [F] responsive mode
+                    |   √ Width < 996px
+                    |   √ Mobile (WIP,40%)
+                    |__________________
 [F] a terminal tool based on commandline to do functional DB operation
     |   basic get of record
     |   basic changes of a column in a record.
