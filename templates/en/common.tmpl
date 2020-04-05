@@ -20,6 +20,9 @@
     {{end}} - {{template "en/website_intro_msg"}}</title>
     <script type="text/javascript" src="/bin/js/ender.js"></script>
     <link rel="stylesheet" href="/bin/css/ender.css" type="text/css"/>
+    {{if ne .Style "shadeless"}}
+    <link rel="stylesheet" href="/bin/css/ender-shadeless.css" type="text/css"/>
+    {{end}}
 </head>
 <body onload="load()">
     <div id="background" class="{{if eq .Domain "datapacks"}}

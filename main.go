@@ -5,12 +5,24 @@ import (
 	"html/template"
 )
 
+func SetCookie() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		cookie, e := c.Request.Cookie("style")
+		if e == nil { // Refresh Cookie
+			c.SetCookie(cookie.Name, cookie.Value, 604800, cookie.Path, cookie.Domain, cookie.Secure, cookie.HttpOnly)
+		} else { // Set New Cookie
+			c.SetCookie("style", "normal", 604800, "/", "localhost", false, true)
+		}
+		c.Next()
+	}
+}
 func main() {
 	//connect to database
 	Connect()
 	defer db.Close()   //close database
 	_ = seg.LoadDict() //load dict
 	r := gin.Default()
+	r.Use(SetCookie())
 	r.SetFuncMap(template.FuncMap{
 		"unescaped": unescaped,
 	})

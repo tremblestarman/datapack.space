@@ -23,6 +23,14 @@ func getPage(c *gin.Context) int {
 	}
 	return p
 }
+func getStyle(c *gin.Context) string {
+	cookie, e := c.Request.Cookie("style")
+	if e == nil {
+		return cookie.Value
+	} else {
+		return "normal"
+	}
+}
 func getOrder(orderId string, language string) string {
 	orderName := orderByPostTimeDesc
 	switch orderId {
@@ -45,6 +53,8 @@ func renderDatapacks(c *gin.Context, page int, total int, language string, datap
 	c.HTML(http.StatusOK, language+"/datapacks.html", gin.H{
 		//domain
 		"Domain": "datapacks",
+		//style
+		"Style": getStyle(c),
 		//result-related
 		"Datapacks": datapacks,
 		"NoResult":  len(*datapacks) == 0,
@@ -60,6 +70,8 @@ func renderDatapack(c *gin.Context, language string, datapack *Datapack) {
 	c.HTML(http.StatusOK, language+"/datapack.html", gin.H{
 		//domain
 		"Domain": datapack.Name,
+		//style
+		"Style": getStyle(c),
 		//result-related
 		"Datapack": datapack,
 		"NoResult": datapack == nil,
@@ -69,6 +81,8 @@ func renderAuthors(c *gin.Context, page int, total int, language string, authors
 	c.HTML(http.StatusOK, language+"/authors.html", gin.H{
 		//domain
 		"Domain": "authors",
+		//style
+		"Style": getStyle(c),
 		//result-related
 		"Authors":  authors,
 		"NoResult": len(*authors) == 0,
@@ -99,6 +113,8 @@ func renderAuthor(c *gin.Context, language string, author *Author) {
 	c.HTML(http.StatusOK, language+"/author.html", gin.H{
 		//domain
 		"Domain": author.AuthorName,
+		//style
+		"Style": getStyle(c),
 		//result-related
 		"Author":         author,
 		"TotalCount":     len(author.Datapacks),
@@ -110,6 +126,8 @@ func renderTags(c *gin.Context, page int, total int, language string, tags *[]Ta
 	c.HTML(http.StatusOK, language+"/tags.html", gin.H{
 		//domain
 		"Domain": "tags",
+		//style
+		"Style": getStyle(c),
 		//result-related
 		"Tags":     tags,
 		"NoResult": len(*tags) == 0,
@@ -131,6 +149,8 @@ func renderTag(c *gin.Context, language string, tag *Tag) {
 		c.HTML(http.StatusOK, language+"/tag.html", gin.H{
 			//domain
 			"Domain": tag.Tag,
+			//style
+			"Style": getStyle(c),
 			//result-related
 			"Tag":             tag,
 			"TotalCount":      len(tag.Datapacks),

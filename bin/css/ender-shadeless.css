@@ -1,0 +1,32 @@
+* {
+    box-shadow: none !important;
+    filter: none !important;
+}
+.datapack-palette .page_turner {
+    --pillar: rgb(126, 93, 126);
+}
+.datapack-palette .page_turner .option-shower{
+    --pillar: rgb(116, 85, 116);
+}
+.datapack-palette .options {
+    --pillar: rgb(159, 114, 159);
+}
+.datapack-palette .datapack-list, .datapack-unique .pillar {
+    --pillar: rgb(159, 114, 159);
+}
+.datapack-palette .bottom {
+    --pillar: rgb(134, 97, 134);
+}
+
+.datapack-palette .search {
+    background: rgb(166, 118, 166) !important;
+}
+.author-palette .search {
+    background: rgb(78, 78, 118) !important;
+}
+.tag-palette .search {
+    background: rgb(118, 78, 118) !important;
+}
+.select-menu {
+    --background: rgb(166, 118, 166) !important;
+}

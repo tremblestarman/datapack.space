@@ -31,11 +31,11 @@
         </script>
     </div>
     <div class="menu">
-        <div class="datapack-list" style="--pillar: rgb(124, 92, 124); --pillar-shadow: rgba(172, 123, 172, 0.74);">
+        <div class="datapack-list">
             <div class="pillar left"></div>
             <div class="pillar right"></div>
             {{range .Datapacks}}
-                <div class="bottom" style="--background: rgb(144, 101, 144); --arrow-shadow: rgba(176, 124, 176, 0.5); --pillar: rgb(98, 75, 98); --pillar-shadow: rgba(176, 124, 176, 0.5);">
+                <div class="bottom">
                     <div class="pillar left"></div>
                     <span class="more folded" onclick="show_datapack({{.ID}})">
                         {{template "icon/arrow-up"}}

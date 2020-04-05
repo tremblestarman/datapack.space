@@ -117,6 +117,16 @@ span.highlight {
     --search-shadow-focus: rgba(124, 92, 124, 0.75);
     --magnify-background: rgba(184, 126, 184, 0.7);
 }
+.datapack-palette .datapack-list, .datapack-unique .pillar {
+    --pillar: rgb(124, 92, 124);
+    --pillar-shadow: rgba(172, 123, 172, 0.74);
+}
+.datapack-palette .bottom {
+    --background: rgb(144, 101, 144);
+    --arrow-shadow: rgba(176, 124, 176, 0.5);
+    --pillar: rgb(98, 75, 98);
+    --pillar-shadow: rgba(176, 124, 176, 0.5);
+}
 .author-palette .page_turner {
     --background: rgb(40, 40, 64);
     --background-1: rgba(40, 40, 64, 0.9);
