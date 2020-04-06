@@ -1,6 +1,9 @@
 {{define "default/about.html"}}
     {{template "default/header" .}}
     <div class="about-panel doc">
+        <div class="about-link doc-navigate">
+            {{template "default/about-link"}}
+        </div>
         {{template "default/about"}}
     </div>
 {{end}}

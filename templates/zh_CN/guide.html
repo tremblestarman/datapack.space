@@ -6,8 +6,16 @@
         </div>
         {{template "zh_CN/guide"}}
     </div>
-    >
     <script>
+        function change_style(style) {
+            document.cookie = "style=" + escape(style);
+            location.reload(true);
+        }
+        function randomize(target) {
+            nUrl = window.location.protocol + "//" + window.location.host + "/random/" + target;
+            this.location = nUrl;
+            window.location.href = nUrl;
+        }
         function show_options() {
             console.log("just a fake button.");
         }

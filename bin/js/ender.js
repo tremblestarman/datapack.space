@@ -582,7 +582,7 @@ function thumb(table, id) {
 /* Gesture */
 let enablePageFlip = false, atTop = false;
 let touch_last_x = 0, touch_last_y = 0,
-    touch_vertical_sensitivity = 150
+    touch_vertical_sensitivity = 150,
     touch_horizontal_sensitivity = 400;
 if (window.screen.width <= 600 || window.screen.width >= 2160) {
     document.addEventListener('touchstart', function (e){

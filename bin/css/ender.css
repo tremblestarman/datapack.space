@@ -414,8 +414,8 @@ svg.button:active {
 }
 .utter .about-panel {
     margin: 0 auto;
-    background: #202020;
-    box-shadow: 0 0 20px 10px rgb(24,24,24) inset;
+    background: #dfdfdf;
+    box-shadow: 0 0 20px 10px #888888;
     position: relative;
 }
 .pillar {
@@ -1551,7 +1551,7 @@ hide_a:hover {
     clear: right;
     float: right;
     margin: 0 0 1em 1em;
-    padding: 0 0 10px 20px;
+    padding: 0 0 20px 20px;
     width: 200px;
     top: 20px;
 }
@@ -1592,7 +1592,36 @@ hide_a:hover {
     line-height: inherit;
     margin: 0.5em 0;
 }
+.doc button {
+    height: 32px;
+    line-height: 32px;
+    padding: 0 8px;
+    margin: 0 8px;
+    font-size: 16px;
+    border: rgba(72,72,72,0.25) solid 1px;
+    border-radius: 3px;
+    background: transparent;
+    color: inherit;
+    transition: all 0.2s ease-in;
+    -moz-transition: all 0.2s ease-in;
+    -webkit-transition: all 0.2s ease-in;
+    -o-transition: all 0.2s ease-in;
+}
+.doc button:hover {
+    cursor: pointer;
+    border-color: rgba(72,72,72,0.5);
+    background: transparent;
+}
 /* About */
+.about-panel {
+    position: relative;
+    color: #666666;
+    padding: 20px 60px;
+}
+.about-link {
+    border-bottom: rgba(144,144,144,0.3) solid 1px;
+    border-left: rgba(144,144,144,0.3) solid 1px;
+}
 
 /* Responsive */
 /* Low resolution 800px ~ 996px */

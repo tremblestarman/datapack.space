@@ -366,6 +366,8 @@ func language(c *gin.Context) {
 	c.HTML(http.StatusOK, lang+"/language.html", gin.H{
 		//domain
 		"Domain": "languages",
+		//style
+		"Style": getStyle(c),
 		//result-related
 		"languages": mapLang,
 	})
@@ -375,6 +377,8 @@ func guide(c *gin.Context) {
 	c.HTML(http.StatusOK, lang+"/guide.html", gin.H{
 		//domain
 		"Domain": "guide",
+		//style
+		"Style": getStyle(c),
 	})
 }
 func about(c *gin.Context) {
@@ -382,5 +386,7 @@ func about(c *gin.Context) {
 	c.HTML(http.StatusOK, lang+"/about.html", gin.H{
 		//domain
 		"Domain": "about",
+		//style
+		"Style": getStyle(c),
 	})
 }

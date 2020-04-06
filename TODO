@@ -85,15 +85,18 @@
                     |   touchmove to turn page
                     |   when page umber change, turn page means goto page.
                     |_____________________________________________________
-                √ [F] shadeless style
+                X [F] Adapt to mouse wheel  (bad experience)
+                    |   turn page when scrolling down on top.
+                    |________________________________________
+                                √ [F] shadeless style
                     |   Shadeless and modify color collocation.
                     |   Attach style to cookie.
                     |__________________________________________
 [F] simplified style
     |   Attach style to cookie.
     |__________________________
-[F] An entrance in '/about' providing access to changing style.
-                √ (except 'guide' and 'about') [F] responsive mode
+                √ [F] An entrance in '/guide' providing access to changing style.
+                √ [F] responsive mode
                     |   √ Width < 996px
                     |   √ Mobile (WIP,40%)
                     |__________________
