@@ -13,6 +13,7 @@
 {{define "default/update_at_msg"}}更新于{{end}}
 {{define "default/goto_link_msg"}}前往原帖{{end}}
 {{define "default/to_top_msg"}}回到顶部{{end}}
+{{define "default/related_datapacks_msg"}}相同数据包{{end}}
 {{define "default/hide_msg"}}内容被隐藏，请前往原贴查看{{end}}
 {{define "default/hide_a_msg"}}链接被隐藏，请前往原贴查看{{end}}
 {{define "default/counter_msg"}}收录署名数据包数目{{end}}
@@ -107,14 +108,16 @@
     <p>json格式，详见：<span>Github - docs/API.md</span></p>
 <h2 id="7">贡献</h2>
     <li id="7.0">翻译</li>
-        <p>想要翻译网站提示到另外一种语言？详见：<span>Github - docs/translation.md</span></p>
+        <p>想要把网站提示或开发文档翻译到另外一种语言？详见：<span>Github - docs/translation.md</span></p>
     <li id="7.1">纠错</li>
-        <p>所有内容的第一次翻译都是由谷歌翻译完成的，因此存在不准确的情况。如需纠错，参考：<span>Github - docs/correction.md</span></p>
-    <li id="7.2">授权</li>
+        <p>所有内容的第一次翻译都是由谷歌翻译完成的，因此存在不准确的情况。如需纠错，参考：<span>Github - docs/administer.md#correction</span></p>
+    <li id="7.2">合并</li>
+        <p>如果来源不同，即使是同名的作者或数据包也是被单独呈现的，所以可能会存在多个相同数据包以及多个相同作者的尴尬情形。如需合并您在不同网站上的相同项目，参考：<span>Github - docs/administer.md#combine</span></p>
+    <li id="7.3">授权</li>
         <p>所有数据包默认都是未授权的，因此将会隐藏原介绍中的视频、链接等交互功能。将您的数据包授权给末地，上述功能将会开放，但您也许会损失一部分点击量。授权操作参考：<span>Github - docs/authorize.md</span></p>
-    <li id="7.3">添加网站来源</li>
+    <li id="7.4">添加网站来源</li>
         <p>希望您的个人集合被末地收录？或者想要引用一个新的数据包库？参考：<span>Github - docs/robot.md</span></p>
-    <li id="7.4">反馈</li>
+    <li id="7.5">反馈</li>
         <p>无论是想到了很棒的点子，还是遇到了棘手的难题，您都可以在<span>Github - Issues</span>下告知我。</p>
 {{end}}
 {{define "default/guide-link"}}
@@ -141,9 +144,10 @@
 <ul>
     <li><a href="#7.0">翻译</a></li>
     <li><a href="#7.1">纠错</a></li>
-    <li><a href="#7.2">授权</a></li>
-    <li><a href="#7.3">添加网站来源</a></li>
-    <li><a href="#7.4">反馈</a></li>
+    <li><a href="#7.2">合并</a></li>
+    <li><a href="#7.3">授权</a></li>
+    <li><a href="#7.4">添加网站来源</a></li>
+    <li><a href="#7.5">反馈</a></li>
 </ul>
 {{end}}
 

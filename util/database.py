@@ -157,10 +157,26 @@ class datapack_db:
                 tag_id VARCHAR(36) NOT NULL,
                 PRIMARY KEY (id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
+            datapack_related = '''create table if not exists datapacks_related
+            (
+                id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                datapack_id VARCHAR(36) NOT NULL,
+                related TEXT,
+                PRIMARY KEY (id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
+            author_related = '''create table if not exists authors_related
+            (
+                id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                author_id VARCHAR(36) NOT NULL,
+                related TEXT,
+                PRIMARY KEY (id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
             self.cur.execute(tag_info) # create tables
             self.cur.execute(author_info)
             self.cur.execute(datapack_info)
             self.cur.execute(datapack_tag)
+            self.cur.execute(datapack_related)
+            self.cur.execute(author_related)
             print('connect successfully')
             def alter(table: str, col: str, type: str): # add colums
                 for k, _ in self.languages.items():

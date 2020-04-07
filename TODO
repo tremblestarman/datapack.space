@@ -101,8 +101,8 @@
                     |   √ Mobile (WIP,40%)
                     |__________________
 [F] a terminal tool based on commandline to do functional DB operation
-    |   basic get of record
-    |   basic changes of a column in a record.
-    |   combine author, datapack. (via table 'author_authors', table 'datapack_datapacks')
+    |   basic get of records.
+    |   basic changes of a column in a record. (only translated content)
+    |   √ combine author, datapack. (via table 'authors_related', table 'datapacks_related')
     |   mark authorized post.
     |_______________________________________________________________________________________

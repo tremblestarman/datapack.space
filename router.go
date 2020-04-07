@@ -73,8 +73,9 @@ func renderDatapack(c *gin.Context, language string, datapack *Datapack) {
 		//style
 		"Style": getStyle(c),
 		//result-related
-		"Datapack": datapack,
-		"NoResult": datapack == nil,
+		"Datapack":  datapack,
+		"IsRelated": len(datapack.RelatedDatapacks) > 0,
+		"NoResult":  datapack == nil,
 	})
 }
 func renderAuthors(c *gin.Context, page int, total int, language string, authors *[]Author) {
@@ -95,20 +96,19 @@ func renderAuthors(c *gin.Context, page int, total int, language string, authors
 	})
 }
 func renderAuthor(c *gin.Context, language string, author *Author) {
-	sourcesMap := map[string]Tag{} //Source / Last Update Time Analysis
-	var sources []Tag
+	sourcesMap := make(map[string]string) //Source / Last Update Time Analysis
 	lastUpdateTime := ""
+	for i := 0; i < len(author.RelatedAuthors); i++ {
+		if len(author.RelatedAuthors[i].Datapacks) > 0 {
+			sourcesMap[author.RelatedAuthors[i].Datapacks[0].Source] = author.RelatedAuthors[i].ID
+		}
+		author.Datapacks = append(author.Datapacks, author.RelatedAuthors[i].Datapacks...)
+	}
 	for i := 0; i < len(author.Datapacks); i++ {
 		author.Datapacks[i].Initialize() // Initialize
-		if len(author.Datapacks[i].Tags) > 0 {
-			sourcesMap[author.Datapacks[i].Source] = author.Datapacks[i].Tags[0]
-		}
 		if author.Datapacks[i].UpdateTimeString > lastUpdateTime {
 			lastUpdateTime = author.Datapacks[i].UpdateTimeString
 		}
-	}
-	for _, tag := range sourcesMap {
-		sources = append(sources, tag)
 	}
 	c.HTML(http.StatusOK, language+"/author.html", gin.H{
 		//domain
@@ -118,7 +118,7 @@ func renderAuthor(c *gin.Context, language string, author *Author) {
 		//result-related
 		"Author":         author,
 		"TotalCount":     len(author.Datapacks),
-		"Sources":        sources,
+		"Sources":        sourcesMap,
 		"LastUpdateTime": lastUpdateTime,
 	})
 }

@@ -65,33 +65,35 @@ type Tag struct {
 }
 type Author struct {
 	SearchResult
-	ID         string     `json:"-" gorm:"primary_key:true"`
-	AuthorUid  string     `json:"-"`
-	AuthorName string     `json:"author_name"`
-	Avatar     string     `json:"author_avatar"`
-	Thumb      int        `json:"-"`
-	Datapacks  []Datapack `json:"datapacks" gorm:"ForeignKey:AuthorID;AssociationForeignKey:ID"`
+	ID             string     `json:"-" gorm:"primary_key:true"`
+	AuthorUid      string     `json:"-"`
+	AuthorName     string     `json:"author_name"`
+	Avatar         string     `json:"author_avatar"`
+	Thumb          int        `json:"-"`
+	Datapacks      []Datapack `json:"datapacks" gorm:"ForeignKey:AuthorID;AssociationForeignKey:ID"`
+	RelatedAuthors []Author   `json:"-"`
 }
 type Datapack struct {
 	SearchResult
-	ID               string    `json:"-" gorm:"primary_key:true"`
-	Link             string    `json:"datapack_link"`
-	Name             string    `json:"datapack_name"`
-	Author           Author    `json:"author"`
-	AuthorID         string    `json:"-"`
-	DefaultLang      string    `json:"datapack_language"`
-	DefaultLangId    string    `json:"-"`
-	DefaultName      string    `json:"datapack_default_name"`
-	Source           string    `json:"source"`
-	Intro            string    `json:"introduction"`
-	FullContent      string    `json:"-"`
-	PostTime         time.Time `json:"-"`
-	PostTimeString   string    `json:"post_time"`
-	UpdateTime       time.Time `json:"-"`
-	UpdateTimeString string    `json:"update_time"`
-	CoverExists      bool      `json:"-"`
-	Thumb            int       `json:"-"`
-	Tags             []Tag     `json:"tag" gorm:"many2many:datapack_tags;association_foreignkey:id;foreignkey:id;association_jointable_foreignkey:tag_id;jointable_foreignkey:datapack_id;"`
+	ID               string     `json:"-" gorm:"primary_key:true"`
+	Link             string     `json:"datapack_link"`
+	Name             string     `json:"datapack_name"`
+	Author           Author     `json:"author"`
+	AuthorID         string     `json:"-"`
+	DefaultLang      string     `json:"datapack_language"`
+	DefaultLangId    string     `json:"-"`
+	DefaultName      string     `json:"datapack_default_name"`
+	Source           string     `json:"source"`
+	Intro            string     `json:"introduction"`
+	FullContent      string     `json:"-"`
+	PostTime         time.Time  `json:"-"`
+	PostTimeString   string     `json:"post_time"`
+	UpdateTime       time.Time  `json:"-"`
+	UpdateTimeString string     `json:"update_time"`
+	CoverExists      bool       `json:"-"`
+	Thumb            int        `json:"-"`
+	Tags             []Tag      `json:"tag" gorm:"many2many:datapack_tags;association_foreignkey:id;foreignkey:id;association_jointable_foreignkey:tag_id;jointable_foreignkey:datapack_id;"`
+	RelatedDatapacks []Datapack `json:"-"`
 }
 
 func (d *Datapack) Initialize() {
@@ -102,6 +104,52 @@ func (d *Datapack) Initialize() {
 	d.Intro = strings.ReplaceAll(d.Intro, ">", "＞") // replace '<>' with unicode '＜＞'
 	d.CoverExists, _ = PathExists("bin/img/cover/" + d.ID + ".png")
 }
+func (d *Datapack) GetRelated(language string) {
+	// Get Related Datapacks
+	var sql = db
+	var related DatapackRelated
+	sql.Model(&DatapackRelated{}).
+		Where("datapack_id = ?", d.ID).
+		First(&related)
+	if related.Related != "" {
+		// Set language
+		name, tag := "default_name", "default_tag"
+		if language != "" && language != "default" {
+			name, tag = "name_"+language, "tag_"+language
+		}
+		fmt.Println(related.GetTuple())
+		sql.Model(&Datapack{}).
+			Select("distinct datapacks.*, datapacks."+name+" as name"). // Set Datapack Name
+			Preload("Tags", func(db *gorm.DB) *gorm.DB {                // Preload Tags
+				return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag DESC") // Set Tag Name & Set Order
+			}).
+			Preload("Author").                                                       // Preload Author
+			Where("datapacks.id IN " + related.GetTuple()).Find(&d.RelatedDatapacks) // Get All Related Datapacks
+	}
+}
+func (a *Author) GetRelated(language string) {
+	// Get Related Authors
+	var sql = db
+	var related AuthorRelated
+	sql.Model(&AuthorRelated{}).
+		Where("author_id = ?", a.ID).
+		First(&related)
+	if related.Related != "" {
+		// Set language
+		name, tag := "default_name", "default_tag"
+		if language != "" && language != "default" {
+			name, tag = "name_"+language, "tag_"+language
+		}
+		sql.Preload("Datapacks", func(db *gorm.DB) *gorm.DB { // Preload Datapacks
+			return db.Select("*, datapacks." + name + " as name").Order("datapacks.post_time DESC") // Set Datapack Name & Set Order
+		}).
+			Preload("Datapacks.Tags", func(db *gorm.DB) *gorm.DB { // Preload Datapacks.Tags
+				return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag DESC") // Set Tag Name & Set Order
+			}).
+			Where("authors.id IN " + related.GetTuple()).Find(&a.RelatedAuthors) // Get All Related Authors
+	}
+
+}
 func KeyWordHighlight(raw *string, keywordsReg string) int {
 	l, q := len(*raw), len(keyWordHighlightHead+keyWordHighlightTail)
 	re := regexp.MustCompile("(?i)" + keywordsReg)
@@ -111,7 +159,6 @@ func KeyWordHighlight(raw *string, keywordsReg string) int {
 	return (len(*raw) - l) / q
 }
 func (d *Datapack) CountKeyWords(keywordsReg string) {
-	d.Initialize()
 	d.KeyWordCount += KeyWordHighlight(&d.Name, keywordsReg)
 	d.KeyWordCount += KeyWordHighlight(&d.Intro, keywordsReg)
 	for _, t := range d.Tags {
@@ -121,7 +168,6 @@ func (d *Datapack) CountKeyWords(keywordsReg string) {
 	}
 }
 func (d *Datapack) AccurateCountKeyWords(keywordsRegMatrix *[3]string) {
-	d.Initialize()
 	if (*keywordsRegMatrix)[0] != "" {
 		d.KeyWordCount += KeyWordHighlight(&d.Name, (*keywordsRegMatrix)[0])
 	}
@@ -137,6 +183,33 @@ func (t *Tag) CountKeyWords(keywordsReg string) {
 }
 func (a *Author) CountKeyWords(keywordsReg string) {
 	a.KeyWordCount += KeyWordHighlight(&a.AuthorName, keywordsReg)
+}
+
+type IDRelated struct {
+	Related     string
+	RelatedList []string
+}
+type DatapackRelated struct {
+	IDRelated
+	DatapackID string
+}
+type AuthorRelated struct {
+	IDRelated
+	Related string
+}
+
+func (DatapackRelated) TableName() string {
+	return "datapacks_related"
+}
+func (AuthorRelated) TableName() string {
+	return "authors_related"
+}
+func (i *IDRelated) GetTuple() string {
+	if i.Related == "" {
+		return "('')"
+	}
+	r := strings.ReplaceAll(i.Related, ";", "','")
+	return "('" + r[0:len(r)-2] + ")"
 }
 
 // Connect
@@ -248,6 +321,7 @@ func GetDatapack(language string, id string) *Datapack {
 		Where("datapacks.id = '" + id + "'").First(&datapacks)
 	if len(datapacks) > 0 {
 		datapacks[0].Initialize()
+		datapacks[0].GetRelated(language)
 		return &(datapacks[0])
 	}
 	return nil
@@ -412,6 +486,7 @@ func GetAuthor(language string, id string) *Author {
 		Where("authors.id = '" + id + "'"). // Find Tag Id
 		First(&authors)                     // Find One
 	if len(authors) > 0 {
+		authors[0].GetRelated(language)
 		return &(authors[0])
 	}
 	return nil
@@ -479,6 +554,7 @@ func SearchDatapacks(language string, page int, content string, source string, v
 	total := len(datapacks)
 	// Count and Mark Keywords
 	for i := 0; i < len(datapacks); i++ {
+		datapacks[i].Initialize()
 		datapacks[i].CountKeyWords(*keywordsReg)
 	}
 	// Sort by Keywords Occur-Time And Slice
@@ -530,6 +606,7 @@ func AccurateSearchDatapacks(language string, page int, name string, intro strin
 	total := len(datapacks)
 	// Count and Mark Keywords
 	for i := 0; i < len(datapacks); i++ {
+		datapacks[i].Initialize()
 		datapacks[i].AccurateCountKeyWords(&keywordsMatrix)
 	}
 	// Sort by Keywords Occur-Time And Slice

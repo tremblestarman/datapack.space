@@ -1086,6 +1086,17 @@ input.search:focus {
     border-image: url("../img/css/tag-border-3.png") 3 round;
     background: rgba(158, 113, 158, 0.5);
 }
+.attachments .datapacks {
+    margin-top: 32px;
+}
+.datapacks .r-dp-msg {
+    height: 20px;
+    font-size: 14px;
+    color: rgba(64,64,64,0.56);
+    text-shadow: 0 0 3px rgba(32,32,32,0.2);
+    text-align: left;
+    padding: 4px 8px;
+}
 .datapack-unique {
     margin: 0 auto;
     justify-content: center;
