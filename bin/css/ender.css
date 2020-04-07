@@ -1574,7 +1574,20 @@ hide_a:hover {
     margin-block-end: 0.1em;
     margin-inline-start: 0;
     margin-inline-end: 0;
-    font-weight: bold
+    font-weight: bold;
+}
+.doc h1,h2,h3,li {
+    transition: all 1s;
+    -moz-transition: all 1s;
+    -webkit-transition: all 1s;
+    -o-transition: all 1s;
+}
+.doc h1.h,h2.h,h3.h,li.h {
+    transition: all 0.1s;
+    -moz-transition: all 0.1s;
+    -webkit-transition: all 0.1s;
+    -o-transition: all 0.1s;
+    color: #EEEEEE;
 }
 .doc h1,h2 {
     border-bottom: rgba(72,72,72,0.3) solid 1px;
@@ -1591,6 +1604,11 @@ hide_a:hover {
     font-size: 0.875em;
     line-height: inherit;
     margin: 0.5em 0;
+}
+.doc a {
+    color: inherit;
+    cursor: pointer;
+    text-decoration: none;
 }
 .doc button {
     height: 32px;
