@@ -8,8 +8,10 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"io/ioutil"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Auth struct {
@@ -112,6 +114,87 @@ func Combine() {
 	}
 	fmt.Println(id2 + ".")
 }
+func makeResultReceiver(length int) []interface{} {
+	result := make([]interface{}, 0, length)
+	for i := 0; i < length; i++ {
+		var current interface{}
+		current = struct{}{}
+		result = append(result, &current)
+	}
+	return result
+}
+func Query() {
+	if len(os.Args) < 4 {
+		fmt.Println("Parameters error.")
+		os.Exit(1)
+	}
+	var sql = db
+	table := "author"
+	if os.Args[2] == "-d" {
+		table = "datapack"
+	} else if os.Args[2] == "-t" {
+		table = "tag"
+	} else if os.Args[2] != "-a" {
+		fmt.Println("You must choose a table. '-a' or '-d'.")
+		os.Exit(1)
+	}
+	id := os.Args[3]
+	if id == "" {
+		fmt.Println("You must input id.")
+		os.Exit(1)
+	}
+	showAll := false
+	if len(os.Args) == 5 && os.Args[4] == "-v" {
+		showAll = true
+		fmt.Println("-- Show All : enabled ;")
+	}
+
+	result := make(map[string]interface{})
+	rows, err := sql.Raw("select * from " + table + "s where id = '" + id + "'").Rows()
+	if err != nil {
+		panic(err)
+	}
+	columns, err := rows.Columns()
+	if err != nil {
+		panic(err)
+	}
+	length := len(columns)
+	for rows.Next() {
+		current := makeResultReceiver(length)
+		if err := rows.Scan(current...); err != nil {
+			panic(err)
+		}
+		for i := 0; i < length; i++ {
+			key := columns[i]
+			result[key] = *(current[i]).(*interface{})
+		}
+	}
+	for k, v := range result {
+		vType := reflect.TypeOf(v)
+		switch vType.String() {
+		case "int64":
+			fmt.Println(k + " : \"" + strconv.FormatInt(v.(int64), 10) + "\" ;")
+		case "string":
+			vl := v.(string)
+			if showAll || len(vl) <= 50 {
+				fmt.Println(k + " : \"" + vl + "\" ;")
+			} else if len(vl) > 50 {
+				fmt.Println(k + " : \"" + vl[:50] + "...\" ;")
+			}
+		case "time.Time":
+			fmt.Println(k + " : \"" + v.(time.Time).Format("2006-01-02 15:04:05") + "\" ;")
+		case "[]uint8":
+			vl := string(v.([]uint8))
+			if showAll || len(vl) <= 50 {
+				fmt.Println(k + " : \"" + vl + "\" ;")
+			} else if len(vl) > 50 {
+				fmt.Println(k + " : \"" + vl[:50] + "...\" ;")
+			}
+		default:
+			fmt.Println("Do not support '" + vType.String() + "'")
+		}
+	}
+}
 func main() {
 	//connect to database
 	Connect()
@@ -120,7 +203,8 @@ func main() {
 		_, err := fmt.Fprintf(os.Stderr, `admin:
 Usage:
 admin combine [-a | -d] [id1] [id2]
-admin update [-a | -d | -t] [-l] [...]
+admin query [-a | -d | -t] [id] 
+admin update [-a | -d | -t] [-l=language] [...]
 Options:
 `)
 		if err != nil {
@@ -130,5 +214,7 @@ Options:
 	}
 	if os.Args[1] == "combine" {
 		Combine()
+	} else if os.Args[1] == "query" {
+		Query()
 	}
 }

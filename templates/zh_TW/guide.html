@@ -8,6 +8,10 @@
     </div>
     <script>
         function change_style(style) {
+            if (style === 'simplified') {
+                window.alert('2 b continue...');
+                return;
+            }
             document.cookie = "style=" + escape(style);
             location.reload(true);
         }
@@ -19,5 +23,17 @@
         function show_options() {
             console.log("just a fake button.");
         }
+        document.addEventListener('click', function(e) {
+            let target = e.target;
+            if (target.matches('a')) {
+                let jump = document.getElementById(target.href.replace(/.*#/,''));
+                if (!jump.classList.contains('h')) {
+                    jump.classList.add('h');
+                }
+                setTimeout(function () {
+                    jump.classList.remove('h');
+                }, 100);
+            }
+        }, false);
     </script>
 {{end}}

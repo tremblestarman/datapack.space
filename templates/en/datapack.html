@@ -36,7 +36,22 @@
                         {{end}}
                     {{end}}
                 </div>
-                <div class="thumb"></div>
+                {{if .IsRelated}}
+                <div class="datapacks result">
+                    <div class="r-dp-msg">{{template "en/related_datapacks_msg"}}</div>
+                    {{range .Datapack.RelatedDatapacks}}
+                        <div class="datapack-short">
+                            <div class="name" onclick="jump_datapack('{{.ID}}')">{{.Name | unescaped}}</div>
+                            <div class="tags">
+                                {{range .Tags}}
+                                    <div class="tag tag-{{.Type}}" onclick="jump_tag({{.ID}})">{{.Tag | unescaped}}</div>
+                                {{end}}
+                            </div>
+                            <div class="_goto mask-attach" onclick="jump_datapack('{{.ID}}')"></div>
+                        </div>
+                    {{end}}
+                </div>
+                {{end}}
             </div>
         </div>
         <div class="shulker-bottom"></div>
@@ -48,22 +63,23 @@
     <script src="/bin/js/particles.js"></script>
     <script type="text/javascript">
         unfold_datapack({{.Datapack.ID}});
+        function auto_set_height() {
+            if (window.screen.width <= 600 || window.screen.width >= 2160) return;
+            let datapack = document.getElementById({{.Datapack.ID}});
+            let objs = datapack.children;
+            let cover = objs[0];
+            let intro = objs[1];
+            let attachments = objs[2];
+            let intro_height = Number(window.getComputedStyle(intro).getPropertyValue("height").replace("px",""));
+            let attachments_height = Number(window.getComputedStyle(attachments).getPropertyValue("height").replace("px",""));
+            attachments.style.top = (320 + intro_height) + "px";
+            datapack.style.height = (320 + intro_height + attachments_height) + "px";
+        }
         function height_fit(e) {
             for (var target = e.target; target && target != this && target != document; target = target.parentNode) {
                 if (target.matches('.text')) {
-                    let datapack = document.getElementById({{.Datapack.ID}});
-                    let objs = datapack.children;
-                    let cover = objs[0];
-                    let intro = objs[1];
-                    let attachments = objs[2];
-                    let intro_height = Number(window.getComputedStyle(intro).getPropertyValue("height").replace("px",""));
-                    let attachments_height = Number(window.getComputedStyle(attachments).getPropertyValue("height").replace("px",""));
-                    if (window.screen.width <= 600 || window.screen.width >= 2160) {
-                        break;
-                    }
-                    attachments.style.top = (320 + intro_height) + "px";
-                    datapack.style.height = (320 + intro_height + attachments_height) + "px";
-                    break;
+                    auto_set_height();
+                    break
                 }
             }
         }
@@ -71,7 +87,7 @@
             height_fit(e);
         }, false);
         function load_extra() {
-            height_fit(document.getElementById({{.Datapack.ID}}));
+            setTimeout(auto_set_height, 501);
         }
         let elements = document.getElementsByTagName('hide_a');
         Array.prototype.forEach.call(elements, function(hide_a) {

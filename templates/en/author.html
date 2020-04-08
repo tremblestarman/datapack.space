@@ -14,9 +14,9 @@
                 <span class="name">{{.Author.AuthorName | unescaped}}</span>
                 <span class="counter">{{template "en/counter_msg"}} : {{.TotalCount}}</span>
                 <span class="last-update">{{template "en/last_update_msg"}} : {{.LastUpdateTime}}</span>
-                <div class="tags">
-                    {{range .Sources}}
-                        <div class="tag tag-0" onclick="jump_tag({{.ID}})">{{.Tag | unescaped}}</div>
+                <div class="sources tags">
+                    {{range $source, $id := .Sources}}
+                        <div class="tag tag-0" onclick="jump_author({{$id}})">{{$source}}</div>
                     {{end}}
                 </div>
                 <div class="thumb mask-attach" onclick="thumb('authors','{{.Author.ID}}');" title="{{template "en/end_crystal_msg"}} : {{.Author.Thumb}}"></div>

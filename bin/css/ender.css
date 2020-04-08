@@ -2055,6 +2055,14 @@ hide_a:hover {
         padding-left: 8px;
         font-size: 24px;
     }
+    .attachments .datapacks {
+        margin-top: 0;
+    }
+    .datapacks .r-dp-msg {
+        height: 40px;
+        font-size: 28px;
+        padding: 8px 16px;
+    }
     .attachments .tags {
         width: 432px;
         height: 80px;
@@ -2138,11 +2146,11 @@ hide_a:hover {
     .author-unique .info .last-update {
         top: 108px;
     }
-    .author-unique .info .tag {
-        bottom: 8px;
-        left: 256px;
+    .author-unique .info .sources.tags {
+        top: 178px;
+        left: 254px;
         line-height: 16px;
-        height: 16px;
+        max-width: 716px;
         padding: 8px;
         font-size: 24px;
     }
@@ -2201,5 +2209,29 @@ hide_a:hover {
     }
     .languages .language:hover {
         font-size: 56px;
+    }
+    /* Guide */
+    .doc button {
+        height: 48px;
+        line-height: 48px;
+        padding: 0 12px;
+        margin: 0 12px;
+        font-size: 24px;
+        border-radius: 6px;
+    }
+    .doc h1, h2 {
+        border-bottom-width: 3px;
+    }
+    .doc h2 {
+        border-bottom-color: rgba(72,72,72,0.2);
+    }
+    .doc h1, h2, h3 {
+        margin-block-start: 2.5em;
+    }
+    .doc li {
+        margin-block-start: 1.25em;
+    }
+    .doc-navigate {
+        display: none;
     }
 }
