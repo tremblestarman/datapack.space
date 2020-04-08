@@ -98,8 +98,11 @@ func renderAuthors(c *gin.Context, page int, total int, language string, authors
 func renderAuthor(c *gin.Context, language string, author *Author) {
 	sourcesMap := make(map[string]string) //Source / Last Update Time Analysis
 	lastUpdateTime := ""
+	if len(author.Datapacks) > 0 { // This Source
+		sourcesMap[author.Datapacks[0].Source] = author.ID
+	}
 	for i := 0; i < len(author.RelatedAuthors); i++ {
-		if len(author.RelatedAuthors[i].Datapacks) > 0 {
+		if len(author.RelatedAuthors[i].Datapacks) > 0 { // Related Sources
 			sourcesMap[author.RelatedAuthors[i].Datapacks[0].Source] = author.RelatedAuthors[i].ID
 		}
 		author.Datapacks = append(author.Datapacks, author.RelatedAuthors[i].Datapacks...)

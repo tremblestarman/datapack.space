@@ -1365,16 +1365,18 @@ hide_a:hover {
     right: 0;
     bottom: 0;
 }
-.author-unique .info .tag {
+.author-unique .info .sources.tags {
     position: absolute;
-    bottom: 4px;
+    display: flex;
+    top: 90px;
     left: 128px;
     float: left;
     line-height: 8px;
-    height: 8px;
-    width: auto;
+    height: auto;
+    max-width: 488px;
     padding: 4px;
     font-size: 12px;
+    overflow: hidden;
 }
 .author-unique .datapacks {
     display: flex;

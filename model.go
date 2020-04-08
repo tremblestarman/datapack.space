@@ -148,7 +148,6 @@ func (a *Author) GetRelated(language string) {
 			}).
 			Where("authors.id IN " + related.GetTuple()).Find(&a.RelatedAuthors) // Get All Related Authors
 	}
-
 }
 func KeyWordHighlight(raw *string, keywordsReg string) int {
 	l, q := len(*raw), len(keyWordHighlightHead+keyWordHighlightTail)
@@ -195,7 +194,7 @@ type DatapackRelated struct {
 }
 type AuthorRelated struct {
 	IDRelated
-	Related string
+	AuthorID string
 }
 
 func (DatapackRelated) TableName() string {
