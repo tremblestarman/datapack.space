@@ -157,6 +157,7 @@
     },
     "info_adapt": {
         "game_version": "if game_version.__len__() > 1:\n    if game_version[0] > game_version[1]:\n        game_version[0], game_version[1] = game_version[1], game_version[0]\n    temp = []\n    v1 = game_version[0].split('.')\n    v2 = game_version[1].split('.')\n    for i in range(int(v1[1]), int(v2[1]) + 1):\n        temp.append(v1[0] + '.' + str(i))\n    game_version = temp",
-        "content_raw": "content_raw = '<link rel=\"stylesheet\" href=\"\/bin\/css\/planetminecraft.css\" type=\"text\/css\"\/>' + content_raw"
+        "content_raw": "content_raw = '<link rel=\"stylesheet\" href=\"\/bin\/css\/planetminecraft.css\" type=\"text\/css\"\/>' + content_raw",
+        "content_full": "content_full = '<link rel=\"stylesheet\" href=\"\/bin\/css\/planetminecraft.css\" type=\"text\/css\"\/>' + content_full"
     }
 }

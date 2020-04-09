@@ -60,6 +60,9 @@
                     |_______________________________________
                     |   Final Fix: upgraded regex match.
                     |___________________________________
+                √ [B] hide & hide_a do not coexist with authrization
+                    |   to seperate content_full from content_raw.
+                    |_____________________________________________
 - WEB Bugs & Features
                 √ [B] incorrect synonymous tag
                     |   synonymous tags do not show.
@@ -88,7 +91,7 @@
                 X [F] Adapt to mouse wheel  (bad experience)
                     |   turn page when scrolling down on top.
                     |________________________________________
-                                √ [F] shadeless style
+                √ [F] shadeless style
                     |   Shadeless and modify color collocation.
                     |   Attach style to cookie.
                     |__________________________________________

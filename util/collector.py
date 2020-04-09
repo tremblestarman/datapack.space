@@ -275,6 +275,8 @@ class datapack_collector:
             post:
                 The dict as a collection of all desired information in a post.
         '''
+        if not 'info_refine' in self.schema:
+            return
         for k, v in self.schema['info_refine'].items():
             if not k in post:
                 continue
@@ -286,8 +288,6 @@ class datapack_collector:
                 if 'replace' in n: # replace fields
                     def rep(p):
                         post[k] = re.sub(p['from'], p['to'], post[k])
-                        if k == 'content_raw':
-                            post['content_full'] = post[k]
                     if p == list:
                         for i in p:
                             rep(i)
@@ -311,8 +311,6 @@ class datapack_collector:
                         post[k] = [p['to'] % m[i] for i in range(math.floor(m.__len__()))]
                     if 'regexs' in n:
                         post[k] = post[k][0] if post[k].__len__() > 0 else ''
-                    if k == 'content_raw':
-                        post['content_full'] = post[k]
                 elif 'remove' in n: # remove fields
                     def rem(p):
                         if type(p) == dict:
@@ -327,33 +325,11 @@ class datapack_collector:
                             post[k] = str(bs)
                         elif type(p) == str:
                             post[k] = re.sub(p, '', post[k])
-                        if k == 'content_raw':
-                            post['content_full'] = post[k]
                     if type(p) == list:
                         for t in p:
                             rem(t)
                     else:
                         rem(p)
-                elif n == 'hide': # hide fields (replace with <hide>)
-                    def hide(p):
-                        if type(p) == dict:
-                            bs = BeautifulSoup(post[k], "lxml")
-                            _hide = bs.new_tag("hide")
-                            k1, v1 = tuple(p.items())[0]
-                            for k2 in v1:
-                                v1[k2] = re.compile(v1[k2])
-                            if v1.__len__() == 0:
-                                [s.replace_with(_hide) for s in bs.find_all(k1)]
-                            else:
-                                [s.replace_with(_hide) for s in bs.find_all(k1, v1)]
-                            post[k] = str(bs)
-                        elif type(p) == str:
-                            post[k] = re.sub(p, '<hide></hide>', post[k])
-                    if type(p) == list:
-                        for t in p:
-                            hide(t)
-                    else:
-                        hide(p)
     def __pool_fill(self):
         '''
         Fill the info_pool.
@@ -561,6 +537,27 @@ class datapack_collector:
             post:
                 The dict as a collection of all desired information in a post.
         '''
+        if 'info_refine' in self.schema and 'content_raw' in self.schema['info_refine'] and 'hide' in self.schema['info_refine']['content_raw']:
+            p = self.schema['info_refine']['content_raw']['hide']
+            def hide(p): # hide fields (replace with <hide>)
+                if type(p) == dict:
+                    bs = BeautifulSoup(post['content_raw'], "lxml")
+                    _hide = bs.new_tag("hide")
+                    k1, v1 = tuple(p.items())[0]
+                    for k2 in v1:
+                        v1[k2] = re.compile(v1[k2])
+                    if v1.__len__() == 0:
+                        [s.replace_with(_hide) for s in bs.find_all(k1)]
+                    else:
+                        [s.replace_with(_hide) for s in bs.find_all(k1, v1)]
+                    post['content_raw'] = str(bs)
+                elif type(p) == str:
+                    post['content_raw'] = re.sub(p, '<hide></hide>', post[k])
+            if type(p) == list:
+                for t in p:
+                    hide(t)
+            else:
+                hide(p)
         html = post['content_raw']
         bs = BeautifulSoup(html, 'lxml')
         for a in bs.find_all('a'): # hide a
@@ -614,6 +611,7 @@ class datapack_collector:
         if not 'content_filtered' in self.schema['info_collect'] or self.schema['info_collect']['content_filtered'] == 'auto': # auto fill content_filtered
             post['content_filtered'] = post['content_raw']
         self.__trim(post)
+        post['content_full'] = post['content_raw']
         li = ['game_version', 'tag']
         for k, v in post.items():
             if len(k) > 2 and k[:2] == '$.':
@@ -670,7 +668,7 @@ class datapack_collector:
         post['default_tag'] = post['tag']
         post['name_' + self.schema['lang']] = post['name']
         self.versions = self.versions | set(post['game_version'])
-    def peek():
+    def peek(self):
         '''
         Test tool.
 

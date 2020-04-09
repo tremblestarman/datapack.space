@@ -151,6 +151,7 @@
     },
     "info_adapt": {
         "name": "if name == '':    name = name_backup",
-        "content_raw": "content_raw = '<link rel=\"stylesheet\" href=\"\/bin\/css\/dpc.css\" type=\"text\/css\"\/>' + content_raw"
+        "content_raw": "content_raw = '<link rel=\"stylesheet\" href=\"\/bin\/css\/dpc.css\" type=\"text\/css\"\/>' + content_raw",
+        "content_full": "content_full = '<link rel=\"stylesheet\" href=\"\/bin\/css\/dpc.css\" type=\"text\/css\"\/>' + content_full"
     }
 }

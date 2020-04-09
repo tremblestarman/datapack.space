@@ -104,6 +104,7 @@
     },
     "info_adapt": {
         "content_raw": "content_raw = '<link rel=\"stylesheet\" href=\"\/bin\/css\/9minecraft.css\" type=\"text\/css\"\/>' + content_raw",
+        "content_full": "content_full = '<link rel=\"stylesheet\" href=\"\/bin\/css\/9minecraft.css\" type=\"text\/css\"\/>' + content_full",
         "post_time": "if post_time in ['none','',None]:    post_time = time_backup",
         "update_time": "if update_time in ['none','',None]:    update_time = time_backup"
     }

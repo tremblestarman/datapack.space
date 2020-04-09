@@ -333,6 +333,7 @@
         }
     },
     "info_adapt": {
-        "content_raw": "content_raw = '<link rel=\"stylesheet\" href=\"\/bin\/css\/mcbbs.css\" type=\"text\/css\"\/><div id=\"postlist\" class=\"pl\">\\n' + content_raw + '<\/div>'"
+        "content_raw": "content_raw = '<link rel=\"stylesheet\" href=\"\/bin\/css\/mcbbs.css\" type=\"text\/css\"\/><div id=\"postlist\" class=\"pl\">\\n' + content_raw + '<\/div>'",
+        "content_full": "content_full = '<link rel=\"stylesheet\" href=\"\/bin\/css\/mcbbs.css\" type=\"text\/css\"\/><div id=\"postlist\" class=\"pl\">\\n' + content_full + '<\/div>'"
     }
 }
