@@ -286,6 +286,8 @@ class datapack_collector:
                 if 'replace' in n: # replace fields
                     def rep(p):
                         post[k] = re.sub(p['from'], p['to'], post[k])
+                        if k == 'content_raw':
+                            post['content_full'] = post[k]
                     if p == list:
                         for i in p:
                             rep(i)
@@ -309,6 +311,8 @@ class datapack_collector:
                         post[k] = [p['to'] % m[i] for i in range(math.floor(m.__len__()))]
                     if 'regexs' in n:
                         post[k] = post[k][0] if post[k].__len__() > 0 else ''
+                    if k == 'content_raw':
+                        post['content_full'] = post[k]
                 elif 'remove' in n: # remove fields
                     def rem(p):
                         if type(p) == dict:
@@ -323,6 +327,8 @@ class datapack_collector:
                             post[k] = str(bs)
                         elif type(p) == str:
                             post[k] = re.sub(p, '', post[k])
+                        if k == 'content_raw':
+                            post['content_full'] = post[k]
                     if type(p) == list:
                         for t in p:
                             rem(t)
@@ -527,9 +533,29 @@ class datapack_collector:
         trs = TextRank4Sentence()
         trs.analyze(post['content_filtered'], lower=True)
         post['summary'] = [i.sentence for i in trs.get_key_sentences(2)]
+    def __connect_url(self, post:dict):
+        '''
+        Connect local url.
+
+        Args:
+            post:
+                The dict as a collection of all desired information in a post.
+        '''
+        def __connect(t: str):
+            html = post[t]
+            bs = BeautifulSoup(html, 'lxml')
+            for tag in ['href', 'src', 'file']:
+                for i in bs.find_all(attrs={tag: re.compile(r'''^(?!www\.|(?:http|ftp)s?://|[A-Za-z]:\\|//).*''')}):
+                    i[tag] = urlparse.urljoin(self.schema['domain'], i[tag])
+            for img in bs.find_all('img'): # edit img
+                if 'file' in img.attrs:
+                    img['src'] = img['file']
+            post[t] = str(bs)
+        __connect('content_raw')
+        __connect('content_full')
     def __content_hide(self, post:dict):
         '''
-        To make raw content adapat external environment, using adapater function defined in schema.
+        Hide some information.
 
         Args:
             post:
@@ -537,12 +563,6 @@ class datapack_collector:
         '''
         html = post['content_raw']
         bs = BeautifulSoup(html, 'lxml')
-        for tag in ['href', 'src', 'file']:
-            for i in bs.find_all(attrs={tag: re.compile(r'''^(?!www\.|(?:http|ftp)s?://|[A-Za-z]:\\|//).*''')}):
-                i[tag] = urlparse.urljoin(self.schema['domain'], i[tag])
-        for img in bs.find_all('img'): # edit img
-            if 'file' in img.attrs:
-                img['src'] = img['file']
         for a in bs.find_all('a'): # hide a
             a.name = 'hide_a'
             if 'href' in a and a.text == a['href']:
@@ -618,8 +638,9 @@ class datapack_collector:
             post['game_version'] = ['other']
         ### adapt
         #   - using "info_adapt" to adapt all info
-        self.__content_hide(post) # adapt raw html and hide some information
-        self.__post_adapt(post)
+        self.__connect_url(post) # connect relative url in content_raw
+        self.__post_adapt(post) # adapt
+        self.__content_hide(post) # hide some information
         ### second refine
         #   - make 'content_filtered' be pure text
         #   - get summary of 'content_filtered'
@@ -631,6 +652,7 @@ class datapack_collector:
         if 'content_filtered' in post:
             post['content_filtered'] = BeautifulSoup(post['content_filtered'], "lxml").get_text()
         self.__summary(post)
+        del post['content_filtered']
         if post['summary'].__len__() == 0:
             post['summary'] = ['']
         if post['author_uid'] in [None, 'auto', 'none', '']:

@@ -100,10 +100,10 @@
                     |   √ Width < 996px
                     |   √ Mobile (WIP,40%)
                     |__________________
-[F] a terminal tool based on commandline to do functional DB operation
-    |   √ basic get of records.
-    |   basic changes of a column in a record. (only translated content)
-    |   √ combine author, datapack. (via table 'authors_related', table 'datapacks_related')
-    |   mark authorized post.
-    |_______________________________________________________________________________________
-[F] Wandering
+                √ [F] a terminal tool based on commandline to do functional DB operation
+                    |   √ basic get of records.
+                    |   √ basic changes of a column in a record. (only translated content)
+                    |   √ combine author, datapack. (via table 'authors_related', table 'datapacks_related')
+                    |   √ mark authorized post.
+                    |_______________________________________________________________________________________
+[F] Wandering (a datapack-seeking function)

@@ -100,6 +100,8 @@ class datapack_db:
                 self.db = pymysql.connect(**auth)
             with open(BASE_DIR + '/languages.json', 'r', encoding="utf-8") as f:
                 self.languages = json.loads(f.read())
+            with open(BASE_DIR + '/authlist.json', 'r', encoding="utf-8") as f:
+                self.authlist = json.loads(f.read())
             self.cur = self.db.cursor()
             self.cur.execute('show databases;') # initialize database
             if not ('datapack_collection',) in self.cur.fetchall():
@@ -344,8 +346,11 @@ class datapack_db:
             return True
         if info['post_time'] == info['update_time']: # if post_time = update_time
             info['post_time'] = info['update_time'] = previous[0].strftime('%Y-%m-%d %H:%M:%S') # let it be the previous post_time
-        self._name_translate(info, previous[2], previous[3:])
         return False
+    def _authorize_update(self, did: str, aid: str):
+        if (str(did) in self.authlist['queue']['datapacks'] or str(aid) in self.authlist['queue']['authors']) and not (str(did) in self.authlist['unauth']):
+            return False # if not had been initially authorized
+        return True
     @func_set_timeout(600) # set timeout for 10 minutes
     def _datapack_insert(self, info: dict):
         '''
@@ -372,15 +377,19 @@ class datapack_db:
         res = self.cur.fetchall()
         exists = [j for i in res for j in i] if not res == None else []
         if not exists.__len__() == 0: # has previous info
-            if self._incremental_update(info, exists): #incremental_update
-                print('this post had not been updated, so just skipped.')  # did not updated and skip it
+            if self._incremental_update(info, exists) and self._authorize_update(did, aid): #incremental_update and authorize_update
+                print('this post had not been updated, so just have been skipped.')  # did not updated and skip it
                 del info
                 return str(did)
         if exists.__len__() == 0: # new element
             self._name_translate(info)
+        else: # exists and update it's name
+            self._name_translate(info, exists[2], exists[3:])
         # if the datapack has been updated or do not exist, update or insert content etc.
         intro = pymysql.escape_string('\n'.join(info['summary'])) #escape summaries
-        content_raw = pymysql.escape_string(info['content_raw']) #escape content
+        content_raw = pymysql.escape_string(info['content_raw']) #escape content raw (not authorized)
+        if (str(did) in self.authlist['auth']['datapacks'] or str(aid) in self.authlist['auth']['authors']) and not (str(did) in self.authlist['unauth']):
+            content_raw = pymysql.escape_string(info['content_full']) #escape content full (if authorized)
         info["default_tags_str"] = ''.join(info["default_tags_strs"])
         info["default_name"] = pymysql.escape_string(info["default_name"])
         for k, _ in self.languages.items():
@@ -408,7 +417,7 @@ class datapack_db:
             self.img_queue.add((info['cover_img'], 'cover', did))
         del info
         return str(did)
-    def info_import(self, info_list: list):
+    def info_import(self, info_list: list, interrupt = False):
         '''
         Import information from 'info_list' to database.
         '''
@@ -417,19 +426,26 @@ class datapack_db:
         for i in range(0, info_list.__len__()):
             print(str(i + 1), '/', str(info_list.__len__()), ':', info_list[i]['link'], '.')
             info = info_list[i]
-            try:
+            if interrupt:
                 did = self._datapack_insert(info)
                 if did in self._datapack_removal:
                     self._datapack_removal.remove(did)
                 self.db.commit()
                 print(did, ':', info['link'], 'has been imported into database successfully.')
-            except FunctionTimedOut as e: # if timeout occurs, retry
-                print('database operation timeout')
-                self.retry_list.append(info)
-                print('skipped :', info['link'], ', then retry in the next turn.')
-            except Exception as e:
-                print('cannot handle this problem. please check \'/util/err/database.err\'')
-                self.LOG.log('database', e, link=info['link'])
+            else:
+                try:
+                    did = self._datapack_insert(info)
+                    if did in self._datapack_removal:
+                        self._datapack_removal.remove(did)
+                    self.db.commit()
+                    print(did, ':', info['link'], 'has been imported into database successfully.')
+                except FunctionTimedOut as e: # if timeout occurs, retry
+                    print('database operation timeout')
+                    self.retry_list.append(info)
+                    print('skipped :', info['link'], ', then retry in the next turn.')
+                except Exception as e:
+                    print('cannot handle this problem. please check \'/util/err/database.err\'')
+                    self.LOG.log('database', e, link=info['link'])
         if self.retry_list.__len__() > 0:
             print('end. but still have', str(self.retry_list.__len__()), 'to be retried.')
         else:
@@ -475,6 +491,10 @@ class datapack_db:
         self.cur.execute('drop table if exists datapacks, tags, authors, datapack_tags;')
         print('reseted')
     def __del__(self):
+        with open(BASE_DIR + '/authlist.json', 'w+', encoding="utf-8") as f: # clear authlist's queue
+            self.authlist['queue']['datapacks'] = []
+            self.authlist['queue']['authors'] = []
+            f.write(json.dumps(self.authlist))
         self.db.commit()
         self.db.close()
         print('committed and closed')

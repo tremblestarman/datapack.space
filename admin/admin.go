@@ -20,6 +20,43 @@ type Auth struct {
 	User     string `json:"user"`
 	Password string `json:"password"`
 }
+type Authorized struct {
+	Datapacks []string `json:"datapacks"`
+	Authors   []string `json:"authors"`
+}
+type AuthList struct {
+	Authorized   Authorized `json:"auth"`
+	UnAuthorized []string   `json:"unauth"` // Only Ids of Datapack
+	Queue        Authorized `json:"queue"`  // To be updated
+}
+
+func GetAuthList() *AuthList {
+	var authList AuthList
+	jString, err := ioutil.ReadFile("../util/authlist.json")
+	if err != nil {
+		fmt.Println("authlist.json: ", err)
+		os.Exit(1)
+	}
+	err = json.Unmarshal(jString, &authList)
+	if err != nil {
+		fmt.Println("authlist.json -> AuthList err: ", err)
+		os.Exit(1)
+	}
+	fmt.Println("loaded authlist.json")
+	return &authList
+}
+func WriteAuthList(authList *AuthList) {
+	jString, err := json.Marshal(authList)
+	if err != nil {
+		fmt.Println("AuthList -> languages.json err: ", err)
+		os.Exit(1)
+	}
+	err = ioutil.WriteFile("../util/authlist.json", jString, os.ModeAppend)
+	if err != nil {
+		fmt.Println("authlist.json: ", err)
+		os.Exit(1)
+	}
+}
 
 var db *gorm.DB
 
@@ -63,6 +100,92 @@ func Connect() {
 	if err != nil {
 		fmt.Println(err)
 	}
+}
+func listAppend(id string, list *[]string) bool {
+	for _, v := range *list {
+		if v == id {
+			return false
+		}
+	}
+	*list = append(*list, id)
+	return true
+}
+func listDelete(id string, list *[]string) bool {
+	for i, v := range *list {
+		if v == id {
+			*list = append((*list)[:i], (*list)[i+1:]...)
+			return true
+		}
+	}
+	return false
+}
+func Authorize() {
+	if len(os.Args) < 4 {
+		fmt.Println("Parameters error.")
+		os.Exit(1)
+	}
+	isDatapack := false
+	if os.Args[2] == "-d" {
+		isDatapack = true
+	} else if os.Args[2] != "-a" {
+		fmt.Println("You must choose a type. '-a' or '-d'.")
+		os.Exit(1)
+	}
+	id := os.Args[3]
+
+	aList := GetAuthList()
+	if isDatapack {
+		success := listDelete(id, &aList.UnAuthorized)
+		if success {
+			fmt.Println("Removed '" + id + "' from 'unauth'.")
+		}
+		success = listAppend(id, &aList.Authorized.Datapacks)
+		if success {
+			fmt.Println("Appended '" + id + "' to 'auth.datapacks'.")
+		}
+		aList.Queue.Datapacks = append(aList.Queue.Datapacks, id)
+	} else {
+		success := listAppend(id, &aList.Authorized.Authors)
+		if success {
+			fmt.Println("Appended '" + id + "' to 'auth.authors.")
+		}
+		aList.Queue.Datapacks = append(aList.Queue.Authors, id)
+	}
+	WriteAuthList(aList)
+}
+func UnAuthorize() {
+	if len(os.Args) < 4 {
+		fmt.Println("Parameters error.")
+		os.Exit(1)
+	}
+	isDatapack := false
+	if os.Args[2] == "-d" {
+		isDatapack = true
+	} else if os.Args[2] != "-a" {
+		fmt.Println("You must choose a type. '-a' or '-d'.")
+		os.Exit(1)
+	}
+	id := os.Args[3]
+
+	aList := GetAuthList()
+	if isDatapack {
+		success := listDelete(id, &aList.Authorized.Datapacks)
+		if success {
+			fmt.Println("Removed '" + id + "' from 'auth.datapacks'.")
+		}
+		success = listAppend(id, &aList.UnAuthorized)
+		if success {
+			fmt.Println("Appended '" + id + "' to 'unauth'.")
+		}
+		aList.Queue.Datapacks = append(aList.Queue.Datapacks, id)
+	} else {
+		success := listDelete(id, &aList.Authorized.Authors)
+		if success {
+			fmt.Println("Removed '" + id + "' from 'auth.authors'.")
+		}
+		aList.Queue.Datapacks = append(aList.Queue.Authors, id)
+	}
+	WriteAuthList(aList)
 }
 func Combine() {
 	if len(os.Args) < 5 {
@@ -123,12 +246,35 @@ func makeResultReceiver(length int) []interface{} {
 	}
 	return result
 }
+func getRow(id string, table string) map[string]interface{} {
+	var s = db
+	result := make(map[string]interface{})
+	rows, err := s.Raw("select * from " + table + "s where id = '" + id + "'").Rows()
+	if err != nil {
+		panic(err)
+	}
+	columns, err := rows.Columns()
+	if err != nil {
+		panic(err)
+	}
+	length := len(columns)
+	for rows.Next() {
+		current := makeResultReceiver(length)
+		if err := rows.Scan(current...); err != nil {
+			panic(err)
+		}
+		for i := 0; i < length; i++ {
+			key := columns[i]
+			result[key] = *(current[i]).(*interface{})
+		}
+	}
+	return result
+}
 func Query() {
 	if len(os.Args) < 4 {
 		fmt.Println("Parameters error.")
 		os.Exit(1)
 	}
-	var sql = db
 	table := "author"
 	if os.Args[2] == "-d" {
 		table = "datapack"
@@ -149,27 +295,7 @@ func Query() {
 		fmt.Println("-- Show All : enabled ;")
 	}
 
-	result := make(map[string]interface{})
-	rows, err := sql.Raw("select * from " + table + "s where id = '" + id + "'").Rows()
-	if err != nil {
-		panic(err)
-	}
-	columns, err := rows.Columns()
-	if err != nil {
-		panic(err)
-	}
-	length := len(columns)
-	for rows.Next() {
-		current := makeResultReceiver(length)
-		if err := rows.Scan(current...); err != nil {
-			panic(err)
-		}
-		for i := 0; i < length; i++ {
-			key := columns[i]
-			result[key] = *(current[i]).(*interface{})
-		}
-	}
-	for k, v := range result {
+	for k, v := range getRow(id, table) {
 		vType := reflect.TypeOf(v)
 		switch vType.String() {
 		case "int64":
@@ -195,6 +321,51 @@ func Query() {
 		}
 	}
 }
+func Update() {
+	if len(os.Args) < 6 {
+		fmt.Println("Parameters error.")
+		os.Exit(1)
+	}
+	table := "author"
+	if os.Args[2] == "-d" {
+		table = "datapack"
+	} else if os.Args[2] == "-t" {
+		table = "tag"
+	} else if os.Args[2] != "-a" {
+		fmt.Println("You must choose a table. '-a' or '-d'.")
+		os.Exit(1)
+	}
+	id, column, content := os.Args[3], os.Args[4], os.Args[5]
+	if id == "" || column == "" || content == "" {
+		fmt.Println("You must input id, column and content.")
+		os.Exit(1)
+	}
+
+	if v, ok := getRow(id, table)[column]; ok {
+		vType := reflect.TypeOf(v)
+		switch vType.String() {
+		case "int64":
+			fmt.Println("from '" + strconv.FormatInt(v.(int64), 10) + "' to '" + content + "';")
+		case "string":
+			vl := v.(string)
+			fmt.Println("from '" + vl + "' to '" + content + "'")
+		case "time.Time":
+			fmt.Println("from '" + v.(time.Time).Format("2006-01-02 15:04:05") + "' to '" + content + "';")
+		case "[]uint8":
+			vl := string(v.([]uint8))
+			fmt.Println("from '" + vl + "' to '" + content + "';")
+		default:
+			fmt.Println("Do not support '" + vType.String() + "';")
+			return
+		}
+		db.Exec("update " + table + "s set " + column + " = '" + content + "' where id = '" + id + "';")
+		fmt.Println("Updated '" + column + "' of '" + id + "' successfully.")
+	} else {
+		fmt.Println("No record.")
+		os.Exit(0)
+	}
+}
+
 func main() {
 	//connect to database
 	Connect()
@@ -202,9 +373,11 @@ func main() {
 	flag.Usage = func() {
 		_, err := fmt.Fprintf(os.Stderr, `admin:
 Usage:
+admin auth [-a | -d] [id]
+admin unauth [-a | -d] [id]
 admin combine [-a | -d] [id1] [id2]
 admin query [-a | -d | -t] [id] 
-admin update [-a | -d | -t] [-l=language] [...]
+admin update [-a | -d | -t] [id] [column] "[content]"
 Options:
 `)
 		if err != nil {
@@ -212,9 +385,17 @@ Options:
 		}
 		flag.PrintDefaults()
 	}
-	if os.Args[1] == "combine" {
+	if os.Args[1] == "auth" {
+		Authorize()
+	} else if os.Args[1] == "unauth" {
+		UnAuthorize()
+	} else if os.Args[1] == "combine" {
 		Combine()
 	} else if os.Args[1] == "query" {
 		Query()
+	} else if os.Args[1] == "update" {
+		Update()
+	} else {
+		fmt.Println("unknown command. -h see usage.")
 	}
 }
