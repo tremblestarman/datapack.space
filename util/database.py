@@ -173,6 +173,10 @@ class datapack_db:
                 related TEXT,
                 PRIMARY KEY (id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
+            datapack_log = '''create table if not exists datapack_log
+            (
+                id VARCHAR(36) NOT NULL, link TEXT, operate VARCHAR(4), date DATETIME, PRIMARY KEY (id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
             self.cur.execute(tag_info) # create tables
             self.cur.execute(author_info)
             self.cur.execute(datapack_info)
@@ -417,7 +421,7 @@ class datapack_db:
             self.img_queue.add((info['cover_img'], 'cover', did))
         del info
         return str(did)
-    def info_import(self, info_list: list, interrupt = False):
+    def info_import(self, info_list: list, log = True, interrupt = False):
         '''
         Import information from 'info_list' to database.
         '''
@@ -427,9 +431,11 @@ class datapack_db:
             print(str(i + 1), '/', str(info_list.__len__()), ':', info_list[i]['link'], '.')
             info = info_list[i]
             if interrupt:
-                did = self._datapack_insert(info)
+                did, opt = self._datapack_insert(info), '+'
                 if did in self._datapack_removal:
                     self._datapack_removal.remove(did)
+                    opt = '-'
+                self.cur.execute(f'''insert into authors (id, link, operate, date) values ('{did}', '{info['link']}', '{opt}', '{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}');''') # log
                 self.db.commit()
                 print(did, ':', info['link'], 'has been imported into database successfully.')
             else:

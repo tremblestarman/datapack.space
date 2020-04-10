@@ -246,16 +246,20 @@ func makeResultReceiver(length int) []interface{} {
 	}
 	return result
 }
-func getRow(id string, table string) map[string]interface{} {
+func getRows(sql string) map[string]interface{} {
 	var s = db
 	result := make(map[string]interface{})
-	rows, err := s.Raw("select * from " + table + "s where id = '" + id + "'").Rows()
+	rows, err := s.Raw(sql).Rows()
 	if err != nil {
-		panic(err)
+		fmt.Println("sql error :")
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	columns, err := rows.Columns()
 	if err != nil {
-		panic(err)
+		fmt.Println("column error :")
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	length := len(columns)
 	for rows.Next() {
@@ -295,7 +299,7 @@ func Query() {
 		fmt.Println("-- Show All : enabled ;")
 	}
 
-	for k, v := range getRow(id, table) {
+	for k, v := range getRows("select * from " + table + "s where id = '" + id + "'") {
 		vType := reflect.TypeOf(v)
 		switch vType.String() {
 		case "int64":
@@ -341,7 +345,7 @@ func Update() {
 		os.Exit(1)
 	}
 
-	if v, ok := getRow(id, table)[column]; ok {
+	if v, ok := getRows("select * from " + table + "s where id = '" + id + "'")[column]; ok {
 		vType := reflect.TypeOf(v)
 		switch vType.String() {
 		case "int64":
@@ -365,6 +369,46 @@ func Update() {
 		os.Exit(0)
 	}
 }
+func Sql() {
+	if len(os.Args) < 3 {
+		fmt.Println("Parameters error.")
+		os.Exit(1)
+	}
+	sql := os.Args[2]
+	showAll := false
+	if len(os.Args) == 4 && os.Args[3] == "-v" {
+		showAll = true
+		fmt.Println("-- Show All : enabled ;")
+	}
+	counter := 0
+	for k, v := range getRows(sql) {
+		fmt.Println("- record : " + strconv.Itoa(counter) + " --------")
+		vType := reflect.TypeOf(v)
+		switch vType.String() {
+		case "int64":
+			fmt.Println(k + " : \"" + strconv.FormatInt(v.(int64), 10) + "\" ;")
+		case "string":
+			vl := v.(string)
+			if showAll || len(vl) <= 50 {
+				fmt.Println(k + " : \"" + vl + "\" ;")
+			} else if len(vl) > 50 {
+				fmt.Println(k + " : \"" + vl[:50] + "...\" ;")
+			}
+		case "time.Time":
+			fmt.Println(k + " : \"" + v.(time.Time).Format("2006-01-02 15:04:05") + "\" ;")
+		case "[]uint8":
+			vl := string(v.([]uint8))
+			if showAll || len(vl) <= 50 {
+				fmt.Println(k + " : \"" + vl + "\" ;")
+			} else if len(vl) > 50 {
+				fmt.Println(k + " : \"" + vl[:50] + "...\" ;")
+			}
+		default:
+			fmt.Println("Do not support '" + vType.String() + "'")
+		}
+		counter++
+	}
+}
 
 func main() {
 	//connect to database
@@ -378,6 +422,7 @@ admin unauth [-a | -d] [id]
 admin combine [-a | -d] [id1] [id2]
 admin query [-a | -d | -t] [id] 
 admin update [-a | -d | -t] [id] [column] "[content]"
+admin sql "[sql]"
 Options:
 `)
 		if err != nil {
@@ -395,6 +440,8 @@ Options:
 		Query()
 	} else if os.Args[1] == "update" {
 		Update()
+	} else if os.Args[1] == "sql" {
+		Sql()
 	} else {
 		fmt.Println("unknown command. -h see usage.")
 	}

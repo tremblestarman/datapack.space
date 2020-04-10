@@ -62,7 +62,18 @@
                     |___________________________________
                 √ [B] hide & hide_a do not coexist with authrization
                     |   to seperate content_full from content_raw.
-                    |_____________________________________________
+                    |_____________________________________________ 
+[B] content in 'mcbbs.json'
+    |   in javascript: (undefined function)
+    |   " Uncaught ReferenceError: img_onmouseoverfunc is not defined.
+    |   at HTMLImageElement.onmouseover "
+    |_________________________________________________________________
+                √ [F] To record history.
+                    |   in database.py, add a switcher for 'record'.
+                    |   a new table recording datapacks' status.
+                    |   when new datapack occurs and old one is deleted, record.
+                    |   4 column: 'id', 'link', 'operate' (+ or -), 'date'.
+                    |___________________________________________________________
 - WEB Bugs & Features
                 √ [B] incorrect synonymous tag
                     |   synonymous tags do not show.
@@ -108,5 +119,6 @@
                     |   √ basic changes of a column in a record. (only translated content)
                     |   √ combine author, datapack. (via table 'authors_related', table 'datapacks_related')
                     |   √ mark authorized post.
+                    |   √ raw sql. (only 'select')
                     |_______________________________________________________________________________________
 [F] Wandering (a datapack-seeking function)
