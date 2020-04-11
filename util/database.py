@@ -118,8 +118,6 @@ class datapack_db:
                 default_lang TINYTEXT,
                 default_lang_id TINYTEXT,
                 {' '.join([f"name_{k.replace('-','_')} TINYTEXT," for k, _ in self.languages.items()])}
-                default_tags_str TEXT,
-                {' '.join([f"tags_str_{k.replace('-','_')} TEXT," for k, _ in self.languages.items()])}
                 default_name TINYTEXT,
                 source TEXT NOT NULL,
                 post_time DATETIME,
@@ -195,7 +193,6 @@ class datapack_db:
                     if operated:
                         print(f'{table} added "', k.replace('-', '_'), f'" of colum {col}')
             alter('datapacks', 'name', 'TINYTEXT')
-            alter('datapacks', 'tags_str', 'TEXT')
             alter('tags', 'tag', 'TINYTEXT')
             self.cur.execute('update tags set quotation = 0;') # reset quotation
             # preload
@@ -246,24 +243,18 @@ class datapack_db:
         Insert Tag from info_dict to database.
         '''
         tag_sort = [info['source'], info['game_version'], info['tag'], info['keywords']]
-        info["default_tags_strs"] = []
-        for k, _ in self.languages.items():
-            info["tags_strs_" + k] = []
         def __exe(_tag: str, _type: int):
             tid = uuid.uuid3(uuid.NAMESPACE_DNS, _tag)
             _tag = pymysql.escape_string(_tag)
-            info["default_tags_strs"].append(f'{_type}:{_tag},')
             if str(tid) in self.translated_tags:
                 translated = self.translated_tags[str(tid)]
                 for k, _ in translated.items():
-                    info["tags_strs_" + k].append(f'{_type}:{translated[k]},')
                 quotation = f"update tags set quotation = quotation + 1 where id = '{tid}';"
                 self.cur.execute(quotation) # because quotation has been reset
                 return str(tid)
             translated = self._tag_translate(str(tid), _tag, _type, info['default_lang'])
             for k, _ in translated.items():
                 translated[k] = pymysql.escape_string(translated[k])
-                info["tags_strs_" + k].append(f'{_type}:{translated[k]},')
             tag_insert = f'''insert into tags (id, default_tag, default_lang, default_lang_id, {' '.join([f"tag_{k.replace('-','_')}," for k, _ in self.languages.items()])} type) 
             values ('{tid}', '{_tag}', '{self.languages[info['default_lang']]['name']}', '{info['default_lang']}', {' '.join([f"'{translated[k]}'," for k, _ in self.languages.items()])} {_type}) 
             on duplicate key update 
@@ -394,13 +385,11 @@ class datapack_db:
         content_raw = pymysql.escape_string(info['content_raw']) #escape content raw (not authorized)
         if (str(did) in self.authlist['auth']['datapacks'] or str(aid) in self.authlist['auth']['authors']) and not (str(did) in self.authlist['unauth']):
             content_raw = pymysql.escape_string(info['content_full']) #escape content full (if authorized)
-        info["default_tags_str"] = ''.join(info["default_tags_strs"])
         info["default_name"] = pymysql.escape_string(info["default_name"])
         for k, _ in self.languages.items():
             info['name_' + k] = pymysql.escape_string(info['name_' + k])
-            info["tags_str_" + k] = ''.join(info["tags_strs_" + k])
-        datapack_insert = f'''insert into datapacks (id, link, {' '.join([f"name_{k.replace('-','_')}," for k, _ in self.languages.items()])} {' '.join([f"tags_str_{k.replace('-','_')}," for k, _ in self.languages.items()])} default_tags_str, author_id, default_lang, default_lang_id, default_name, intro, full_content, source, post_time, update_time) 
-        values ('{did}', '{info['link']}', {",".join(["'" + info["name_" + k] + "'" for k, _ in self.languages.items()])}, {",".join(["'" + info["tags_str_" + k] + "'" for k, _ in self.languages.items()])}, '{info["default_tags_str"]}', '{aid}', '{self.languages[info['default_lang']]['name']}', '{info['default_lang']}', '{info['default_name']}', '{intro}', '{content_raw}', '{info['source']}', '{info['post_time']}', '{info['update_time']}') 
+        datapack_insert = f'''insert into datapacks (id, link, {' '.join([f"name_{k.replace('-','_')}," for k, _ in self.languages.items()])} author_id, default_lang, default_lang_id, default_name, intro, full_content, source, post_time, update_time) 
+        values ('{did}', '{info['link']}', {",".join(["'" + info["name_" + k] + "'" for k, _ in self.languages.items()])}, '{aid}', '{self.languages[info['default_lang']]['name']}', '{info['default_lang']}', '{info['default_name']}', '{intro}', '{content_raw}', '{info['source']}', '{info['post_time']}', '{info['update_time']}') 
         on duplicate key update 
         link = '{info['link']}',
         {"".join(["name_" + k.replace('-','_') + " = '" + info["name_" + k] + "'," for k, _ in self.languages.items()])}
@@ -410,8 +399,6 @@ class datapack_db:
         default_name = '{info['default_name']}',
         intro = '{intro}',
         full_content = '{content_raw}',
-        default_tags_str = '{info["default_tags_str"]}',
-        {"".join(["tags_str_" + k.replace('-','_') + " = '" + info["tags_str_" + k] + "'," for k, _ in self.languages.items()])}
         source = '{info['source']}',
         update_time = '{info['update_time']}';'''
         self.cur.execute(datapack_insert)

@@ -63,11 +63,11 @@
                 √ [B] hide & hide_a do not coexist with authrization
                     |   to seperate content_full from content_raw.
                     |_____________________________________________ 
-[B] content in 'mcbbs.json'
-    |   in javascript: (undefined function)
-    |   " Uncaught ReferenceError: img_onmouseoverfunc is not defined.
-    |   at HTMLImageElement.onmouseover "
-    |_________________________________________________________________
+                √ [B] content in 'mcbbs.json'
+                    |   in javascript: (undefined function)
+                    |   " Uncaught ReferenceError: img_onmouseoverfunc is not defined.
+                    |   at HTMLImageElement.onmouseover "
+                    |_________________________________________________________________
                 √ [F] To record history.
                     |   in database.py, add a switcher for 'record'.
                     |   a new table recording datapacks' status.
@@ -106,9 +106,33 @@
                     |   Shadeless and modify color collocation.
                     |   Attach style to cookie.
                     |__________________________________________
-[F] simplified style
+[F] Optimize search funcion (full text, inverted index)
+    |   After robot process done, build a new table indexing words. (via gse)
+    |   build for default_name, name_x, intro. (totally 2 + n tables)
+    |   (table structure: [word | datapack_id | count])
+    |   To match word, use 'like xxx = y%'
+    |   UNION use 'union all' + 'xxx' + 'group by id', INTERSECT use 'union all' + 'xxx' + 'group by id having count(*) = N'.
+    |   process: 
+    |   query word & sum count ([word | id | count])
+    |   -> 'UNION' or 'INTERSECT' all words & sum count ([id | count]) (relation between words)
+    |   -> 'UNION' or 'INTERSECT' all ids in name and intro & sum count & order by count & offset & limit ([id]) (relation between name and intro)
+    |   (-> normal search: 'UNION' (datapack_tags's datapack_id left join tags ... where ... group by...) # union relevant tags' datapack ids
+    |   -> use left join to query datapacks from the sub set of ids.
+    |   (-> accurate search: left join authors on datapacks.author_id = authors.id where ...) # intersect authors name
+    |_____________________________________________________________________________________________________________________________________________
+[F] Optimize query in mysql
+    |  1. change version, tag from regexp to left join. (left join (datapack_tags's datapack_id left join tags ... where ... group by) ...)
+    |       if use version or tag, previously add join.
+    |  2. build solo-index of each colum to query:
+    |       datapacks: source, post_time, update_time
+    |       authors: author_name
+    |       tags: tag
+    |       datapack_tags: datapack_id, tag_id
+    |______________________________________________________________________________________________________________________________________
+[F] Simplified style
+    |   Based on shadeless, a simplified ui.
     |   Attach style to cookie.
-    |__________________________
+    |_____________________________________________________________________________
                 √ [F] An entrance in '/guide' providing access to changing style.
                 √ [F] responsive mode
                     |   √ Width < 996px
@@ -122,3 +146,19 @@
                     |   √ raw sql. (only 'select')
                     |_______________________________________________________________________________________
 [F] Wandering (a datapack-seeking function)
+    |   3d flexibly link tag with other tags and showing the most relevant datapack.
+    |_______________________________________________________________________________
+[F] A secure way to authorize, combine and correct
+    |   additional related tool: email, discord, accounts in other websites.
+    |
+    |   # how to identify the author's application:
+    |   if source is a comprehensive website with functions to make a post, (like 'planetminecraft')
+    |       then firstly ask for website permission, secondly post a thread (to release),
+    |       reply in a certain format to apply for operation.
+    |   if source is a personal website,
+    |       then use discord / email to send a picture showing the website's terminal.
+    |   if source is a 3rd website (like '9minecraft')
+    |       the original author in original website has authority to operate it.
+    |       apply according to the above two situation.
+    |   to correct mistranslated content, reply in oppropriate thread, send discord message or email are all available.
+    |__________________________________________________________________________________________________________________

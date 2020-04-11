@@ -8,10 +8,6 @@
     </div>
     <script>
         function change_style(style) {
-            if (style === 'simplified') {
-                window.alert('2 b continue...');
-                return;
-            }
             document.cookie = "style=" + escape(style);
             location.reload(true);
         }

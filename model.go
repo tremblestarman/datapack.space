@@ -531,11 +531,11 @@ func SearchDatapacks(language string, page int, content string, source string, v
 	keywordsReg, sqlReg := WordsIntersect(content)
 	var regexps []string
 	// Set language
-	name, tag, tagStr := "default_name", "default_tag", "default_tags_str"
+	name, tag := "default_name", "default_tag"
 	if language != "" && language != "default" {
-		name, tag, tagStr = "name_"+language, "tag_"+language, "tags_str_"+language
+		name, tag = "name_"+language, "tag_"+language
 	}
-	cols := []string{"datapacks." + name, "datapacks.intro", "datapacks." + tagStr}
+	cols := []string{"datapacks." + name, "datapacks.intro"}
 	// Set SqlRegs Expression
 	for _, v := range cols {
 		regexps = append(regexps, strings.ReplaceAll(*sqlReg, "$?", v))
