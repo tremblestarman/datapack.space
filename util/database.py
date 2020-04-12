@@ -248,7 +248,6 @@ class datapack_db:
             _tag = pymysql.escape_string(_tag)
             if str(tid) in self.translated_tags:
                 translated = self.translated_tags[str(tid)]
-                for k, _ in translated.items():
                 quotation = f"update tags set quotation = quotation + 1 where id = '{tid}';"
                 self.cur.execute(quotation) # because quotation has been reset
                 return str(tid)
@@ -482,6 +481,20 @@ class datapack_db:
         Reset database. (Destructive)
         '''
         self.cur.execute('drop table if exists datapacks, tags, authors, datapack_tags;')
+        def drop_index(index: str, table: str):
+            try:
+                self.cur.execute(f'drop index {index} ON {table};')
+            except:
+                pass
+        drop_index('datapacks_source_i', 'datapacks') # drop indexes
+        drop_index('datapacks_post_time_i', 'datapacks')
+        drop_index('datapacks_update_time_i', 'datapacks')
+        drop_index('authors_author_name_i', 'authors')
+        drop_index('tags_default_tag_i', 'tags')
+        for k, _ in self.languages.items():
+            drop_index(f"tags_tag_{k.replace('-','_')}_i", 'tags')
+        drop_index('datapack_tags_datapack_id_i', 'datapack_tags')
+        drop_index('datapack_tags_tag_id_i', 'datapack_tags')
         print('reseted')
     def __del__(self):
         with open(BASE_DIR + '/authlist.json', 'w+', encoding="utf-8") as f: # clear authlist's queue

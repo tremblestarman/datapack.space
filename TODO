@@ -116,8 +116,8 @@
     |   query word & sum count ([word | id | count])
     |   -> 'UNION' or 'INTERSECT' all words & sum count ([id | count]) (relation between words)
     |   -> 'UNION' or 'INTERSECT' all ids in name and intro & sum count & order by count & offset & limit ([id]) (relation between name and intro)
-    |   (-> normal search: 'UNION' (datapack_tags's datapack_id left join tags ... where ... group by...) # union relevant tags' datapack ids
-    |   -> use left join to query datapacks from the sub set of ids.
+    |   (-> normal search: 'UNION' (datapack_tags's datapack_id left join tags ... on ... group by...) # union relevant tags' datapack ids
+    |   -> use left join to query datapacks from the sub set of ids. (select ... left join (subquery) as x on x.id = datapacks.id ...)
     |   (-> accurate search: left join authors on datapacks.author_id = authors.id where ...) # intersect authors name
     |_____________________________________________________________________________________________________________________________________________
 [F] Optimize query in mysql
