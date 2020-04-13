@@ -111,7 +111,7 @@
     |   build for default_name, name_x, intro. (totally 2 + n tables)
     |   (table structure: [word | datapack_id | count])
     |   To match word, use 'like xxx = y%'
-    |   UNION use 'union all' + 'xxx' + 'group by id', INTERSECT use 'union all' + 'xxx' + 'group by id having count(*) = N'.
+    |   UNION use 'union all' + 'xxx' + 'group by id', INTERSECT use 'union all' + 'xxx' + 'group by id having count(*) >= N'.
     |   process: 
     |   query word & sum count ([word | id | count])
     |   -> 'UNION' or 'INTERSECT' all words & sum count ([id | count]) (relation between words)
@@ -119,10 +119,61 @@
     |   (-> normal search: 'UNION' (datapack_tags's datapack_id left join tags ... on ... group by...) # union relevant tags' datapack ids
     |   -> use left join to query datapacks from the sub set of ids. (select ... left join (subquery) as x on x.id = datapacks.id ...)
     |   (-> accurate search: left join authors on datapacks.author_id = authors.id where ...) # intersect authors name
+    |
+    |   eg:
+    |   # normal search '羊羊工艺' -> '羊' or '工艺'
+    |   (0.00-0.01 sec) explain
+        select datapacks.*, count from (
+            select id, sum(count) as count from (
+                select id, sum(count) as count from (
+                    select id, count as count from datapacks_default_name_ii where word like '羊%' 
+                    union all 
+                    select id, count as count from datapacks_default_name_ii where word like '工艺%'
+                ) as _default_name group by id 
+                union all 
+                select id, sum(count) as count from (
+                    select id, count as count from datapacks_intro_ii where word like '羊%' 
+                    union all 
+                    select id, count as count from datapacks_intro_ii where word like '工艺%'
+                ) as _intro group by id 
+                union all
+                select id, 1 as count from (
+                    select dt.datapack_id as id from tags left join datapack_tags as dt on tags.id = dt.tag_id where tags.default_tag like '羊%'
+                    union all
+                    select dt.datapack_id as id from tags left join datapack_tags as dt on tags.id = dt.tag_id where tags.default_tag like '工艺%'
+                ) as _default_tag
+            ) as results group by id order by count DESC limit 15 offset 0
+        ) as ids left join datapacks on ids.id = datapacks.id;
+    |
+    |   eg:
+    |   # accurate search '羊羊工艺' in default_name, '剪刀 羊' in intro and 'kong' in author_name -> '羊' and '工艺', '剪刀' and '羊'
+    |   (0.00-0.01 sec) explain
+        select datapacks.*, count from (
+            select id, sum(count) as count from (
+                select id, sum(count) as count from (
+                    select id, count as count from datapacks_default_name_ii where word like '羊%' 
+                    union all 
+                    select id, count as count from datapacks_default_name_ii where word like '工艺%'
+                ) as _default_name group by id having count(*) >= 2 
+                union all 
+                select id, sum(count) as count from (
+                    select id, count as count from datapacks_intro_ii where word like '剪刀%' 
+                    union all 
+                    select id, count as count from datapacks_intro_ii where word like '羊%'
+                ) as _intro group by id having count(*) >= 2 
+            ) as results group by id having count(*) >= 2 order by count DESC limit 15 offset 0
+        ) as ids left join datapacks on ids.id = datapacks.id
+        left join authors on datapacks.author_id = authors.id where authors.author_name like 'kong%';
     |_____________________________________________________________________________________________________________________________________________
 [F] Optimize query in mysql
     |  1. change version, tag from regexp to left join. (left join (datapack_tags's datapack_id left join tags ... where ... group by) ...)
     |       if use version or tag, previously add join.
+    |       (subquery as 'datapacks')
+    |   eg: (0.01-0.02 sec) explain
+        select datapacks.* from (
+            select dt.datapack_id as id from tags left join datapack_tags as dt on tags.id = dt.tag_id where 
+                tags.type = 1 and tags.default_tag = '1.14'
+        ) as ids left join datapacks on ids.id = datapacks.id;
     |  2. build solo-index of each colum to query:
     |       datapacks: source, post_time, update_time
     |       authors: author_name

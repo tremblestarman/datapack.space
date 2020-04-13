@@ -171,9 +171,15 @@ class datapack_db:
                 related TEXT,
                 PRIMARY KEY (id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
-            datapack_log = '''create table if not exists datapack_log
+            datapack_log = '''create table if not exists datapacks_log
             (
-                id VARCHAR(36) NOT NULL, link TEXT, operate VARCHAR(4), date DATETIME, PRIMARY KEY (id)
+                id VARCHAR(36) NOT NULL, link TEXT, operate VARCHAR(4), date DATETIME,
+                INDEX datapacks_log_id_i (id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
+            datapack_ii_queue = '''create table if not exists datapacks_ii_queue
+            (
+                id VARCHAR(36) NOT NULL, operate VARCHAR(4),
+                INDEX datapacks_ii_queue_id_i (id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
             self.cur.execute(tag_info) # create tables
             self.cur.execute(author_info)
@@ -181,6 +187,8 @@ class datapack_db:
             self.cur.execute(datapack_tag)
             self.cur.execute(datapack_related)
             self.cur.execute(author_related)
+            self.cur.execute(datapack_log)
+            self.cur.execute(datapack_ii_queue)
             print('connect successfully')
             def alter(table: str, col: str, type: str): # add colums
                 for k, _ in self.languages.items():
@@ -375,7 +383,9 @@ class datapack_db:
                 print('this post had not been updated, so just have been skipped.')  # did not updated and skip it
                 del info
                 return str(did)
+        self.cur.execute(f'''insert into datapacks_ii_queue (id, operate) values ('{did}', '+');''') # insert into invert index queue
         if exists.__len__() == 0: # new element
+            self.cur.execute(f'''insert into datapacks_log (id, link, operate, date) values ('{did}', '{info['link']}', '+', '{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}');''') # log
             self._name_translate(info)
         else: # exists and update it's name
             self._name_translate(info, exists[2], exists[3:])
@@ -417,11 +427,9 @@ class datapack_db:
             print(str(i + 1), '/', str(info_list.__len__()), ':', info_list[i]['link'], '.')
             info = info_list[i]
             if interrupt:
-                did, opt = self._datapack_insert(info), '+'
+                did = self._datapack_insert(info)
                 if did in self._datapack_removal:
                     self._datapack_removal.remove(did)
-                    opt = '-'
-                self.cur.execute(f'''insert into authors (id, link, operate, date) values ('{did}', '{info['link']}', '{opt}', '{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}');''') # log
                 self.db.commit()
                 print(did, ':', info['link'], 'has been imported into database successfully.')
             else:
@@ -474,13 +482,15 @@ class datapack_db:
             rem = self._datapack_removal[i]
             datapack_delete = f"delete from datapacks where id = '{rem}';"
             self.cur.execute(datapack_delete)
+            self.cur.execute(f'''insert into datapacks_ii_queue (id, operate) values ('{rem}', '-');''') # insert into invert index queue
+            self.cur.execute(f'''insert into datapacks_log (id, link, operate, date) values ('{rem}', '', '-', '{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}');''') # log
             self._img_remove('cover', rem)
             print(rem, 'has been deleted.')
     def reset(self):
         '''
         Reset database. (Destructive)
         '''
-        self.cur.execute('drop table if exists datapacks, tags, authors, datapack_tags;')
+        self.cur.execute('drop table if exists datapacks, tags, authors, datapack_tags, datapack_related, tags_related, datapacks_log, datapacks_ii_queue;')
         def drop_index(index: str, table: str):
             try:
                 self.cur.execute(f'drop index {index} ON {table};')
@@ -495,6 +505,9 @@ class datapack_db:
             drop_index(f"tags_tag_{k.replace('-','_')}_i", 'tags')
         drop_index('datapack_tags_datapack_id_i', 'datapack_tags')
         drop_index('datapack_tags_tag_id_i', 'datapack_tags')
+        self.cur.execute('drop table if exists datapacks_intro_ii, datapacks_default_name_ii;')
+        for k, _ in self.languages.items():
+            self.cur.execute(f"drop table if exists datapacks_name_{k.replace('-','_')}_ii;")
         print('reseted')
     def __del__(self):
         with open(BASE_DIR + '/authlist.json', 'w+', encoding="utf-8") as f: # clear authlist's queue

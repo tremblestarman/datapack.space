@@ -364,6 +364,9 @@ func Update() {
 		}
 		db.Exec("update " + table + "s set " + column + " = '" + content + "' where id = '" + id + "';")
 		fmt.Println("Updated '" + column + "' of '" + id + "' successfully.")
+		if table == "datapacks" {
+			_ = db.Exec("insert into datapacks_ii_queue (id, operate) values ('" + id + "', '+');") //insert into invert index queue
+		}
 	} else {
 		fmt.Println("No record.")
 		os.Exit(0)
