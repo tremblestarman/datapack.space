@@ -144,9 +144,9 @@ func renderTags(c *gin.Context, page int, total int, language string, tags *[]Ta
 }
 func renderTag(c *gin.Context, language string, tag *Tag) {
 	if tag.Type == 0 {
-		c.Redirect(http.StatusMovedPermanently, "/search?source="+tag.DefaultTag)
+		c.Redirect(http.StatusMovedPermanently, "/?source="+tag.DefaultTag)
 	} else if tag.Type == 1 {
-		c.Redirect(http.StatusMovedPermanently, "/search?version="+tag.DefaultTag)
+		c.Redirect(http.StatusMovedPermanently, "/?version="+tag.DefaultTag)
 	} else {
 		synonymous := tag.GetSynonymousTag(language)
 		c.HTML(http.StatusOK, language+"/tag.html", gin.H{

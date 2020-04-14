@@ -255,7 +255,7 @@ svg.button:active {
     color: rgba(240,240,240,0.6);
     text-shadow: 0 0 10px rgba(240,240,240,0.6);
     text-align: center;
-    z-index: 9999999;
+    z-index: 9999;
 }
 .back-to-top {
     float: right;
@@ -2181,6 +2181,10 @@ hide_a:hover {
     /* Tag */
     .tag-container, .tag-container .grid {
         width: 780px;
+    }
+    .tag-container .tag {
+        margin-top: 0;
+        margin-left: 0;
     }
     .bottom .tag {
         height: 36px;

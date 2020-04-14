@@ -136,6 +136,7 @@ function search_datapacks() {
     if (version_el.selectedIndex > 0) params["version"] = version; else delete params['version'];
     if (post_time > 0) params["p_time"] = post_time; else delete params['p_time'];
     if (update_time > 0) params["u_time"] = update_time; else delete params['u_time'];
+    console.log(post_time)
     if (normal_search.value !== '' && !normal_search.classList.contains('hide')) { //Search
         delete params['name'];
         delete params['author'];

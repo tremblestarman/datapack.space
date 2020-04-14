@@ -33,10 +33,152 @@
 }
 
 /* Simplified */
+.utter {
+    width: 750px;
+}
+.pillar {
+    display: none !important;
+}
+.page_turner {
+    width: 800px;
+    left: -25px;
+}
+.footer-bar {
+    width: 750px;
+}
 .datapack .cover {
-    width: 64px;
+    width: 128px;
+    height: 128px;
+    left: 0;
+    top: 0;
+}
+.mask {
+    display: none;
+}
+.datapack .info {
+    left: 128px;
+    width: 526px;
     height: 64px;
 }
+.info .intro {
+    width: 514px;
+    height: 52px;
+    padding: 0 6px;
+}
 .intro .text {
+    height: 26px;
+}
+.datapack .attachments {
+    width: 528px;
+    top: 86px;
+    left: 128px;
+}
+.attachments .tags {
+    width: 364px;
+}
+.tags .tag {
+    margin-top: 12px;
+}
+.datapack-short .tag {
+    margin-top: 8px;
+}
+.datapack {
+    height: 124px;
+}
+.bottom {
     display: none;
+}
+/* Option */
+.options {
+    width: 750px;
+}
+.search-bar {
+    position: relative;
+    width: 750px;
+    left: -25px;
+}
+input.search {
+    width: 216px;
+}
+.search.accurate.double {
+    width: 540px;
+}
+.combo-list {
+    left: 7px;
+}
+/* Author */
+#line {
+    display: none;
+}
+#gif_element {
+    display: none;
+}
+.author-container {
+    margin: 1px auto 1px;
+}
+/* Tags */
+.tag-unique {
+    padding: 24px 0;
+}
+@media only screen and (max-device-width: 600px), (min-device-width: 2160px) {
+    .page_turner {
+        width: 960px;
+        left: -60px;
+        height: 96px;
+    }
+    .utter {
+        width: 840px;
+    }
+    /* Datapack */
+    .datapack {
+        height: auto;
+    }
+    .datapack .cover {
+        left: 12px;
+        top: 12px;
+        width: 240px;
+        height: 240px;
+    }
+    .datapack .info {
+        position: absolute;
+        left: 268px;
+        top: 12px;
+        width: 480px;
+        height: 240px;
+    }
+    .info .intro {
+        width: 472px;
+        height: 80px;
+        padding: 8px 0;
+        margin-top: 94px;
+    }
+    .datapack  .attachments {
+        top: 0;
+        margin-top: 24px;
+        left: 2px;
+        width: 758px;
+        height: 84px;
+    }
+    .tags .tag {
+        margin-left: 10px;
+        margin-top: 24px;
+    }
+    .datapack-short .tag {
+        margin-top: 8px;
+    }
+    /* Option */
+    .options {
+        width: 840px;
+    }
+    .search-bar {
+        width: 800px;
+        left: 0;
+    }
+    .search.accurate.double {
+        width: 500px;
+    }
+    .combo-list {
+        width: 720px;
+        left: 180px;
+    }
 }

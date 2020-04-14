@@ -96,15 +96,34 @@ type Datapack struct {
 	RelatedDatapacks []Datapack `json:"-"`
 }
 
-func (d *Datapack) Initialize() {
+func (d *Datapack) Initialize() *Datapack {
 	d.PostTimeString = d.PostTime.Format("2006-01-02 15:04:05")
 	d.UpdateTimeString = d.UpdateTime.Format("2006-01-02 15:04:05")
 	d.Intro = "    " + strings.ReplaceAll(d.Intro, "\n", ".\n    ") + "."
 	d.Intro = strings.ReplaceAll(d.Intro, "<", "＜") // '<' and '>', which confuse function 'unescape'
 	d.Intro = strings.ReplaceAll(d.Intro, ">", "＞") // replace '<>' with unicode '＜＞'
 	d.CoverExists, _ = PathExists("bin/img/cover/" + d.ID + ".png")
+	return d
 }
-func (d *Datapack) GetRelated(language string) {
+func (d *Datapack) GetTags(tag string) *Datapack {
+	rows, _ := db.Raw("select tags.*, tags." + tag + " as tag from (select datapack_tags.tag_id as id from datapack_tags where datapack_id = '" + d.ID + "') as ids left join tags on tags.id = ids.id order by tags.type, tags.default_tag, tags.default_tag DESC;").Rows()
+	for rows.Next() {
+		var tag Tag
+		_ = db.ScanRows(rows, &tag)
+		d.Tags = append(d.Tags, tag)
+	}
+	_ = rows.Close()
+	return d
+}
+func (d *Datapack) GetAuthor() *Datapack {
+	rows, _ := db.Raw("select authors.* from authors where authors.id = '" + d.AuthorID + "'").Rows()
+	for rows.Next() {
+		_ = db.ScanRows(rows, &d.Author)
+	}
+	_ = rows.Close()
+	return d
+}
+func (d *Datapack) GetRelated(language string) *Datapack {
 	// Get Related Datapacks
 	var sql = db
 	var related DatapackRelated
@@ -126,6 +145,7 @@ func (d *Datapack) GetRelated(language string) {
 			Preload("Author").                                                       // Preload Author
 			Where("datapacks.id IN " + related.GetTuple()).Find(&d.RelatedDatapacks) // Get All Related Datapacks
 	}
+	return d
 }
 func (a *Author) GetRelated(language string) {
 	// Get Related Authors
@@ -149,39 +169,11 @@ func (a *Author) GetRelated(language string) {
 			Where("authors.id IN " + related.GetTuple()).Find(&a.RelatedAuthors) // Get All Related Authors
 	}
 }
-func KeyWordHighlight(raw *string, keywordsReg string) int {
-	l, q := len(*raw), len(keyWordHighlightHead+keyWordHighlightTail)
-	re := regexp.MustCompile("(?i)" + keywordsReg)
+func KeyWordHighlight(raw *string, keywordsReg *string) {
+	re := regexp.MustCompile("(?i)" + *keywordsReg)
 	*raw = re.ReplaceAllStringFunc(*raw, func(s string) string {
 		return keyWordHighlightHead + strings.ToUpper(s) + keyWordHighlightTail
 	})
-	return (len(*raw) - l) / q
-}
-func (d *Datapack) CountKeyWords(keywordsReg string) {
-	d.KeyWordCount += KeyWordHighlight(&d.Name, keywordsReg)
-	d.KeyWordCount += KeyWordHighlight(&d.Intro, keywordsReg)
-	for _, t := range d.Tags {
-		if t.Type == 3 || t.Type == 4 {
-			d.KeyWordCount += KeyWordHighlight(&t.Tag, keywordsReg)
-		}
-	}
-}
-func (d *Datapack) AccurateCountKeyWords(keywordsRegMatrix *[3]string) {
-	if (*keywordsRegMatrix)[0] != "" {
-		d.KeyWordCount += KeyWordHighlight(&d.Name, (*keywordsRegMatrix)[0])
-	}
-	if (*keywordsRegMatrix)[1] != "" {
-		d.KeyWordCount += KeyWordHighlight(&d.Intro, (*keywordsRegMatrix)[1])
-	}
-	if (*keywordsRegMatrix)[2] != "" {
-		d.KeyWordCount += KeyWordHighlight(&d.Author.AuthorName, (*keywordsRegMatrix)[2])
-	}
-}
-func (t *Tag) CountKeyWords(keywordsReg string) {
-	t.KeyWordCount += KeyWordHighlight(&t.Tag, keywordsReg)
-}
-func (a *Author) CountKeyWords(keywordsReg string) {
-	a.KeyWordCount += KeyWordHighlight(&a.AuthorName, keywordsReg)
 }
 
 type IDRelated struct {
@@ -260,12 +252,13 @@ func dateRange(sql *gorm.DB, dateRange int, col string) *gorm.DB {
 	}
 	return sql
 }
-func datapackFilter(sql *gorm.DB, source string, version string, postTimeRange int, updateTimeRange int) *gorm.DB {
+func datapackFilter(sql *gorm.DB, source string, version string, postTimeRange int, updateTimeRange int) (*gorm.DB, string) {
+	table := "datapacks"
 	if source != "" {
 		sql = sql.Where("source = '" + source + "'")
 	}
 	if version != "" {
-		sql = sql.Where("default_tags_str REGEXP '1:" + version + ",'")
+		table = "(select dt.datapack_id as id from tags left join datapack_tags as dt on tags.id = dt.tag_id where tags.type = 1 and tags.default_tag = '" + version + "') as vs left join datapacks on vs.id = datapacks.id"
 	}
 	if postTimeRange != 0 {
 		sql = dateRange(sql, postTimeRange, "datapacks.post_time")
@@ -273,7 +266,7 @@ func datapackFilter(sql *gorm.DB, source string, version string, postTimeRange i
 	if updateTimeRange != 0 {
 		sql = dateRange(sql, updateTimeRange, "datapacks.update_time")
 	}
-	return sql
+	return sql, table
 }
 func ListDatapacks(language string, page int, order string, source string, version string, postTimeRange int, updateTimeRange int) (*[]Datapack, int) {
 	var datapacks []Datapack
@@ -295,8 +288,9 @@ func ListDatapacks(language string, page int, order string, source string, versi
 			return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag, tags.default_tag DESC") // Set Tag Name & Set Order
 		}).
 		Preload("Author") // Preload Author
-	sql = datapackFilter(sql, source, version, postTimeRange, updateTimeRange)  // Filter, Using Joined Table
-	sql.Count(&total).Order(order).Offset(offset).Limit(limit).Find(&datapacks) // Count All & Only Find Datapack to be Shown
+		// Preload is quicker than Rows Iterator, because Iterator use extra codes to reflect data on structure
+	sql, table := datapackFilter(sql, source, version, postTimeRange, updateTimeRange)       // Filter
+	sql.Table(table).Count(&total).Order(order).Offset(offset).Limit(limit).Find(&datapacks) // Count All & Only Find Datapack to be Shown
 	// Initialize Datapacks
 	for i := 0; i < len(datapacks); i++ {
 		datapacks[i].Initialize()
@@ -336,17 +330,6 @@ func RemoveDuplicates(a []string) (ret []string) {
 	}
 	return
 }
-func SplitAllCharacters(content string) (*string, *string) {
-	chars := []rune(content)
-	var keywords []string
-	for _, c := range chars {
-		keywords = append(keywords, string(c))
-	}
-	keywords = RemoveDuplicates(keywords)
-	keywordsReg := strings.Join(keywords, "|")
-	sqlReg := "($? REGEXP '" + strings.Join(keywords, "' AND $? REGEXP '") + "')"
-	return &keywordsReg, &sqlReg
-}
 func ListTags(language string, page int, tag string) (*[]Tag, int) {
 	var tags []Tag
 	if page < 1 {
@@ -358,34 +341,16 @@ func ListTags(language string, page int, tag string) (*[]Tag, int) {
 	if language != "" && language != "default" {
 		_tag = "tag_" + language
 	}
-	var sql = db.Select("distinct tags.*, tags." + _tag + " as tag").Order("tags.quotation DESC")
+	var sql = db.Model(Tag{}).Select("distinct tags.*, tags." + _tag + " as tag").Order("tags.quotation DESC")
 	// Return All
+	total := 0
 	if tag == "" {
-		sql.Find(&tags)
+		sql.Count(&total).Order("tags." + _tag + "").Offset(offset).Limit(limit).Find(&tags)
 	} else { // Find via Reg
-		sql.Where("tags.tag REG '" + tag + "'").Find(&tags)
-		keywordsReg, sqlReg := &tag, &tag
-		if len(tags) == 0 {
-			keywordsReg, sqlReg = SplitAllCharacters(tag)
-			sql.Where(strings.ReplaceAll(*sqlReg, "$?", "tags."+_tag)).Find(&tags) // Find via Letters
-		}
+		sql.Where("tags." + _tag + " like '" + tag + "%'").Count(&total).Order("tags." + _tag + "").Offset(offset).Limit(limit).Find(&tags)
 		for i := 0; i < len(tags); i++ { // Count and mark keywords
-			tags[i].CountKeyWords(*keywordsReg)
+			KeyWordHighlight(&tags[i].Tag, &tag)
 		}
-		sort.Slice(tags, func(i, j int) bool { // Sort
-			if tags[j].KeyWordCount == tags[i].KeyWordCount {
-				return len(tags[i].Tag) < len(tags[j].Tag)
-			}
-			return tags[j].KeyWordCount < tags[i].KeyWordCount
-		})
-	}
-	total := len(tags)
-	if offset >= len(tags) {
-		tags = make([]Tag, 0)
-	} else if offset+limit > len(tags) { // Slice
-		tags = append(tags[offset:])
-	} else {
-		tags = append(tags[offset : offset+limit])
 	}
 	return &tags, total
 }
@@ -438,32 +403,14 @@ func ListAuthors(page int, author string) (*[]Author, int) {
 	var offset, limit = (page - 1) * authorPageCount, authorPageCount
 	var sql = db
 	// Return All
+	total := 0
 	if author == "" {
-		sql.Select("distinct authors.*").Find(&authors)
+		sql.Model(Author{}).Select("distinct authors.*").Count(&total).Order("authors.author_name").Offset(offset).Limit(limit).Find(&authors)
 	} else { // Find via Reg
-		sql.Where("authors.author_name REG '" + author + "'").Limit(1).Find(&authors)
-		keywordsReg, sqlReg := &author, &author
-		if len(authors) == 0 { // No Result
-			keywordsReg, sqlReg = SplitAllCharacters(author)
-			sql.Where(strings.ReplaceAll(*sqlReg, "$?", "authors.author_name")).Find(&authors) // Find via Letters
-		}
+		sql.Model(Author{}).Where("authors.author_name like '" + author + "%'").Count(&total).Order("authors.author_name").Offset(offset).Limit(limit).Find(&authors)
 		for i := 0; i < len(authors); i++ { // Count and mark keywords
-			authors[i].CountKeyWords(*keywordsReg)
+			KeyWordHighlight(&authors[i].AuthorName, &author)
 		}
-		sort.Slice(authors, func(i, j int) bool { // Sort
-			if authors[j].KeyWordCount == authors[i].KeyWordCount {
-				return len(authors[i].AuthorName) < len(authors[j].AuthorName)
-			}
-			return authors[j].KeyWordCount < authors[i].KeyWordCount
-		})
-	}
-	total := len(authors)
-	if offset >= len(authors) {
-		authors = make([]Author, 0)
-	} else if offset+limit > len(authors) { // Slice
-		authors = append(authors[offset:])
-	} else {
-		authors = append(authors[offset : offset+limit])
 	}
 	return &authors, total
 }
@@ -492,33 +439,20 @@ func GetAuthor(language string, id string) *Author {
 }
 
 // Search
-func WordsIntersect(text string) (*string, *string) {
+func getKeywords(text string) (*string, []string) {
 	hmm := seg.CutSearch(text, true)
 	var words []string
 	words = RemoveDuplicates(hmm)
 	keywordsReg := strings.Join(words, "|")
-	sqlReg := "$? REGEXP '" + keywordsReg + "'"
-	return &keywordsReg, &sqlReg
+	return &keywordsReg, words
 }
-func LettersIn(text string) (*string, *string) {
-	hmm := seg.CutSearch(text, true)
-	var words []string
-	words = RemoveDuplicates(hmm)
-	keywordsReg := strings.Join(words, "|")
-	sqlReg := "($? REGEXP '" + strings.Join(words, "' AND $? REGEXP '") + "')"
-	return &keywordsReg, &sqlReg
-}
-func datapacksSortTrim(datapacks *[]Datapack, offset int, limit int) {
-	sort.Slice(*datapacks, func(i, j int) bool { // Sort
-		return (*datapacks)[j].KeyWordCount < (*datapacks)[i].KeyWordCount
-	})
-	if offset >= len(*datapacks) {
-		*datapacks = make([]Datapack, 0)
-	} else if offset+limit > len(*datapacks) { // Slice
-		*datapacks = append((*datapacks)[offset:])
-	} else {
-		*datapacks = append((*datapacks)[offset : offset+limit])
+func unionByWords(words []string, count string, wordSelect func(word string) string, postPosition string) string {
+	var selects []string
+	for _, word := range words {
+		selects = append(selects, wordSelect(word))
 	}
+	sql := "select id, " + count + " as count from (" + strings.Join(selects, " union all ") + ") " + postPosition + " "
+	return sql
 }
 func SearchDatapacks(language string, page int, content string, source string, version string, postTimeRange int, updateTimeRange int) (*[]Datapack, int) {
 	if page < 1 {
@@ -528,36 +462,42 @@ func SearchDatapacks(language string, page int, content string, source string, v
 	// search via datapacks.name or datapacks.name_zh or datapacks.content or t.tag (type = 3 or 4
 	var sql = db
 	var offset, limit = (page - 1) * datapackPageCount, datapackPageCount
-	keywordsReg, sqlReg := WordsIntersect(content)
-	var regexps []string
+	keywordsReg, keywords := getKeywords(content)
 	// Set language
 	name, tag := "default_name", "default_tag"
 	if language != "" && language != "default" {
 		name, tag = "name_"+language, "tag_"+language
 	}
-	cols := []string{"datapacks." + name, "datapacks.intro"}
-	// Set SqlRegs Expression
-	for _, v := range cols {
-		regexps = append(regexps, strings.ReplaceAll(*sqlReg, "$?", v))
-	}
 	// Query
+	total := 0
 	sql = db.Model(&Datapack{}).
-		Select("distinct datapacks.*, datapacks."+name+" as name"). // Set Datapack Name
-		Preload("Tags", func(db *gorm.DB) *gorm.DB {                // Preload Tags
+		Select("distinct datapacks.*, datapacks."+name+" as name, count as key_word_count"). // Set Datapack Name
+		Preload("Tags", func(db *gorm.DB) *gorm.DB {                                         // Preload Tags
 			return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag DESC") // Set Tag Name & Set Order
 		}).
-		Preload("Author").                   // Preload Author
-		Where(strings.Join(regexps, " OR ")) // Search
-	sql = datapackFilter(sql, source, version, postTimeRange, updateTimeRange) // Filter, Using Joined Table
-	sql.Find(&datapacks)                                                       // Find All
-	total := len(datapacks)
+		Preload("Author") // Preload Author
+	sql, table := datapackFilter(sql, source, version, postTimeRange, updateTimeRange) // Filter, Using Joined Table
+	// Set Search Expression
+	table = `(select id, sum(count) as count from (` + unionByWords(keywords, "sum(count)", func(word string) string {
+		return "select id, count as count from datapacks_" + name + "_ii where word like '" + word + "%'"
+	}, "as _name group by id") + ` union all ` + unionByWords(keywords, "sum(count)", func(word string) string {
+		return "select id, count as count from datapacks_intro_ii where word like '" + word + "%'"
+	}, "as _intro group by id") + ` union all ` + unionByWords(keywords, "1", func(word string) string {
+		return "select dt.datapack_id as id from tags left join datapack_tags as dt on tags.id = dt.tag_id where tags.default_tag like '" + word + "%' and tags.type >= 2"
+	}, "as _intro group by id") + `) as results group by id 
+        ) as ids left join ` + table + ` on ids.id = datapacks.id`
+	sql.Table(table).Where("datapacks.id is not NULL").Count(&total).Order("count DESC").Offset(offset).Limit(limit).Find(&datapacks) // Find All
 	// Count and Mark Keywords
 	for i := 0; i < len(datapacks); i++ {
 		datapacks[i].Initialize()
-		datapacks[i].CountKeyWords(*keywordsReg)
+		KeyWordHighlight(&datapacks[i].Name, keywordsReg)
+		KeyWordHighlight(&datapacks[i].Intro, keywordsReg)
+		for _, t := range datapacks[i].Tags {
+			if t.Type == 3 || t.Type == 4 {
+				KeyWordHighlight(&t.Tag, keywordsReg)
+			}
+		}
 	}
-	// Sort by Keywords Occur-Time And Slice
-	datapacksSortTrim(&datapacks, offset, limit)
 	return &datapacks, total
 }
 func AccurateSearchDatapacks(language string, page int, name string, intro string, author string, source string, version string, postTimeRange int, updateTimeRange int) (*[]Datapack, int) {
@@ -568,48 +508,60 @@ func AccurateSearchDatapacks(language string, page int, name string, intro strin
 	// search via datapacks.name or name_zh and datapacks.intro and authors.author_name and date
 	var sql = db
 	var offset, limit = (page - 1) * datapackPageCount, datapackPageCount
-	var keywordsMatrix [3]string
+	var keywordsMatrix [3]*string
+	selects := make([]string, 0)
 	// Set language
 	_name, tag := "default_name", "default_tag"
 	if language != "" && language != "default" {
 		_name, tag = "name_"+language, "tag_"+language
 	}
 	// Query
+	total := 0
 	sql = db.Model(&Datapack{}).
-		Select("distinct datapacks.*, datapacks."+_name+" as name"). // Set Datapack Name
-		Preload("Tags", func(db *gorm.DB) *gorm.DB {                 // Preload Tags
+		Select("distinct datapacks.*, datapacks."+_name+" as name, count as key_word_count"). // Set Datapack Name
+		Preload("Tags", func(db *gorm.DB) *gorm.DB {                                          // Preload Tags
 			return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag DESC") // Set Tag Name & Set Order
 		}).
 		Preload("Author"). // Preload Authors
 		Joins("JOIN authors ON datapacks.author_id = authors.id")
 	// Query Name
 	if name != "" {
-		keywordsReg, sqlReg := LettersIn(name)
-		keywordsMatrix[0] = *keywordsReg
-		sql = sql.Where(strings.ReplaceAll(*sqlReg, "$?", "datapacks."+_name))
+		var keywords []string
+		keywordsMatrix[0], keywords = getKeywords(name)
+		selects = append(selects, unionByWords(keywords, "sum(count)", func(word string) string {
+			return "select id, count as count from datapacks_" + _name + "_ii where word like '" + word + "%'"
+		}, "as _name group by id having count(*) >= "+strconv.Itoa(len(keywords))))
 	}
 	// Query Intro
 	if intro != "" {
-		keywordsReg, sqlReg := LettersIn(intro)
-		keywordsMatrix[1] = *keywordsReg
-		sql = sql.Where(strings.ReplaceAll(*sqlReg, "$?", "datapacks.intro"))
+		var keywords []string
+		keywordsMatrix[1], keywords = getKeywords(intro)
+		selects = append(selects, unionByWords(keywords, "sum(count)", func(word string) string {
+			return "select id, count as count from datapacks_intro_ii where word like '" + word + "%'"
+		}, "as _intro group by id having count(*) >= "+strconv.Itoa(len(keywords))))
 	}
 	// Query Author
 	if author != "" {
-		keywordsReg, sqlReg := LettersIn(author)
-		keywordsMatrix[2] = *keywordsReg
-		sql = sql.Where(strings.ReplaceAll(*sqlReg, "$?", "authors.author_name"))
+		keywordsMatrix[2] = &author
+		sql = sql.Where("authors.author_name like '" + author + "%'")
 	}
-	sql = datapackFilter(sql, source, version, postTimeRange, updateTimeRange) // Filter, Using Joined Table
-	sql.Find(&datapacks)                                                       // Find All
-	total := len(datapacks)
+	sql, table := datapackFilter(sql, source, version, postTimeRange, updateTimeRange) // Filter, Using Joined Table
+	table = "(select id, sum(count) as count from (" + strings.Join(selects, " union all ") + ") as results group by id having count(*) >= " + strconv.Itoa(len(selects)) + " ) as ids left join " + table + " on ids.id = datapacks.id"
+	fmt.Println(table)
+	sql.Table(table).Count(&total).Order("count DESC").Offset(offset).Limit(limit).Find(&datapacks) // Find All
 	// Count and Mark Keywords
 	for i := 0; i < len(datapacks); i++ {
 		datapacks[i].Initialize()
-		datapacks[i].AccurateCountKeyWords(&keywordsMatrix)
+		if name != "" {
+			KeyWordHighlight(&datapacks[i].Name, keywordsMatrix[0])
+		}
+		if intro != "" {
+			KeyWordHighlight(&datapacks[i].Intro, keywordsMatrix[1])
+		}
+		if author != "" {
+			KeyWordHighlight(&datapacks[i].Author.AuthorName, keywordsMatrix[2])
+		}
 	}
-	// Sort by Keywords Occur-Time And Slice
-	datapacksSortTrim(&datapacks, offset, limit)
 	return &datapacks, total
 }
 

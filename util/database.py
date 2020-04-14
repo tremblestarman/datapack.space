@@ -490,7 +490,7 @@ class datapack_db:
         '''
         Reset database. (Destructive)
         '''
-        self.cur.execute('drop table if exists datapacks, tags, authors, datapack_tags, datapack_related, tags_related, datapacks_log, datapacks_ii_queue;')
+        self.cur.execute('drop table if exists datapacks, tags, authors, datapack_tags, datapacks_related, authors_related, datapacks_log, datapacks_ii_queue;')
         def drop_index(index: str, table: str):
             try:
                 self.cur.execute(f'drop index {index} ON {table};')
