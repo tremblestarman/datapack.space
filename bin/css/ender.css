@@ -1866,7 +1866,7 @@ hide_a:hover {
         -o-transition: all 0.5s ease-in;
     }
     .options.unfolded {
-        height: 100px;
+        height: 132px;
         transition: all 0.35s ease-out;
         -moz-transition: all 0.35s ease-out;
         -webkit-transition: all 0.35s ease-out;
@@ -1923,7 +1923,8 @@ hide_a:hover {
         transform: scale(2);
     }
     .magnify {
-        left: 644px;
+        left: 708px;
+        top: 49px;
     }
     .datapack-palette .magnify {
         top: 48px;

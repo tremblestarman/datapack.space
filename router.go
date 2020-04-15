@@ -230,6 +230,9 @@ func search(c *gin.Context) {
 		nameContent := c.Query("name")
 		introContent := c.Query("intro")
 		authorContent := c.Query("author")
+		if nameContent == "" && introContent == "" && authorContent != "" {
+			c.Redirect(http.StatusMovedPermanently, "/author?author="+authorContent)
+		}
 		datapacks, total = AccurateSearchDatapacks(lang, p, nameContent, introContent, authorContent, filterSource, filterVersion, postTimeRange, updateTimeRange)
 	}
 	// api service
