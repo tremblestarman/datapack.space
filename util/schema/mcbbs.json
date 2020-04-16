@@ -333,7 +333,7 @@
         }
     },
     "info_adapt": {
-        "content_raw": "content_raw = '<script type=\"text/javascript\">function img_onmouseoverfunc(img) {} function showMenu(obj) {}</script><link rel=\"stylesheet\" href=\"\/bin\/css\/mcbbs.css\" type=\"text\/css\"\/><div id=\"postlist\" class=\"pl\">\\n' + content_raw + '<\/div>'",
-        "content_full": "content_full = '<script type=\"text/javascript\">function img_onmouseoverfunc(img) {} function showMenu(obj) {}</script><link rel=\"stylesheet\" href=\"\/bin\/css\/mcbbs.css\" type=\"text\/css\"\/><div id=\"postlist\" class=\"pl\">\\n' + content_full + '<\/div>'"
+        "content_raw": "content_raw = '<script type=\"text/javascript\">function img_onmouseoverfunc(img) {} function showMenu(obj) {}</script><link rel=\"stylesheet\" href=\"\/bin\/css\/vendored\/mcbbs.css\" type=\"text\/css\"\/><div id=\"postlist\" class=\"pl\">\\n' + content_raw + '<\/div>'",
+        "content_full": "content_full = '<script type=\"text/javascript\">function img_onmouseoverfunc(img) {} function showMenu(obj) {}</script><link rel=\"stylesheet\" href=\"\/bin\/css\/vendored\/mcbbs.css\" type=\"text\/css\"\/><div id=\"postlist\" class=\"pl\">\\n' + content_full + '<\/div>'"
     }
 }
