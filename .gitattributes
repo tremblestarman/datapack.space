@@ -1,7 +1,5 @@
-*.css linguist-vendored
-*.scss linguist-vendored
 * text=auto
-bin/css/ender.min.css linguist-language=css
+bin/css/vendored linguist-vendored
 templates/en/* linguist-generated
 templates/zh_CN/* linguist-generated
 templates/zh_TW/* linguist-generated
