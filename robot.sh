@@ -1,5 +1,6 @@
-DIR="`pwd`"/"`dirname $0`"
-rm -f $DIR/console.log
-xvfb-run python3 -u $DIR/update.py > $DIR/console.log 2>&1
-cd $DIR/util || exit
-./indexer
+#!/bin/bash
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+cd "$parent_path"
+xvfb-run /usr/local/bin/python3 -u "$parent_path"/update.py > "$parent_path"/robot.log 2>&1
+cd util || exit
+./indexer > indexer.log 2>&1
