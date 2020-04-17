@@ -1,5 +1,5 @@
 * text=auto
-bin/css/vendored linguist-vendored
+bin/css/vendored/* linguist-vendored
 bin/css/ender-*.css linguist-vendored
 templates/en/* linguist-generated
 templates/zh_CN/* linguist-generated

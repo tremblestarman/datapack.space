@@ -510,10 +510,14 @@ class datapack_db:
             self.cur.execute(f"drop table if exists datapacks_name_{k.replace('-','_')}_ii;")
         print('reseted')
     def __del__(self):
-        with open(BASE_DIR + '/authlist.json', 'w+', encoding="utf-8") as f: # clear authlist's queue
-            self.authlist['queue']['datapacks'] = []
-            self.authlist['queue']['authors'] = []
-            f.write(json.dumps(self.authlist))
+        try:
+            with open(BASE_DIR + '/authlist.json', 'w+', encoding="utf-8") as f: # clear authlist's queue
+                self.authlist['queue']['datapacks'] = []
+                self.authlist['queue']['authors'] = []
+                f.write(json.dumps(self.authlist))
+        except:
+            with open(BASE_DIR + '/authlist.json', 'w+', encoding="utf-8") as f: # clear authlist's queue
+                f.write(r'{"auth": {"datapacks": [], "authors": []}, "unauth": [], "queue": {"datapacks": [], "authors": []}}')
         self.db.commit()
         self.db.close()
         print('committed and closed')

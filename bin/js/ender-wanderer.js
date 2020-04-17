@@ -10,7 +10,10 @@ for (let i = 0; i < elements.length; i++) {
 Array.prototype.forEach.call(Object.keys(statistic).sort(function(a,b) {
         return statistic[b].v-statistic[a].v
     }), function (k) {
-    rank.push(elements[statistic[k].i])
+    rank.push({
+        el: elements[statistic[k].i],
+        c: statistic[k].v
+    })
 });
 Array.prototype.forEach.call(document.querySelectorAll('.name'), function (d) {
     datapacks.push({
@@ -18,4 +21,7 @@ Array.prototype.forEach.call(document.querySelectorAll('.name'), function (d) {
         id: d.id
     });
 })
-console.log(datapacks)
+
+Array.prototype.forEach.call(document.querySelectorAll('.tag-unique'), function (e) {
+    e.parentNode.removeChild(e);
+});
