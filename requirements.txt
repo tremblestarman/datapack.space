@@ -6,5 +6,6 @@ googletrans
 lxml
 pymysql
 pyvirtualdisplay
+requests
 selenium
 textrank4zh

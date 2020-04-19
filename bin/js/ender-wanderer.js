@@ -21,7 +21,11 @@ Array.prototype.forEach.call(document.querySelectorAll('.name'), function (d) {
         id: d.id
     });
 })
-
+let root =  null;
 Array.prototype.forEach.call(document.querySelectorAll('.tag-unique'), function (e) {
-    e.parentNode.removeChild(e);
+    root = e.parentNode;
+    root.removeChild(e); // Clear All
 });
+datapacks = document.createElement("div")
+datapacks.id = "datapacks";
+root.appendChild(datapacks);

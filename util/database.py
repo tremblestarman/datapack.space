@@ -83,7 +83,7 @@ class datapack_db:
     trans = translator()
     retry_list = [] # retry buffer
     LOG = logger()
-    def __init__(self):
+    def __init__(self, rebuild = True):
         '''
         Connect and Preload.
 
@@ -107,6 +107,9 @@ class datapack_db:
             if not ('datapack_collection',) in self.cur.fetchall():
                 self.cur.execute('create database datapack_collection;')
             self.cur.execute('use datapack_collection;')
+            if not rebuild:
+                print('connect successfully')
+                return
             self.cur.execute('drop table if exists datapack_tags;') # delete relation table and rebuild it
             datapack_info = f'''create table if not exists datapacks
             (
