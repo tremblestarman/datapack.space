@@ -83,6 +83,7 @@ class datapack_db:
     trans = translator()
     retry_list = [] # retry buffer
     LOG = logger()
+    _datapack_removal = [] # to remove
     def __init__(self, rebuild = True):
         '''
         Connect and Preload.
@@ -207,10 +208,9 @@ class datapack_db:
             alter('tags', 'tag', 'TINYTEXT')
             self.cur.execute('update tags set quotation = 0;') # reset quotation
             # preload
-            self.cur.execute('select id from datapacks')
+            self.cur.execute('select id from datapacks;')
             res = self.cur.fetchall()
-            self._datapack_removal = [j for i in res for j in i] if not res == None else None
-            assert not self._datapack_removal == None
+            self._datapack_removal = [j for i in res for j in i] if not res == None else []
             print('preloaded successfully')
             self.db.commit()
         except Exception as e:
@@ -489,6 +489,7 @@ class datapack_db:
             self.cur.execute(f'''insert into datapacks_log (id, link, operate, date) values ('{rem}', '', '-', '{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}');''') # log
             self._img_remove('cover', rem)
             print(rem, 'has been deleted.')
+        self._datapack_removal = []
     def reset(self):
         '''
         Reset database. (Destructive)
