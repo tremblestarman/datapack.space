@@ -2,7 +2,7 @@
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 cd "$parent_path" || exit
 touch robot.log
-touch crontab.log
+touch schedule.log
 chmod 666 *.log
 cd admin || exit
 go build admin.go

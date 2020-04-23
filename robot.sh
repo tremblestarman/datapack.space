@@ -15,5 +15,5 @@ do
     mysqldump -u root -p$MYSQLPASSWORD datapack_collection -P 3306 datapacks tags authors datapack_tags datapacks_related authors_related datapacks_log datapacks_ii_queue > "$parent_path"/datapack_collection.sql
     echo reset prccess at $(date +"%Y-%m-%d %T").
     ps aux | grep "/update.py" |  awk '{print $2}' | xargs kill -9
-    sleep 10
+    sleep 10800
 done

@@ -1,9 +1,8 @@
 let statistic = {}, // name -> id
-    tags = [],      // { c: count, r: raw html, s: sub node count, p: placement { x, y, r, t } } (sort by count)
+    tags = [],      // { c: count, r: raw html, s: sub node count, p: placement { x, y, r, s } } (sort by count)
     datapacks = [], // { n: name, u: uid }
     relations = []; // []{ c: relation count, w: summary of weight} relation table
 let sum = 0, // amount of tags
-    scale = 1, root_sigma = Math.PI / 2, x_min = 0, y_min = 0, x_max = 0, y_max = 0, // canvas params
     root = null; // root node
 
 // Read
@@ -102,7 +101,43 @@ function setWeight(i, p, pw) {
 setWeight(0, 0, 0);
 
 // Draw
-function place(i, sigma, x, y) {
+let scale = 1, root_sigma = Math.PI / 2, x_min = 0, y_min = 0, x_max = 0, y_max = 0, // canvas params
+    x_mass = 0, y_mass = 0; // mass of the whole
+function place(i) {
+    let n = 0, _j = 0, _x_mass = 0, _y_mass = 0, r = Math.sqrt(tags[i].c);
+    for (let j = 0; j < i; j++) {
+        if (relations[j][i].c > 0) {
+            n++;
+            _x_mass += tags[j].p.x * tags[j].p.r * tags[j].p.r;
+            _y_mass += tags[j].p.y * tags[j].p.r * tags[j].p.r;
+            _j = j;
+        }
+    }
+    if (n === 1) { // expanding node
+        let sigma = tags[_j].p.s, sw = - tags[_j].c, lw = 0;
+        for (let j = 0; j <= _j; j++) sw += relations[_j][j].w; // sum of weight
+        for (let j = _j + 1; j < i; j++) lw += relations[j][_j].w; // sum of weight of children of _j before i
+        sigma += (sw + tags[_j].c - relations[_j][_j].w) / sw / 2 * Math.PI - Math.PI; // relative origin angle
+        let _sigma = (lw + relations[_j][i].w / 2) / sw * Math.PI * 2 + sigma;  // edge angle
+        if (i === 1) {
+            _sigma = root_sigma;
+        }
+        tags[i].p.x = tags[_j].p.x + Math.cos(_sigma) * (r + Math.sqrt(tags[_j].c));
+        tags[i].p.y = tags[_j].p.y + Math.sin(_sigma) * (r + Math.sqrt(tags[_j].c));
+    } else if (n > 1) { // binding node
+        tags[i].p.x = _x_mass / n;
+        tags[i].p.y = _y_mass / n;
+    }
+    tags[i].p.r = r;
+    if (i === 0) {
+        tags[i].p.s = root_sigma;
+    }
+    tags[i].p.s = Math.atan2(tags[i].p.y - _y_mass / n, tags[i].p.x - _x_mass / n);
+    if (i > 0) fix(i);
+
+    x_mass += tags[i].p.x;
+    y_mass += tags[i].p.y;
+    /*
     let t = tags[i],
         r = Math.sqrt(t.c),                             // radius of the tag
         sw = - t.c,                                     // total weight of sub nodes and parent nodes
@@ -116,14 +151,63 @@ function place(i, sigma, x, y) {
                 _x = x + Math.cos(_sigma) * (r + _r) * 2,
                 _y = y + Math.sin(_sigma) * (r + _r) * 2;
             lw += relations[i][j].w;
-            place(j, _sigma, _x, _y);
+            tags[j].p.p.push(i);
+            tags[i].p.x = x; tags[i].p.y = y; tags[i].p.r = r; tags[i].p.s = sigma;
+        }
+    }*/
+}
+function fix(i) {
+    let _x_mass = 0, _y_mass = 0, r = tags[i].p.r, n = 0;
+    for (let j = 0; j < i; j++) { // collide detection
+        if ((tags[j].p.x - tags[i].p.x) * (tags[j].p.x - tags[i].p.x) + (tags[j].p.y - tags[i].p.y) * (tags[j].p.y - tags[i].p.y) < (tags[j].p.r + r) * (tags[j].p.r + r)) {
+            _x_mass += tags[j].p.x;
+            _y_mass += tags[j].p.y;
+            n++;
         }
     }
-    tags[i].p.x = x; tags[i].p.y = y; tags[i].p.r = r; tags[i].p.s = sigma;
+    if (n === 0) {
+        return
+    }
+    if (_x_mass === 0 && _y_mass === 0) _x_mass = 1;
+    let k = (_y_mass / n - y_mass / i) / (_x_mass / n - x_mass / i), b = _y_mass / n - k * _x_mass / n,
+        theta = Math.atan(k), c = (tags[i].p.x / k + tags[i].p.y - b) / (k + 1 / k), clipped = [];
+    for (let j = 0; j < i; j++) {
+        let d = distanceToLine(k, b, tags[j].p.x, tags[j].p.y);
+        if (d < tags[j].p.r + r) { // if connect to the line
+            let l = Math.sqrt((tags[j].p.r + r) * (tags[j].p.r + r) - d * d) / Math.sqrt(k * k + 1),
+                cl = (tags[j].p.x / k + tags[j].p.y - b) / (k + 1 / k);
+            clipped.push({l: cl-l, r: cl+l});
+        }
+    }
+    clipped.sort(function(a,b) {
+        return a.l-b.l;
+    });
+    let ans_l = c, ans_r = c;
+    if (clipped.length > 0) {
+        ans_l = clipped[0].l;
+        ans_r = clipped[0].r;
+    }
+    for (let j = 1; j < clipped.length; j++) {
+        if (clipped[j].l >= ans_r) { // find gap
+            if (ans_r > c) break; // get answer
+            ans_l = clipped[j].l;
+            if (ans_l > c) break; // get answer
+            ans_r = clipped[j].r;
+        } else { // connecting clip
+            if (clipped[j].r > ans_r) ans_r = clipped[j].r;
+        }
+    }
+    if (ans_l < ans_r) { // dilemma
+        if (c - ans_l < ans_r - c) tags[i].p.x = ans_l;
+        else tags[i].p.x = ans_r;
+    } else tags[i].p.x = c;
+    tags[i].p.y = k * tags[i].p.x + b;
 }
-place(0, root_sigma, 0, 0);
+function distanceToLine(k, b, x, y) {
+    return Math.abs(k * x - y + b) / Math.sqrt(k * k + 1);
+}
 for (let i = 0; i < sum; i++) {
-    console.log(tags[i].p.x, tags[i].p.y, tags[i].p.r, tags[i].p.s);
+    place(i);
 }
 
 // Reflect
@@ -131,11 +215,27 @@ Array.prototype.forEach.call(document.querySelectorAll('.tag-unique'), function 
     root = e.parentNode;
     root.removeChild(e);
 }); // remove all
-tags = document.createElement("canvas")
-tags.style.width = "100%";
-tags.style.height = "100%";
-tags.id = "tags";
-root.appendChild(tags); // add tags panel
+canvas = document.createElement("canvas")
+canvas.width = document.documentElement.clientWidth;
+canvas.height = document.documentElement.clientHeight;
+canvas.style.zIndex = "1000";
+canvas.id = "tags";
+document.body.appendChild(canvas); // add tags panel
 datapacks = document.createElement("div")
 datapacks.id = "datapacks"; // add datapacks panel
-root.appendChild(datapacks);
+document.body.appendChild(datapacks);
+let ctx = canvas.getContext("2d"), cx = document.documentElement.clientWidth / 2, cy = document.documentElement.clientHeight / 2;
+
+let progress = 0;
+function buildAnimation() {
+    let t = tags[progress];
+    //console.log(t.p.x, t.p.y, t.p.r)
+    ctx.beginPath();
+    ctx.arc(t.p.x * 5 + cx, t.p.y * 5 + cy, t.p.r * 5, 0 ,2*Math.PI);
+    ctx.stroke();
+    if (progress < sum) {
+        progress += 1;
+        window.requestAnimationFrame(buildAnimation);
+    }
+}
+window.requestAnimationFrame(buildAnimation);
