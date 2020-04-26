@@ -18,10 +18,9 @@ function getTagsInDatapack(tags) {
 // Read
 Array.prototype.forEach.call(document.querySelectorAll('.datapack-short'), function (d) {
     elements = getTagsInDatapack(d.children[1])
-    console.log(elements);
     for (let i = 0; i < elements.length; i++) {
         if (statistic.hasOwnProperty(elements[i].textContent)) {
-            let t = tags[statistic[elements[i].textContent]];
+            let id = statistic[elements[i].textContent], t = tags[id];
             t.c++;
             t.d.push(datapacks.length);
         }
@@ -40,14 +39,15 @@ Array.prototype.forEach.call(document.querySelectorAll('.datapack-short'), funct
                     s: 0    // sigma
                 },
                 d: [datapacks.length]
-            })
+            });
             sum++;
         }
     }
     datapacks.push({
         n: d.children[0].textContent,
         u: d.children[0].id,
-        t: d.children[1]
+        t: d.children[1],
+        _t: []
     });
 }); // read data
 tags.sort(function(a,b) {
@@ -56,6 +56,13 @@ tags.sort(function(a,b) {
 for (let i = 0; i < sum; i++) {
     statistic[tags[i].r.textContent] = i;
 } // update index of statistics, inverted
+for (let i = 0; i < datapacks.length; i++) {
+    Array.prototype.forEach.call(getTagsInDatapack(datapacks[i].t), function(t) {
+        let j = statistic[t.textContent];
+        datapacks[i]._t.push(j);
+    });
+    datapacks[i]._t.sort((a,b) => a - b);
+}
 
 // Calculate
 for (let i = 0; i < sum; i++) {
@@ -103,32 +110,27 @@ Array.prototype.forEach.call(document.querySelectorAll('.tag-unique'), function 
 let canvas = document.createElement("canvas")
 canvas.width = document.documentElement.clientWidth;
 canvas.height = document.documentElement.clientHeight;
-canvas.style.position = "absolute";
 let tag_list = document.createElement("div")
-tag_list.style.width = document.documentElement.clientWidth + "px";
-tag_list.style.height = document.documentElement.clientHeight + "px";
-tag_list.style.position = "absolute";
-tag_list.style.overflow = "hidden";
-//canvas.style.zIndex = "1000";
 canvas.id = "canvas";
-tag_list.id = "tags";
+tag_list.id = "tag_list";
 document.body.appendChild(canvas); // add canvas
 document.body.appendChild(tag_list); // add tags panel
 datapack_list = document.createElement("div")
-datapack_list.id = "datapacks"; // add datapacks panel
+datapack_list.id = "datapack_list"; // add datapacks panel
 document.body.appendChild(datapack_list);
 
 // Draw
 let progress = 0;
 root.removeChild(tags_old);
 let ctx = canvas.getContext("2d"),
-    cx = document.documentElement.clientWidth / 2, cy = document.documentElement.clientHeight / 2,
+    cx = document.documentElement.clientWidth / 2, cy = document.documentElement.clientHeight / 2, // client screen
     _cx = 0, _cy = 0,
     _dx = 0, _dy = 0;
+ctx.lineWidth = 2;
+let cx_ = 0, cy_ = 0, _cx_ = 0, _cy_ = 0, _dx_ = 0, _dy_ = 0; // mark for screen
 let scale = 1, root_sigma = Math.PI / 2,
     x_min = 0, y_min = 0, x_max = 0, y_max = 0, // canvas params
     x_mass = 0, y_mass = 0; // mass of the whole
-
 function place(i) {
     let n = 0, _j = 0, _x_mass = 0, _y_mass = 0, r = Math.sqrt(tags[i].c);
     for (let j = 0; j < i; j++) {
@@ -237,78 +239,116 @@ function fix(i) { // fix when being overlapped, find a gap to place it again and
     }
     find_gap();
 }
+function place_on_tags(i) {
+    let tag = tag_list.children[i],
+        width = tags[i].p.r * Math.cos(tags[i].k) * 2 * scale,
+        height = tags[i].p.r * Math.sin(tags[i].k) * 2 * scale;
+    tag.style.setProperty("--s", (height / tag_raw_height).toString());
+    tag.style.setProperty("--l", cx + (tags[i].p.x - _cx) * scale - width / 2 + "px");
+    tag.style.setProperty("--t", cy + (tags[i].p.y - _cy) * scale - height / 2 + "px");
+}
 function update(i) {
     for (let j = 0; j <= i; j++) {
-        let tag = tag_list.children[j],
-            width = tags[j].p.r * Math.cos(tags[j].k) * 2 * scale,
-            height = tags[j].p.r * Math.sin(tags[j].k) * 2 * scale;
-        tag.style.transform = `scale(${height / tag_raw_height})`;
-        tag.style.left = cx + (tags[j].p.x - _cx) * scale - width / 2 + "px";
-        tag.style.top =  cy + (tags[j].p.y - _cy) * scale - height / 2 + "px";
+        place_on_tags(j);
+    }
+    // draw relation again
+    if (current_tag_uid !== "") {
+        draw_relation_on();
     }
 }
 
+function onSubScreenChanged() {
+    if (cx_ !== cx || cy_ !== cy || _cx_ !== _cx || _cy_ !== _cy || _dx_ !== _dx || _dy_ !== _dy) {
+        cx_ = cx; cy_ = cy; _cx_ = _cx; _cy_ = _cy; _dx_ = _dx; _dy_ = _dy;
+        return true
+    }
+    return false
+} // test sub screen changed, and re-draw relation on canvas
 function Animation() {
-    canvas.width = document.documentElement.clientWidth;
-    canvas.height = document.documentElement.clientHeight;
-    tag_list.style.width = document.documentElement.clientWidth + "px";
-    tag_list.style.height = document.documentElement.clientHeight + "px";
+    tag_list.style.setProperty("--w", document.documentElement.clientWidth + "px");
+    tag_list.style.setProperty("--h", document.documentElement.clientHeight + "px");
     cx = document.documentElement.clientWidth / 2;
     cy = document.documentElement.clientHeight / 2;
-    let updated_sub_screen = false;
-    if (current_tag_id !== "") {
-        updated_sub_screen = true;
-    } // selected tag
     if (progress < sum) {
         place(progress);
-        tags[progress].r.style.position = "absolute";
-        tags[progress].r.style.textAlign = "center";
-        tags[progress].r.style.transformOrigin = "0 0"
-        tag_list.appendChild(tags[progress].r); // add child
+        if (current_tag_uid !== "") tags[progress].r.classList.add("transparent");
+        else tags[progress].r.classList.remove("transparent");
+        tag_list.appendChild(tags[progress].r.cloneNode(true)); // add child
+        place_on_tags(progress);
         progress += 1;
+        if (current_tag_uid !== "" && datapacks[current_datapack_id]._t.indexOf(progress - 1) > -1) { // update again when new tag occurs
+            screen_relation_on();
+            draw_relation_on();
+        }
     } // draw new tag
-
-    if (!updated_sub_screen) {
+    if (current_tag_uid === "") { // not fixed view
         _cx = (x_max + x_min) / 2; _cy = (y_max + y_min) / 2;
         _dx = (x_max - x_min); _dy = (y_max - y_min);
-    } // normal view (overview)
-    scale = Math.min( cx / _dx * 2, cy / _dy * 2);
+    } // normal view
 
-    /* update when:
-     * 1. _dx, _dy changed
-     * 2. client height or width changed
-     */
-    update(progress - 1);
+    scale = Math.min( cx / _dx * 2, cy / _dy * 2);
+    if (onSubScreenChanged())
+        update(progress - 1);
     window.requestAnimationFrame(Animation);
 }
 window.requestAnimationFrame(Animation);
 
-let current_tag_id = "", selected_tag = null, current_datapack_id = 0;
+// Interaction
+let current_tag_uid = "", selected_tag_id = 0, current_datapack_id = 0;
 function jump_tag(id) {
-    if (current_tag_id === id) {
+    if (current_tag_uid === id) { // double clicked, jump
         let params = getQueryObject();
         let url = window.location.protocol + "//" + window.location.host + "/tag/" + id;
         if (params.hasOwnProperty('language')) url += "?language=" + params['language'];
         location.href = url;
         return;
     }
-    current_tag_id = id;
-    selected_tag = tags[statistic[event.currentTarget.textContent]];
-    current_datapack_id = selected_tag.d[0];
-    // fix sub_screen
-    setSubScreen(selected_tag);
+    current_tag_uid = id;
+    selected_tag_id = statistic[event.currentTarget.textContent];
+    current_datapack_id = tags[selected_tag_id].d[0];
+    screen_relation_on();
+    draw_relation_on();
 } // click tag
-function setSubScreen(ct) {
-    let d = datapacks[current_datapack_id];
+function screen_relation_on() {
+    let ct = tags[selected_tag_id];
     let _x_min = ct.p.x - ct.p.r, _x_max = ct.p.x + ct.p.r,
         _y_min = ct.p.y - ct.p.r, _y_max = ct.p.y + ct.p.r;
-    Array.prototype.forEach.call(getTagsInDatapack(d.t), function (t) {
-        ct = tags[statistic[t.textContent]]
+    for (let i = 0; i < datapacks[current_datapack_id]._t.length; i++) {
+        if (datapacks[current_datapack_id]._t[i] >= progress) break;
+        ct = tags[datapacks[current_datapack_id]._t[i]];
         _x_min = Math.min(ct.p.x - ct.p.r, _x_min);
         _x_max = Math.max(ct.p.x + ct.p.r, _x_max);
         _y_min = Math.min(ct.p.y - ct.p.r, _y_min);
         _y_max = Math.max(ct.p.y + ct.p.r, _y_max);
-    })
+    } // for each tag
+    // set sub screen
     _cx = (_x_max + _x_min) / 2; _cy = (_y_max + _y_min) / 2;
     _dx = (_x_max - _x_min); _dy = (_y_max - _y_min);
-}
+    scale = Math.min( cx / _dx * 2, cy / _dy * 2);
+} // select all related tags, then update screen size
+function draw_relation_on() {
+    canvas.width = document.documentElement.clientWidth;
+    canvas.height = document.documentElement.clientHeight;
+    ctx.beginPath();
+    let ct = tag_list.children[selected_tag_id];
+    ct.classList.remove("transparent");
+    for (let i = 0; i < progress; i++) {
+        if (!tag_list.classList.contains("transparent"))
+            tag_list.children[i].classList.add("transparent");
+    }
+    for (let i = 0; i < datapacks[current_datapack_id]._t.length; i++) {
+        let _i = datapacks[current_datapack_id]._t[i];
+        if (_i >= progress) break;
+        let cl = tag_list.children[_i];
+        cl.classList.remove("transparent");
+        if (cl.classList.contains("tag-2")) {
+            ctx.strokeStyle = "rgba(22, 135, 146, 0.2)";
+        } else if (cl.classList.contains("tag-3")) {
+            ctx.strokeStyle = "rgba(158, 113, 158, 0.2)";
+        }
+        ctx.beginPath();
+        ctx.moveTo(Number(ct.style.getPropertyValue("--l").replace("px","")), Number(ct.style.getPropertyValue("--t").replace("px","")));
+        ctx.lineTo(Number(cl.style.getPropertyValue("--l").replace("px","")), Number(cl.style.getPropertyValue("--t").replace("px","")));
+        ctx.stroke();
+    }
+} // draw relations between all selected tags

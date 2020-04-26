@@ -1055,13 +1055,43 @@ input.search:focus {
     width: 276px;
     height: 40px;
 }
-.tags .tag, .tag-container .tag, div#tags .tag {
+div#tag_list {
+     --w: 0px;
+     --h: 0px;
+     position: absolute;
+     overflow: hidden;
+     width: var(--w);
+     height: var(--h);
+ }
+.tags .tag, .tag-container .tag, div#tag_list .tag {
     float: left;
     line-height: 8px;
     padding: 4px;
     margin-left: 5px;
     margin-top: 10px;
     font-size: 12px;
+}
+div#tag_list .tag {
+    --l: 0px;
+    --t: 0px;
+    --w: 0px;
+    --h: 0px;
+    --s: 1;
+    margin-left: 0;
+    margin-top: 0;
+    position: absolute;
+    text-align: center;
+    transform-origin: 0 0;
+    opacity: 1;
+    left: var(--l);
+    top: var(--t);
+    transform: scale(var(--s));
+}
+div#tag_list .tag.transparent {
+    opacity: 0.5;
+}
+canvas#canvas {
+    position: absolute;
 }
 .tag:hover {
     cursor: pointer;
