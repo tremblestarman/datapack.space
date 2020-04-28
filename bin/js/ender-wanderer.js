@@ -1,6 +1,6 @@
 let statistic = {}, // name -> id
     tags = [],      // { c: count, r: raw html, s: sub node count, k: arc_tan of height and width, p: placement { x, y, r, s }, d: [] } (sort by count)
-    datapacks = [], // { n: name, u: uid }
+    datapacks = [], // { n: name, u: uid, t: raw tags, _t: id list of tags }
     relations = []; // []{ c: relation count, w: summary of weight} relation table
 let sum = 0, tag_raw_height = 0,// amount of tags
     root = null, tags_old = null; // root node
@@ -108,22 +108,23 @@ Array.prototype.forEach.call(document.querySelectorAll('.tag-unique'), function 
     tags_old = e;
 }); // remove all
 let canvas = document.createElement("canvas")
-canvas.width = document.documentElement.clientWidth;
-canvas.height = document.documentElement.clientHeight;
 let tag_list = document.createElement("div")
 canvas.id = "canvas";
 tag_list.id = "tag_list";
 document.body.appendChild(canvas); // add canvas
 document.body.appendChild(tag_list); // add tags panel
-datapack_list = document.createElement("div")
-datapack_list.id = "datapack_list"; // add datapacks panel
-document.body.appendChild(datapack_list);
+datapack_box = document.createElement("div")
+datapack_box.id = "datapack_box"; // add datapacks panel
+document.body.appendChild(datapack_box);
 
 // Draw
 let progress = 0;
 root.removeChild(tags_old);
+let off_height = document.getElementById("navi").offsetHeight + root.offsetHeight;
+canvas.width = document.documentElement.clientWidth;
+canvas.height = document.documentElement.clientHeight - off_height;
 let ctx = canvas.getContext("2d"),
-    cx = document.documentElement.clientWidth / 2, cy = document.documentElement.clientHeight / 2, // client screen
+    cx = document.documentElement.clientWidth / 2, cy = (document.documentElement.clientHeight - off_height) / 2, // client screen
     _cx = 0, _cy = 0,
     _dx = 0, _dy = 0;
 ctx.lineWidth = 2;
@@ -266,13 +267,11 @@ function onSubScreenChanged() {
 } // test sub screen changed, and re-draw relation on canvas
 function Animation() {
     tag_list.style.setProperty("--w", document.documentElement.clientWidth + "px");
-    tag_list.style.setProperty("--h", document.documentElement.clientHeight + "px");
+    tag_list.style.setProperty("--h", (document.documentElement.clientHeight - off_height) + "px");
     cx = document.documentElement.clientWidth / 2;
-    cy = document.documentElement.clientHeight / 2;
+    cy = (document.documentElement.clientHeight - off_height) / 2;
     if (progress < sum) {
         place(progress);
-        if (current_tag_uid !== "") tags[progress].r.classList.add("transparent");
-        else tags[progress].r.classList.remove("transparent");
         tag_list.appendChild(tags[progress].r.cloneNode(true)); // add child
         place_on_tags(progress);
         progress += 1;
@@ -294,7 +293,7 @@ function Animation() {
 window.requestAnimationFrame(Animation);
 
 // Interaction
-let current_tag_uid = "", selected_tag_id = 0, current_datapack_id = 0;
+let current_tag_uid = "", selected_tag_id = 0, current_datapack_id = 0, selected_datapack_id = 0;
 function jump_tag(id) {
     if (current_tag_uid === id) { // double clicked, jump
         let params = getQueryObject();
@@ -303,12 +302,47 @@ function jump_tag(id) {
         location.href = url;
         return;
     }
+    // reset current related tags
+    for (let i = 0; i < datapacks[current_datapack_id]._t.length; i++) {
+        let _i = datapacks[current_datapack_id]._t[i];
+        if (_i >= progress) break;
+        tag_list.children[_i].classList.remove("related");
+    }
+    // set current tag
     current_tag_uid = id;
     selected_tag_id = statistic[event.currentTarget.textContent];
     current_datapack_id = tags[selected_tag_id].d[0];
+    selected_datapack_id = 0
+    // calculate screen
+    datapack_box_on();
     screen_relation_on();
     draw_relation_on();
 } // click tag
+function datapack_box_on() {
+    let datapack_id = tags[selected_tag_id].d[selected_datapack_id];
+    while(datapack_box.hasChildNodes()) datapack_box.removeChild(datapack_box.firstChild); // clear datapack box
+    let title = document.createElement("div"), cover = document.createElement("div"),
+        _tags = datapacks[current_datapack_id].t.cloneNode(true);
+    let name = document.createElement("div"), goto = document.createElement("div");
+    let head = document.createElement("div"), info = document.createElement("info"),
+        left = document.createElement("div"), right = document.createElement("div");
+    // head
+    head.classList.add("head"); info.classList.add("info"); left.classList.add("left"); right.classList.add("right");
+    info.textContent = (selected_datapack_id + 1) + " | " + tags[selected_tag_id].d.length;
+    left.setAttribute("onclick", "turn_left(true);"); right.setAttribute("onclick", "turn_left(false);");
+    if (selected_datapack_id > 0) head.appendChild(left);
+    head.appendChild(tags[selected_tag_id].r.cloneNode(true));
+    head.appendChild(info);
+    if (selected_datapack_id < tags[selected_tag_id].d.length - 1) head.appendChild(right);
+    // name
+    title.classList.add("title"); cover.classList.add("cover");
+    name.textContent = datapacks[datapack_id].n;
+    name.setAttribute("onclick", "jump_datapack('" + datapacks[datapack_id].n + "')")
+    name.classList.add("name"); goto.classList.add("_goto"); goto.classList.add("mask-attach");
+    title.appendChild(name); title.appendChild(goto);
+    // append
+    datapack_box.appendChild(head); datapack_box.appendChild(title); datapack_box.appendChild(cover); datapack_box.appendChild(_tags);
+}// update datapack box
 function screen_relation_on() {
     let ct = tags[selected_tag_id];
     let _x_min = ct.p.x - ct.p.r, _x_max = ct.p.x + ct.p.r,
@@ -325,22 +359,24 @@ function screen_relation_on() {
     _cx = (_x_max + _x_min) / 2; _cy = (_y_max + _y_min) / 2;
     _dx = (_x_max - _x_min); _dy = (_y_max - _y_min);
     scale = Math.min( cx / _dx * 2, cy / _dy * 2);
-} // select all related tags, then update screen size
+    datapack_box.style.display = null;
+    datapack_box.style.setProperty("--t", document.documentElement.clientHeight + "px");
+} // select all related tags, then update screen size and place datapack box
 function draw_relation_on() {
     canvas.width = document.documentElement.clientWidth;
-    canvas.height = document.documentElement.clientHeight;
-    ctx.beginPath();
+    canvas.height = document.documentElement.clientHeight - off_height;
+    if (current_tag_uid === "") {
+        tag_list.classList.remove("transparent");
+        return;
+    } // reset
     let ct = tag_list.children[selected_tag_id];
-    ct.classList.remove("transparent");
-    for (let i = 0; i < progress; i++) {
-        if (!tag_list.classList.contains("transparent"))
-            tag_list.children[i].classList.add("transparent");
-    }
+    if (!tag_list.classList.contains("transparent"))
+        tag_list.classList.add("transparent");// make all tags transparent
     for (let i = 0; i < datapacks[current_datapack_id]._t.length; i++) {
         let _i = datapacks[current_datapack_id]._t[i];
         if (_i >= progress) break;
         let cl = tag_list.children[_i];
-        cl.classList.remove("transparent");
+        cl.classList.add("related");
         if (cl.classList.contains("tag-2")) {
             ctx.strokeStyle = "rgba(22, 135, 146, 0.2)";
         } else if (cl.classList.contains("tag-3")) {
@@ -350,5 +386,27 @@ function draw_relation_on() {
         ctx.moveTo(Number(ct.style.getPropertyValue("--l").replace("px","")), Number(ct.style.getPropertyValue("--t").replace("px","")));
         ctx.lineTo(Number(cl.style.getPropertyValue("--l").replace("px","")), Number(cl.style.getPropertyValue("--t").replace("px","")));
         ctx.stroke();
-    }
+    } // link all related tags
 } // draw relations between all selected tags
+document.addEventListener("click", function (e) {
+    if (e.target === tag_list) {
+        // reset current related tags
+        for (let i = 0; i < datapacks[current_datapack_id]._t.length; i++) {
+            let _i = datapacks[current_datapack_id]._t[i];
+            if (_i >= progress) break;
+            tag_list.children[_i].classList.remove("related");
+        }
+        current_tag_uid = ""; selected_tag_id = 0; current_datapack_id = 0;
+        draw_relation_on();
+        datapack_box.style.display = "none";
+    }
+}) // cancel select
+function turn_left(isLeft) {
+    if (isLeft && selected_datapack_id > 0) selected_datapack_id--;
+    else if (selected_datapack_id < tags[selected_tag_id].d.length - 1) selected_datapack_id++;
+    current_datapack_id = tags[selected_tag_id].d[selected_datapack_id];
+    // calculate screen
+    datapack_box_on();
+    screen_relation_on();
+    draw_relation_on();
+}

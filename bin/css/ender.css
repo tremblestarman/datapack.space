@@ -1063,7 +1063,7 @@ div#tag_list {
      width: var(--w);
      height: var(--h);
  }
-.tags .tag, .tag-container .tag, div#tag_list .tag {
+.tags .tag, .tag-container .tag, div#tag_list .tag, .head .tag {
     float: left;
     line-height: 8px;
     padding: 4px;
@@ -1087,11 +1087,38 @@ div#tag_list .tag {
     top: var(--t);
     transform: scale(var(--s));
 }
-div#tag_list .tag.transparent {
+div#tag_list.transparent .tag {
     opacity: 0.5;
+}
+div#tag_list.transparent .tag.related {
+    opacity: 1;
 }
 canvas#canvas {
     position: absolute;
+}
+div#datapack_box {
+    --t: 0px;
+    top: var(--t);
+    left: 25%;
+    position: absolute;
+    width: 50%;
+}
+div#datapack_box .head {
+    height: 32px;
+}
+.head .left {
+    width: 0;
+    height: 0;
+    border-right: 10px solid #ccc;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+}
+.head .right {
+    width: 0;
+    height: 0;
+    border-left: 10px solid #cccf;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
 }
 .tag:hover {
     cursor: pointer;
