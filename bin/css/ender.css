@@ -1055,14 +1055,6 @@ input.search:focus {
     width: 276px;
     height: 40px;
 }
-div#tag_list {
-     --w: 0px;
-     --h: 0px;
-     position: absolute;
-     overflow: hidden;
-     width: var(--w);
-     height: var(--h);
- }
 .tags .tag, .tag-container .tag, div#tag_list .tag, .head .tag {
     float: left;
     line-height: 8px;
@@ -1070,55 +1062,6 @@ div#tag_list {
     margin-left: 5px;
     margin-top: 10px;
     font-size: 12px;
-}
-div#tag_list .tag {
-    --l: 0px;
-    --t: 0px;
-    --w: 0px;
-    --h: 0px;
-    --s: 1;
-    margin-left: 0;
-    margin-top: 0;
-    position: absolute;
-    text-align: center;
-    transform-origin: 0 0;
-    opacity: 1;
-    left: var(--l);
-    top: var(--t);
-    transform: scale(var(--s));
-}
-div#tag_list.transparent .tag {
-    opacity: 0.5;
-}
-div#tag_list.transparent .tag.related {
-    opacity: 1;
-}
-canvas#canvas {
-    position: absolute;
-}
-div#datapack_box {
-    --t: 0px;
-    top: var(--t);
-    left: 25%;
-    position: absolute;
-    width: 50%;
-}
-div#datapack_box .head {
-    height: 32px;
-}
-.head .left {
-    width: 0;
-    height: 0;
-    border-right: 10px solid #ccc;
-    border-top: 10px solid transparent;
-    border-bottom: 10px solid transparent;
-}
-.head .right {
-    width: 0;
-    height: 0;
-    border-left: 10px solid #cccf;
-    border-top: 10px solid transparent;
-    border-bottom: 10px solid transparent;
 }
 .tag:hover {
     cursor: pointer;
@@ -1474,7 +1417,7 @@ hide_a:hover {
 .datapack-short .tag {
     margin-top: 8px;
 }
-.datapack-short ._goto {
+.datapack-short ._goto, .title ._goto {
     position: relative;
     background-image: url("../img/css/ender_pearl.png");
     width: 32px;
@@ -1578,6 +1521,114 @@ hide_a:hover {
 .tag-unique .synonymous .tags .tag {
     margin-top: 0;
 }
+div#tag_list {
+    --w: 0px;
+    --h: 0px;
+    position: absolute;
+    overflow: hidden;
+    width: var(--w);
+    height: var(--h);
+}
+div#tag_list .tag {
+    --l: 0px;
+    --t: 0px;
+    --w: 0px;
+    --h: 0px;
+    --s: 1;
+    margin-left: 0;
+    margin-top: 0;
+    position: absolute;
+    text-align: center;
+    transform-origin: 0 0;
+    opacity: 1;
+    left: var(--l);
+    top: var(--t);
+    transform: scale(var(--s));
+}
+div#tag_list.transparent .tag {
+    opacity: 0.5;
+}
+div#tag_list.transparent .tag.related {
+    opacity: 1;
+}
+.tag.center {
+    color: #ccc;
+}
+canvas#canvas {
+    position: absolute;
+}
+div#datapack_box {
+    --t: 0px;
+    top: var(--t);
+    left: 25%;
+    position: absolute;
+    width: 50%;
+}
+div#datapack_box .head {
+    height: 32px;
+}
+div#datapack_box>.head>.tag {
+    float: left;
+}
+div#datapack_box>.head>.info {
+    float: right;
+    margin: 8px 5px;
+    color: rgba(103, 33, 103, 0.75);
+    text-shadow: 0 0 5px rgba(103, 33, 103, 0.75);
+}
+div#datapack_box>.head>.left {
+    width: 0;
+    height: 0;
+    float: left;
+    margin-top: 10px;
+    border-right: 10px solid rgba(144,101,144, 0.6);
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+}
+div#datapack_box>.head>.right {
+    width: 0;
+    height: 0;
+    float: right;
+    margin-top: 10px;
+    border-left: 10px solid rgba(144,101,144, 0.6);
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    transition: all 0.5s;
+    -moz-transition: all 0.5s;
+    -webkit-transition: all 0.5s;
+    -o-transition: all 0.5s;
+}
+div#datapack_box>.head>.left:hover, div#datapack_box>.head>.right:hover {
+    cursor: pointer;
+    border-left: 10px solid rgba(102 ,64 ,102, 0.6);
+}
+div#datapack_box .title {
+    display: flex;
+    justify-content: space-between;
+    height: 32px;
+    width: 100%;
+}
+div#datapack_box>.title>.name {
+    height: 32px;
+    line-height: 32px;
+    margin-left: 32px;
+    width: calc(100% - 64px);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgba(144, 72, 144, 0.75);
+    text-shadow: 0 0 5px rgba(103, 33, 103, 0.75);
+}
+div#datapack_box .cover {
+    height: 128px;
+    margin-left: 25%;
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+}
 /* Language */
 .languages {
     display: flex;
@@ -1600,6 +1651,9 @@ hide_a:hover {
     color: #804080;
     text-shadow: 0 0 12px rgba(32,32,32,0.9);
     transition: all 0.5s;
+    -moz-transition: all 0.5s;
+    -webkit-transition: all 0.5s;
+    -o-transition: all 0.5s;
 }
 .languages .language:hover {
     font-size: 28px;
@@ -2233,7 +2287,7 @@ hide_a:hover {
     .datapack-short .tag {
         margin-top: 8px;
     }
-    .datapack-short ._goto {
+    .datapack-short ._goto, .title ._goto {
         display: none;
     }
     /* Tag */

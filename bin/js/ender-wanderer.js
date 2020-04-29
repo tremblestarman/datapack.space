@@ -293,7 +293,8 @@ function Animation() {
 window.requestAnimationFrame(Animation);
 
 // Interaction
-let current_tag_uid = "", selected_tag_id = 0, current_datapack_id = 0, selected_datapack_id = 0;
+let current_tag_uid = "", selected_tag_content = "", selected_tag_id = 0,
+    current_datapack_id = 0, selected_datapack_id = 0;
 function jump_tag(id) {
     if (current_tag_uid === id) { // double clicked, jump
         let params = getQueryObject();
@@ -302,15 +303,12 @@ function jump_tag(id) {
         location.href = url;
         return;
     }
-    // reset current related tags
-    for (let i = 0; i < datapacks[current_datapack_id]._t.length; i++) {
-        let _i = datapacks[current_datapack_id]._t[i];
-        if (_i >= progress) break;
-        tag_list.children[_i].classList.remove("related");
-    }
+    reset_related()
     // set current tag
     current_tag_uid = id;
     selected_tag_id = statistic[event.currentTarget.textContent];
+    selected_tag_content = event.currentTarget.textContent;
+    tag_list.children[selected_tag_id].classList.add("center");
     current_datapack_id = tags[selected_tag_id].d[0];
     selected_datapack_id = 0
     // calculate screen
@@ -318,29 +316,48 @@ function jump_tag(id) {
     screen_relation_on();
     draw_relation_on();
 } // click tag
+function reset_related() {
+    for (let i = 0; i < datapacks[current_datapack_id]._t.length; i++) {
+        let _i = datapacks[current_datapack_id]._t[i];
+        if (_i >= progress) break;
+        tag_list.children[_i].classList.remove("related");
+    }
+    tag_list.children[selected_tag_id].classList.remove("center");
+} // reset current related tags
 function datapack_box_on() {
     let datapack_id = tags[selected_tag_id].d[selected_datapack_id];
     while(datapack_box.hasChildNodes()) datapack_box.removeChild(datapack_box.firstChild); // clear datapack box
     let title = document.createElement("div"), cover = document.createElement("div"),
         _tags = datapacks[current_datapack_id].t.cloneNode(true);
     let name = document.createElement("div"), goto = document.createElement("div");
-    let head = document.createElement("div"), info = document.createElement("info"),
-        left = document.createElement("div"), right = document.createElement("div");
+    let head = document.createElement("div"), info = document.createElement("span"),
+        left = document.createElement("span"), right = document.createElement("span");
     // head
     head.classList.add("head"); info.classList.add("info"); left.classList.add("left"); right.classList.add("right");
     info.textContent = (selected_datapack_id + 1) + " | " + tags[selected_tag_id].d.length;
     left.setAttribute("onclick", "turn_left(true);"); right.setAttribute("onclick", "turn_left(false);");
     if (selected_datapack_id > 0) head.appendChild(left);
     head.appendChild(tags[selected_tag_id].r.cloneNode(true));
-    head.appendChild(info);
     if (selected_datapack_id < tags[selected_tag_id].d.length - 1) head.appendChild(right);
+    head.appendChild(info);
     // name
     title.classList.add("title"); cover.classList.add("cover");
     name.textContent = datapacks[datapack_id].n;
-    name.setAttribute("onclick", "jump_datapack('" + datapacks[datapack_id].n + "')")
+    name.setAttribute("onclick", "jump_datapack('" + datapacks[datapack_id].u + "')")
     name.classList.add("name"); goto.classList.add("_goto"); goto.classList.add("mask-attach");
+    goto.setAttribute("onclick", "jump_datapack('" + datapacks[datapack_id].u + "')")
     title.appendChild(name); title.appendChild(goto);
+    // cover
+    let img = document.createElement("img")
+    img.setAttribute("src", "/bin/img/cover/" + datapacks[datapack_id].u + ".png");
+    cover.appendChild(img);
     // append
+    for(let j = _tags.children.length - 1; j >= 0; j--) {
+        if (_tags.children[j].classList.contains("tag-0") || _tags.children[j].classList.contains("tag-1")) {
+            _tags.removeChild(_tags.children[j]);
+        }
+        if (_tags.children[j].textContent === selected_tag_content) _tags.children[j].classList.add("center");
+    }
     datapack_box.appendChild(head); datapack_box.appendChild(title); datapack_box.appendChild(cover); datapack_box.appendChild(_tags);
 }// update datapack box
 function screen_relation_on() {
@@ -391,17 +408,14 @@ function draw_relation_on() {
 document.addEventListener("click", function (e) {
     if (e.target === tag_list) {
         // reset current related tags
-        for (let i = 0; i < datapacks[current_datapack_id]._t.length; i++) {
-            let _i = datapacks[current_datapack_id]._t[i];
-            if (_i >= progress) break;
-            tag_list.children[_i].classList.remove("related");
-        }
+        reset_related()
         current_tag_uid = ""; selected_tag_id = 0; current_datapack_id = 0;
         draw_relation_on();
         datapack_box.style.display = "none";
     }
 }) // cancel select
 function turn_left(isLeft) {
+    reset_related()
     if (isLeft && selected_datapack_id > 0) selected_datapack_id--;
     else if (selected_datapack_id < tags[selected_tag_id].d.length - 1) selected_datapack_id++;
     current_datapack_id = tags[selected_tag_id].d[selected_datapack_id];
