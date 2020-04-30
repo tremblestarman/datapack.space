@@ -74,6 +74,7 @@
                     |   when new datapack occurs and old one is deleted, record.
                     |   4 column: 'id', 'link', 'operate' (+ or -), 'date'.
                     |___________________________________________________________
+[B] Being banned from google but datapack is also affected
 - WEB Bugs & Features
                 √ [B] incorrect synonymous tag
                     |   synonymous tags do not show.
@@ -199,9 +200,9 @@
                     |   √ mark authorized post.
                     |   √ raw sql. (only 'select')
                     |_______________________________________________________________________________________
-[F] Wandering (a datapack-seeking function)
-    |   3d flexibly link tag with other tags and showing the most relevant datapack.
-    |_______________________________________________________________________________
+                √ [F] Wandering (a datapack-seeking function)
+                    |   3d flexibly link tag with other tags and showing the most relevant datapack.
+                    |_______________________________________________________________________________
                 √ [F] Database Backup
 [F] Docs (development and protocol)
 [F] A secure way to authorize, combine and correct

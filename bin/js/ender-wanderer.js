@@ -1,6 +1,6 @@
 let statistic = {}, // name -> id
     tags = [],      // { c: count, r: raw html, s: sub node count, k: arc_tan of height and width, p: placement { x, y, r, s }, d: [] } (sort by count)
-    datapacks = [], // { n: name, u: uid, t: raw tags, _t: id list of tags }
+    datapacks = [], // { n: name, u: uid, c: cover exists, t: raw tags, _t: id list of tags }
     relations = []; // []{ c: relation count, w: summary of weight} relation table
 let sum = 0, tag_raw_height = 0,// amount of tags
     root = null, tags_old = null; // root node
@@ -46,6 +46,7 @@ Array.prototype.forEach.call(document.querySelectorAll('.datapack-short'), funct
     datapacks.push({
         n: d.children[0].textContent,
         u: d.children[0].id,
+        c: d.children[0].getAttribute("cover-exist"),
         t: d.children[1],
         _t: []
     });
@@ -106,7 +107,7 @@ for (let i = sum - 1; i >= 0; i--) {
 Array.prototype.forEach.call(document.querySelectorAll('.tag-unique'), function (e) {
     root = e.parentNode;
     tags_old = e;
-}); // remove all
+}); // select root
 let canvas = document.createElement("canvas")
 let tag_list = document.createElement("div")
 canvas.id = "canvas";
@@ -118,11 +119,9 @@ datapack_box.id = "datapack_box"; // add datapacks panel
 document.body.appendChild(datapack_box);
 
 // Draw
-let progress = 0;
-root.removeChild(tags_old);
+let progress = 0, enable_wandering = false;
+let isMobile = (window.screen.width <= 600 || window.screen.width >= 2160);
 let off_height = document.getElementById("navi").offsetHeight + root.offsetHeight;
-canvas.width = document.documentElement.clientWidth;
-canvas.height = document.documentElement.clientHeight - off_height;
 let ctx = canvas.getContext("2d"),
     cx = document.documentElement.clientWidth / 2, cy = (document.documentElement.clientHeight - off_height) / 2, // client screen
     _cx = 0, _cy = 0,
@@ -288,15 +287,18 @@ function Animation() {
     scale = Math.min( cx / _dx * 2, cy / _dy * 2);
     if (onSubScreenChanged())
         update(progress - 1);
-    window.requestAnimationFrame(Animation);
+    if (enable_wandering)
+        window.requestAnimationFrame(Animation);
 }
-window.requestAnimationFrame(Animation);
+canvas.style.display = "none";
+tag_list.style.display = "none";
+datapack_box.style.display = "none";
 
 // Interaction
 let current_tag_uid = "", selected_tag_content = "", selected_tag_id = 0,
     current_datapack_id = 0, selected_datapack_id = 0;
 function jump_tag(id) {
-    if (current_tag_uid === id) { // double clicked, jump
+    if (current_tag_uid === id || !enable_wandering) { // double clicked, jump
         let params = getQueryObject();
         let url = window.location.protocol + "//" + window.location.host + "/tag/" + id;
         if (params.hasOwnProperty('language')) url += "?language=" + params['language'];
@@ -348,8 +350,9 @@ function datapack_box_on() {
     goto.setAttribute("onclick", "jump_datapack('" + datapacks[datapack_id].u + "')")
     title.appendChild(name); title.appendChild(goto);
     // cover
-    let img = document.createElement("img")
-    img.setAttribute("src", "/bin/img/cover/" + datapacks[datapack_id].u + ".png");
+    let img = document.createElement("img"), img_url = "/bin/img/cover/" + datapacks[datapack_id].u + ".png";
+    img.setAttribute("src", img_url);
+    img.setAttribute("onerror", "set_default_cover();");
     cover.appendChild(img);
     // append
     for(let j = _tags.children.length - 1; j >= 0; j--) {
@@ -378,6 +381,7 @@ function screen_relation_on() {
     scale = Math.min( cx / _dx * 2, cy / _dy * 2);
     datapack_box.style.display = null;
     datapack_box.style.setProperty("--t", document.documentElement.clientHeight + "px");
+    tag_list.children[selected_tag_id].classList.add("center"); // set center
 } // select all related tags, then update screen size and place datapack box
 function draw_relation_on() {
     canvas.width = document.documentElement.clientWidth;
@@ -402,6 +406,7 @@ function draw_relation_on() {
         ctx.beginPath();
         ctx.moveTo(Number(ct.style.getPropertyValue("--l").replace("px","")), Number(ct.style.getPropertyValue("--t").replace("px","")));
         ctx.lineTo(Number(cl.style.getPropertyValue("--l").replace("px","")), Number(cl.style.getPropertyValue("--t").replace("px","")));
+        if (isMobile) ctx.lineWidth = 2;
         ctx.stroke();
     } // link all related tags
 } // draw relations between all selected tags
@@ -423,4 +428,7 @@ function turn_left(isLeft) {
     datapack_box_on();
     screen_relation_on();
     draw_relation_on();
+}
+function set_default_cover() {
+    event.currentTarget.src = "/bin/img/css/datapack_default.png";
 }

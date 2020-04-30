@@ -1584,6 +1584,10 @@ div#datapack_box>.head>.left {
     border-right: 10px solid rgba(144,101,144, 0.6);
     border-top: 10px solid transparent;
     border-bottom: 10px solid transparent;
+    transition: all 0.5s;
+    -moz-transition: all 0.5s;
+    -webkit-transition: all 0.5s;
+    -o-transition: all 0.5s;
 }
 div#datapack_box>.head>.right {
     width: 0;
@@ -1598,7 +1602,11 @@ div#datapack_box>.head>.right {
     -webkit-transition: all 0.5s;
     -o-transition: all 0.5s;
 }
-div#datapack_box>.head>.left:hover, div#datapack_box>.head>.right:hover {
+div#datapack_box>.head>.left:hover {
+    cursor: pointer;
+    border-right: 10px solid rgba(102 ,64 ,102, 0.6);
+}
+div#datapack_box>.head>.right:hover {
     cursor: pointer;
     border-left: 10px solid rgba(102 ,64 ,102, 0.6);
 }
@@ -1610,10 +1618,12 @@ div#datapack_box .title {
 }
 div#datapack_box>.title>.name {
     height: 32px;
+    font-size: 24px;
     line-height: 32px;
     margin-left: 32px;
     width: calc(100% - 64px);
     text-align: center;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     color: rgba(144, 72, 144, 0.75);
@@ -1628,6 +1638,28 @@ div#datapack_box .cover {
     align-items: center;
     white-space: nowrap;
     overflow: hidden;
+}
+.wanderer {
+    position: relative;
+    background-image: url("../img/css/ender_eye.png");
+    width: 32px;
+    height: 32px;
+    left: 0;
+    opacity: 0.5;
+    float: right;
+    transition: opacity 0.5s;
+    -moz-transition: opacity 0.5s;
+    -webkit-transition: opacity 0.5s;
+    -o-transition: opacity 0.5s;
+    z-index: 1000;
+}
+.wanderer:hover {
+    cursor: pointer;
+    opacity: 0.75;
+}
+.wandering {
+    opacity: 0.3;
+    background-image: url("../img/css/ender_eye_1.png");
 }
 /* Language */
 .languages {
@@ -2179,7 +2211,7 @@ div#datapack_box .cover {
         width: 432px;
         height: 80px;
     }
-    .tags .tag, .tag-container .tag {
+    .tags .tag, .tag-container .tag, div#tag_list .tag, .head .tag {
         padding: 8px;
         margin-left: 10px;
         margin-top: 24px;
@@ -2311,6 +2343,50 @@ div#datapack_box .cover {
         height: 40px;
         line-height: 40px;
         font-size: 20px;
+    }
+    div#tag_list .tag {
+        margin-left: 0;
+        margin-top: 0;
+    }
+    div#datapack_box {
+        left: 10%;
+        width: 80%;
+    }
+    div#datapack_box>.head>.info {
+        margin: 16px 15px;
+        font-size: 32px;
+    }
+    div#datapack_box>.head>.left {
+        margin-top: 20px;
+        border-right: 20px solid rgba(144,101,144, 0.6);
+        border-top: 20px solid transparent;
+        border-bottom: 20px solid transparent;
+    }
+    div#datapack_box>.head>.right {
+        margin-top: 20px;
+        border-left: 20px solid rgba(144,101,144, 0.6);
+        border-top: 20px solid transparent;
+        border-bottom: 20px solid transparent;
+    }
+    div#datapack_box>.head>.tag {
+        float: left;
+        margin-top: 18px;
+        height: 20px;
+        line-height: 20px;
+    }
+    div#datapack_box .title {
+        height: 64px;
+    }
+    div#datapack_box>.title>.name {
+        height: 64px;
+        font-size: 36px;
+    }
+    div#datapack_box .cover {
+        height: 256px;
+    }
+    .wanderer {
+        transform-origin: top right;
+        transform: scale(2);
     }
     /* Language */
     .languages {

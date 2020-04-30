@@ -447,6 +447,9 @@ class datapack_db:
                     self.retry_list.append(info)
                     print('skipped :', info['link'], ', then retry in the next turn.')
                 except Exception as e:
+                    did = uuid.uuid3(uuid.NAMESPACE_DNS, info['link']) # generate did
+                    if did in self._datapack_removal:
+                        self._datapack_removal.remove(did) # do not wrongly delete datapack with error
                     print('cannot handle this problem. please check \'/util/err/database.err\'')
                     self.LOG.log('database', e, link=info['link'])
         if self.retry_list.__len__() > 0:

@@ -1,5 +1,6 @@
 {{define "default/tag.html"}}
     {{template "default/header" .}}
+    <div id="w_switcher" class="wanderer" onclick="wander_switcher()" title="{{template "default/wander_on_msg"}}"></div>
     <div class="tag-unique" style="--pillar: rgb(91, 63, 91);--pillar-shadow: rgba(106, 66, 106, 0.74);">
         <div class="pillar left"></div>
         <div class="pillar right"></div>
@@ -47,10 +48,44 @@
     </div>
     <script src="/bin/js/ender-wanderer.js"></script>
     <script src="/bin/js/particles.js"></script>
-    <link rel="stylesheet" href="/bin/css/ender.css" type="text/css"/>
     <script>
         particlesJS.load('background', '/bin/js/mist-chorus.json', function() {
             console.log('particles.js config loaded');
         });
+        let switcher = document.getElementById("w_switcher"), utter = switcher.parentNode;
+        utter.removeChild(switcher)
+        utter.parentNode.insertBefore(switcher, utter);
+        function wander_switcher() {
+            if (switcher.classList.contains("wandering")) {
+                switcher.classList.remove("wandering");
+                to_normal();
+            } else {
+                switcher.classList.add("wandering");
+                to_wanderer();
+            }
+        }
+        function to_normal() {
+            // reset current related tags
+            reset_related()
+            current_tag_uid = ""; selected_tag_id = 0; current_datapack_id = 0;
+            draw_relation_on();
+            canvas.style.display = "none";
+            tag_list.style.display = "none";
+            datapack_box.style.display = "none";
+            tags_old.style.display = null;
+            switcher.title = "{{template "default/wander_on_msg"}}";
+            enable_wandering = false;
+        }
+        function to_wanderer() {
+            // reset current related tags
+            canvas.style.display = null;
+            tag_list.style.display = null;
+            datapack_box.style.display = null;
+            tags_old.style.display = "none";
+            switcher.title = "{{template "default/wander_off_msg"}}";
+            off_height = document.getElementById("navi").offsetHeight + root.offsetHeight // offset height is required
+            enable_wandering = true;
+            window.requestAnimationFrame(Animation);
+        }
     </script>
 {{end}}
