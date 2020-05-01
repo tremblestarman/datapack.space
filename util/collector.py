@@ -94,6 +94,7 @@ class datapack_collector:
     async_count = 32
     retry = 2
     LOG = logger()
+    schema_err = False
     def __init__(self, schema, refill = False):
         '''
         Args:
@@ -373,8 +374,10 @@ class datapack_collector:
                         break
                     except Exception as _e:
                         print('post find error :', _e)
-                print('attempted but still have error. please check \'/util/err/schema.err\'')
-                self.LOG.log('schema', e, schema=self.schema['id'])
+                        if i == 5:
+                            print('attempted but still have error. please check \'/util/err/schema.err\'')
+                            self.LOG.log('schema', _e, schema=self.schema['id'])
+                            self.schema_err = True
         elif self.schema['scan']['type'] == 'selenium':
             def selenium_start(driver):
                 page = 1
@@ -450,8 +453,10 @@ class datapack_collector:
                     except Exception as _e:
                         driver.quit()
                         print('selenium error :', _e)
-                print('attempted but still have error. please check \'/util/err/schema.err\'')
-                self.LOG.log('schema', e, schema=self.schema['id'])
+                        if i == 5:
+                            print('attempted but still have error. please check \'/util/err/schema.err\'')
+                            self.LOG.log('schema', _e, schema=self.schema['id'])
+                            self.schema_err = True
             driver.quit()
             if self.schema['scan']['display'] == 'virtual':
                 display.stop()
