@@ -429,17 +429,16 @@ class datapack_db:
         for i in range(0, info_list.__len__()):
             print(str(i + 1), '/', str(info_list.__len__()), ':', info_list[i]['link'], '.')
             info = info_list[i]
+            did = uuid.uuid3(uuid.NAMESPACE_DNS, info['link']) # generate did
+            if did in self._datapack_removal:
+                self._datapack_removal.remove(did) # prevent wrongly deleting datapack with error
             if interrupt:
-                did = self._datapack_insert(info)
-                if did in self._datapack_removal:
-                    self._datapack_removal.remove(did)
+                self._datapack_insert(info)
                 self.db.commit()
                 print(did, ':', info['link'], 'has been imported into database successfully.')
             else:
                 try:
-                    did = self._datapack_insert(info)
-                    if did in self._datapack_removal:
-                        self._datapack_removal.remove(did)
+                    self._datapack_insert(info)
                     self.db.commit()
                     print(did, ':', info['link'], 'has been imported into database successfully.')
                 except FunctionTimedOut as e: # if timeout occurs, retry
@@ -447,9 +446,6 @@ class datapack_db:
                     self.retry_list.append(info)
                     print('skipped :', info['link'], ', then retry in the next turn.')
                 except Exception as e:
-                    did = uuid.uuid3(uuid.NAMESPACE_DNS, info['link']) # generate did
-                    if did in self._datapack_removal:
-                        self._datapack_removal.remove(did) # prevent wrongly deleting datapack with error
                     print('cannot handle this problem. please check \'/util/err/database.err\'')
                     self.LOG.log('database', e, link=info['link'])
         if self.retry_list.__len__() > 0:
