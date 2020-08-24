@@ -6,13 +6,14 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 versions = set()
 sources = []
 DB = datapack_db()
-enable_delete = True
+err_occur = False
+enable_delete = False
 
 for schema in os.listdir(BASE_DIR + '/util/schema'):
     # crawl and insert
     DC = datapack_collector(BASE_DIR + '/util/schema/' + schema, refill=True)
     if DC.schema_err:
-        enable_delete = False
+        err_occur = True
     while DC.post_pool.__len__() > 0:
         DC.analyze_all()
         print('==== start import ====')
@@ -26,9 +27,9 @@ for schema in os.listdir(BASE_DIR + '/util/schema'):
     sources.append(DC.schema['id'])
     del DC
 # delete recordis that do not exist
-if enable_delete:
+if not err_occur and enable_delete:
     DB.info_delete_nonexistent()
-else:
+elif err_occur:
     print('skipped deletion because schema error occurs.')
 
 # update sources and versions

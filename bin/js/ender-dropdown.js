@@ -89,6 +89,9 @@ document.addEventListener('click', function(e) {
             let menu = target;
             if(!menu.classList.contains('open')) {
                 menu.classList.add('open');
+                let val = menu.style.getPropertyValue('--t');
+                menu.setAttribute('temp-t', val);
+                menu.style.setProperty('--t', '28px');
             }
             break;
         }
@@ -103,6 +106,7 @@ document.addEventListener('click', function(e) {
                 selected = select.children[select.selectedIndex],
                 index = get_index(li) - 1;
             menu.style.setProperty('--t', index * -36 + 'px');
+            menu.setAttribute('temp-t', index * -36 + 'px');
             selected.selected = false;
             select.children[index].selected = true;
             menu.classList.add(index > get_index(selected) - 1 ? 'tilt-down' : 'tilt-up');
@@ -119,6 +123,8 @@ document.addEventListener('click', function(e) {
     Array.prototype.forEach.call(menus, function(menu) {
         if (!menu.contains(e.target)) {
             menu.classList.remove('open');
+            if (menu.hasAttribute('temp-t')) menu.style.setProperty('--t', menu.getAttribute('temp-t'));
+            menu.removeAttribute('temp-t');
         }
     });
 }, false);

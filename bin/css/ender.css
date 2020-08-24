@@ -1581,7 +1581,7 @@ div#datapack_box>.head>.left {
     height: 0;
     float: left;
     margin-top: 10px;
-    border-right: 10px solid rgba(144,101,144, 0.6);
+    border-right: 10px solid rgba(160, 160, 160, 0.6);
     border-top: 10px solid transparent;
     border-bottom: 10px solid transparent;
     transition: all 0.5s;
@@ -1594,7 +1594,7 @@ div#datapack_box>.head>.right {
     height: 0;
     float: right;
     margin-top: 10px;
-    border-left: 10px solid rgba(144,101,144, 0.6);
+    border-left: 10px solid rgba(160, 160, 160, 0.6);
     border-top: 10px solid transparent;
     border-bottom: 10px solid transparent;
     transition: all 0.5s;
@@ -1626,7 +1626,7 @@ div#datapack_box>.title>.name {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: rgba(144, 72, 144, 0.75);
+    color: rgba(216, 216, 216, 0.75);
     text-shadow: 0 0 5px rgba(103, 33, 103, 0.75);
 }
 div#datapack_box .cover {
@@ -2358,13 +2358,13 @@ div#datapack_box .cover {
     }
     div#datapack_box>.head>.left {
         margin-top: 20px;
-        border-right: 20px solid rgba(144,101,144, 0.6);
+        border-right: 20px solid rgba(160, 160, 160, 0.6);
         border-top: 20px solid transparent;
         border-bottom: 20px solid transparent;
     }
     div#datapack_box>.head>.right {
         margin-top: 20px;
-        border-left: 20px solid rgba(144,101,144, 0.6);
+        border-left: 20px solid rgba(160, 160, 160, 0.6);
         border-top: 20px solid transparent;
         border-bottom: 20px solid transparent;
     }
