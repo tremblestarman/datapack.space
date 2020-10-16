@@ -15,6 +15,7 @@ from util.err import logger
 filterwarnings('ignore',category=pymysql.Warning)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 socket.setdefaulttimeout(30)
+DISABLE_TRANSLATE = False
 class translator:
     '''
     The Translator.
@@ -25,12 +26,15 @@ class translator:
         timeout:
             Duration of sleep.
     '''
-    limit = 50
+    limit = 25
     current_time = 0
-    timeout = 60
+    timeout = 90
     trans = Translator(service_urls=['translate.google.cn'])
     LOG = logger()
     def translate(self, text: str, lang: str):
+        global DISABLE_TRANSLATE
+        if DISABLE_TRANSLATE:
+            return text
         if self.current_time >= self.limit:
             print('sleep to prevent being banned. (wait 1 minute')
             time.sleep(self.timeout)

@@ -2,7 +2,7 @@ bs4
 cryptography
 emoji
 func_timeout
-googletrans
+googletrans==2.4.0
 lxml
 pymysql
 pyvirtualdisplay
