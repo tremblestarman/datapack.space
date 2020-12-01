@@ -15,7 +15,7 @@ from util.err import logger
 filterwarnings('ignore',category=pymysql.Warning)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 socket.setdefaulttimeout(30)
-DISABLE_TRANSLATE = False
+DISABLE_TRANSLATE = True
 class translator:
     '''
     The Translator.
@@ -88,6 +88,103 @@ class datapack_db:
     retry_list = [] # retry buffer
     LOG = logger()
     _datapack_removal = [] # to remove
+    def rebuild_db(self):
+        self.cur.execute('drop table if exists datapack_tags;') # delete relation table and rebuild it
+        datapack_info = f'''create table if not exists datapacks
+        (
+            id VARCHAR(36) NOT NULL,
+            link VARCHAR(255) NOT NULL,
+            author_id VARCHAR(36) NOT NULL,
+            intro TEXT NOT NULL,
+            full_content MEDIUMTEXT NOT NULL,
+            default_lang TINYTEXT,
+            default_lang_id TINYTEXT,
+            {' '.join([f"name_{k.replace('-','_')} TINYTEXT," for k, _ in self.languages.items()])}
+            default_name TINYTEXT,
+            source TEXT NOT NULL,
+            post_time DATETIME,
+            update_time DATETIME,
+            thumb INT DEFAULT 0,
+            PRIMARY KEY (id),
+            FOREIGN KEY (author_id) REFERENCES authors(id),
+            UNIQUE (link)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
+        tag_info = f'''create table if not exists tags
+        (
+            id VARCHAR(36) NOT NULL,
+            default_lang TINYTEXT,
+            default_lang_id TINYTEXT,
+            {' '.join([f"tag_{k.replace('-','_')} TINYTEXT," for k, _ in self.languages.items()])}
+            default_tag TINYTEXT NOT NULL,
+            quotation INT DEFAULT 1,
+            type INT NOT NULL,
+            thumb INT DEFAULT 0,
+            PRIMARY KEY (id),
+            UNIQUE (id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
+        author_info = '''create table if not exists authors
+        (
+            id VARCHAR(36) NOT NULL,
+            author_uid VARCHAR(32) NOT NULL,
+            author_name TINYTEXT NOT NULL,
+            avatar TEXT,
+            thumb INT DEFAULT 0,
+            PRIMARY KEY (id),
+            UNIQUE (author_uid)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
+        datapack_tag = '''create table if not exists datapack_tags
+        (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            datapack_id VARCHAR(36) NOT NULL,
+            tag_id VARCHAR(36) NOT NULL,
+            PRIMARY KEY (id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
+        datapack_related = '''create table if not exists datapacks_related
+        (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            datapack_id VARCHAR(36) NOT NULL,
+            related TEXT,
+            PRIMARY KEY (id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
+        author_related = '''create table if not exists authors_related
+        (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            author_id VARCHAR(36) NOT NULL,
+            related TEXT,
+            PRIMARY KEY (id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
+        datapack_log = '''create table if not exists datapacks_log
+        (
+            id VARCHAR(36) NOT NULL, link TEXT, operate VARCHAR(4), date DATETIME,
+            INDEX datapacks_log_id_i (id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
+        datapack_ii_queue = '''create table if not exists datapacks_ii_queue
+        (
+            id VARCHAR(36) NOT NULL, operate VARCHAR(4),
+            INDEX datapacks_ii_queue_id_i (id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
+        self.cur.execute(tag_info) # create tables
+        self.cur.execute(author_info)
+        self.cur.execute(datapack_info)
+        self.cur.execute(datapack_tag)
+        self.cur.execute(datapack_related)
+        self.cur.execute(author_related)
+        self.cur.execute(datapack_log)
+        self.cur.execute(datapack_ii_queue)
+        print('rebuilt.')
+        def alter(table: str, col: str, type: str): # add colums
+            for k, _ in self.languages.items():
+                operated = True
+                try:
+                    add_col = f'''ALTER TABLE {table} ADD {col}_{k.replace('-','_')} {type};'''
+                    self.cur.execute(add_col)
+                except:
+                    operated = False
+                if operated:
+                    print(f'{table} added "', k.replace('-', '_'), f'" of colum {col}')
+        alter('datapacks', 'name', 'TINYTEXT')
+        alter('tags', 'tag', 'TINYTEXT')
+        self.cur.execute('update tags set quotation = 0;') # reset quotation
     def __init__(self, rebuild = True):
         '''
         Connect and Preload.
@@ -109,108 +206,15 @@ class datapack_db:
                 self.authlist = json.loads(f.read())
             self.cur = self.db.cursor()
             self.cur.execute('show databases;') # initialize database
-            if not ('datapack_collection',) in self.cur.fetchall():
+            dbs = self.cur.fetchall()
+            if not ('datapack_collection',) in dbs:
                 self.cur.execute('create database datapack_collection;')
-            self.cur.execute('use datapack_collection;')
-            if not rebuild:
-                print('connect successfully')
-                return
-            self.cur.execute('drop table if exists datapack_tags;') # delete relation table and rebuild it
-            datapack_info = f'''create table if not exists datapacks
-            (
-                id VARCHAR(36) NOT NULL,
-                link VARCHAR(255) NOT NULL,
-                author_id VARCHAR(36) NOT NULL,
-                intro TEXT NOT NULL,
-                full_content MEDIUMTEXT NOT NULL,
-                default_lang TINYTEXT,
-                default_lang_id TINYTEXT,
-                {' '.join([f"name_{k.replace('-','_')} TINYTEXT," for k, _ in self.languages.items()])}
-                default_name TINYTEXT,
-                source TEXT NOT NULL,
-                post_time DATETIME,
-                update_time DATETIME,
-                thumb INT DEFAULT 0,
-                PRIMARY KEY (id),
-                FOREIGN KEY (author_id) REFERENCES authors(id),
-                UNIQUE (link)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
-            tag_info = f'''create table if not exists tags
-            (
-                id VARCHAR(36) NOT NULL,
-                default_lang TINYTEXT,
-                default_lang_id TINYTEXT,
-                {' '.join([f"tag_{k.replace('-','_')} TINYTEXT," for k, _ in self.languages.items()])}
-                default_tag TINYTEXT NOT NULL,
-                quotation INT DEFAULT 1,
-                type INT NOT NULL,
-                thumb INT DEFAULT 0,
-                PRIMARY KEY (id),
-                UNIQUE (id)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
-            author_info = '''create table if not exists authors
-            (
-                id VARCHAR(36) NOT NULL,
-                author_uid VARCHAR(32) NOT NULL,
-                author_name TINYTEXT NOT NULL,
-                avatar TEXT,
-                thumb INT DEFAULT 0,
-                PRIMARY KEY (id),
-                UNIQUE (author_uid)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
-            datapack_tag = '''create table if not exists datapack_tags
-            (
-                id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                datapack_id VARCHAR(36) NOT NULL,
-                tag_id VARCHAR(36) NOT NULL,
-                PRIMARY KEY (id)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
-            datapack_related = '''create table if not exists datapacks_related
-            (
-                id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                datapack_id VARCHAR(36) NOT NULL,
-                related TEXT,
-                PRIMARY KEY (id)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
-            author_related = '''create table if not exists authors_related
-            (
-                id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                author_id VARCHAR(36) NOT NULL,
-                related TEXT,
-                PRIMARY KEY (id)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
-            datapack_log = '''create table if not exists datapacks_log
-            (
-                id VARCHAR(36) NOT NULL, link TEXT, operate VARCHAR(4), date DATETIME,
-                INDEX datapacks_log_id_i (id)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
-            datapack_ii_queue = '''create table if not exists datapacks_ii_queue
-            (
-                id VARCHAR(36) NOT NULL, operate VARCHAR(4),
-                INDEX datapacks_ii_queue_id_i (id)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'''
-            self.cur.execute(tag_info) # create tables
-            self.cur.execute(author_info)
-            self.cur.execute(datapack_info)
-            self.cur.execute(datapack_tag)
-            self.cur.execute(datapack_related)
-            self.cur.execute(author_related)
-            self.cur.execute(datapack_log)
-            self.cur.execute(datapack_ii_queue)
+            if not ('datapack_collector',) in dbs:
+                self.cur.execute('create database datapack_collector;')
+            self.cur.execute('use datapack_collector;')
+            if rebuild:
+                self.rebuild_db()
             print('connect successfully')
-            def alter(table: str, col: str, type: str): # add colums
-                for k, _ in self.languages.items():
-                    operated = True
-                    try:
-                        add_col = f'''ALTER TABLE {table} ADD {col}_{k.replace('-','_')} {type};'''
-                        self.cur.execute(add_col)
-                    except:
-                        operated = False
-                    if operated:
-                        print(f'{table} added "', k.replace('-', '_'), f'" of colum {col}')
-            alter('datapacks', 'name', 'TINYTEXT')
-            alter('tags', 'tag', 'TINYTEXT')
-            self.cur.execute('update tags set quotation = 0;') # reset quotation
             # preload
             self.cur.execute('select id from datapacks;')
             res = self.cur.fetchall()
@@ -517,6 +521,7 @@ class datapack_db:
             self.cur.execute(f"drop table if exists datapacks_name_{k.replace('-','_')}_ii;")
         print('reseted')
     def __del__(self):
+        # authlist
         try:
             with open(BASE_DIR + '/authlist.json', 'w+', encoding="utf-8") as f: # clear authlist's queue
                 self.authlist['queue']['datapacks'] = []
@@ -525,6 +530,26 @@ class datapack_db:
         except:
             with open(BASE_DIR + '/authlist.json', 'w+', encoding="utf-8") as f: # clear authlist's queue
                 f.write(r'{"auth": {"datapacks": [], "authors": []}, "unauth": [], "queue": {"datapacks": [], "authors": []}}')
+        # migrate
+        self.cur.execute('use datapack_collection;')
+        try:
+            # drop & build
+            self.cur.execute('drop table if exists datapacks, tags, authors, datapack_tags, datapacks_related, authors_related, datapacks_log, datapacks_ii_queue;')
+            self.rebuild_db()
+            # copy
+            tables = ['tags', 'authors', 'datapack_tags', 'datapacks', 'datapacks_related', 'authors_related', 'datapacks_log', 'datapacks_ii_queue']
+            def migrate_table(db1: str, db2: str, table: str):
+                try:
+                    self.cur.execute(f'insert into {db1}.{table} select * from {db2}.{table};')
+                except Exception as e:
+                    print(e)
+                    pass
+            for tb in tables:
+                migrate_table('datapack_collection', 'datapack_collector', tb)
+            print('migrated')
+        except Exception as e:
+             self.LOG.log('database', e, '')
+        self.cur.execute('use datapack_collector;')
         self.db.commit()
         self.db.close()
         print('committed and closed')
