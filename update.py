@@ -42,5 +42,7 @@ with open(BASE_DIR + '/templates/generic/combo.tmpl', 'w+', encoding='utf-8') as
     combo = combo.replace(r'-temp', '')
     tmpl.write(combo)
 
+[DB.cur.execute(f'update tags set type = 0 where default_tag = \'{s}\';') for s in list(sorted(sources))]
+[DB.cur.execute(f'update tags set type = 1 where default_tag = \'{v}\';') for v in list(sorted(versions))]
 versions.clear()
 sources.clear()

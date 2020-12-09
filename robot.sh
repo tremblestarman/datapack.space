@@ -1,5 +1,5 @@
 #!/bin/bash
-$MYSQLPASSWORD = #PASSWORD
+MYSQLPASSWORD=#PASSWORD
 while :
 do
     parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
