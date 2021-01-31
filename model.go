@@ -25,6 +25,7 @@ const (
 	orderByUpdateTimeDesc = "update_time desc"
 	datapackPageCount     = 15
 	tagPageCount          = 100
+	maxDatapackShownInTag = 100
 	authorPageCount       = 24
 	keyWordHighlightHead  = "<span class=\"highlight\">"
 	keyWordHighlightTail  = "</span>"
@@ -365,7 +366,7 @@ func (t Tag) GetSynonymousTag(language string) *[]Tag {
 		Where("tags."+_tag+" = '"+t.Tag+"'").Not("tags.id = ?", t.ID).Find(&tags)
 	return &tags
 }
-func GetTag(language string, id string) *Tag {
+func GetTag(page int, language string, id string) (*Tag, int) {
 	var tags []Tag
 	var sql = db
 	// Set language
@@ -377,13 +378,18 @@ func GetTag(language string, id string) *Tag {
 		Where("tags.id = '" + id + "'"). // Find Tag Id
 		First(&tags)                     // FindOne
 	if len(tags) > 0 && tags[0].Type < 2 { // Got Tag of Source or Version
-		return &(tags[0])
+		return &(tags[0]), -1
 	}
 	// Query
+	if page < 1 {
+		page = 1
+	}
+	var offset, limit = (page - 1) * maxDatapackShownInTag, maxDatapackShownInTag
+	total := 0
 	sql.Model(&Tag{}).
 		Select("distinct tags.*, tags."+tag+" as tag").   // Set Tag in desired language
 		Preload("Datapacks", func(db *gorm.DB) *gorm.DB { // Preload Datapacks
-			return db.Select("*, datapacks." + name + " as name").Order("datapacks.post_time DESC") // Set Datapack Name & Set Order
+			return db.Select("*, datapacks." + name + " as name").Count(&total).Order("datapacks.post_time DESC").Offset(offset).Limit(limit) // Set Datapack Name & Set Order
 		}).
 		Preload("Datapacks.Tags", func(db *gorm.DB) *gorm.DB { // Preload Datapacks.Tags
 			return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag DESC") // Set Tag Name & Set Order
@@ -391,9 +397,9 @@ func GetTag(language string, id string) *Tag {
 		Where("tags.id = '" + id + "'"). // Find Tag Id
 		First(&tags)                     // Find One
 	if len(tags) > 0 {
-		return &(tags[0])
+		return &(tags[0]), total
 	}
-	return nil
+	return nil, -1
 }
 func ListAuthors(page int, author string) (*[]Author, int) {
 	var authors []Author
@@ -583,8 +589,9 @@ func GetRandDatapack(language string) *Datapack {
 func GetRandAuthor(language string) *Author {
 	return GetAuthor(language, GetRandID("authors"))
 }
-func GetRandTag(language string) *Tag {
-	return GetTag(language, GetRandID("tags"))
+func GetRandTag(page int, language string) (*Tag, int) {
+	tag, total := GetTag(page, language, GetRandID("tags"))
+	return tag, total
 }
 
 // Thumb

@@ -74,8 +74,11 @@
                     |   when new datapack occurs and old one is deleted, record.
                     |   4 column: 'id', 'link', 'operate' (+ or -), 'date'.
                     |___________________________________________________________
-[B] Being banned from google but datapack is also affected.
-[B] async of datapacks_tags
+                √ [B] Being banned from google but datapack is also affected.
+                √ [B] async of datapacks_tags
+[B] googletrans broke
+    |   either change a module to translate text, or use a new way translate by offline dictionary manually
+    |______________________________________________________________________________________________________
 - WEB Bugs & Features
                 √ [B] incorrect synonymous tag
                     |   synonymous tags do not show.
@@ -205,6 +208,7 @@
                     |   3d flexibly link tag with other tags and showing the most relevant datapack.
                     |_______________________________________________________________________________
                 √ [F] Database Backup
+[F] Paged datapacks shown in /tag
 [F] Docs (development and protocol)
 [F] A secure way to authorize, combine and correct
     |   additional related tool: email, discord, accounts in other websites.

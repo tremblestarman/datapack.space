@@ -142,7 +142,7 @@ func renderTags(c *gin.Context, page int, total int, language string, tags *[]Ta
 		"Page":        page,
 	})
 }
-func renderTag(c *gin.Context, language string, tag *Tag) {
+func renderTag(c *gin.Context, page int, total int, language string, tag *Tag) {
 	if tag.Type == 0 {
 		c.Redirect(http.StatusMovedPermanently, "/?source="+tag.DefaultTag)
 	} else if tag.Type == 1 {
@@ -156,7 +156,10 @@ func renderTag(c *gin.Context, language string, tag *Tag) {
 			"Style": getStyle(c),
 			//result-related
 			"Tag":             tag,
-			"TotalCount":      len(tag.Datapacks),
+			"PageNotEnd":      page*maxDatapackShownInTag < total,
+			"OffsetCount":     (page-1)*maxDatapackShownInTag + 1,
+			"EndCount":        (page-1)*maxDatapackShownInTag + len(tag.Datapacks),
+			"TotalCount":      total,
 			"Synonymous":      synonymous,
 			"SynonymousCount": len(*synonymous),
 		})
@@ -336,7 +339,7 @@ func tag(c *gin.Context) {
 	id := c.Param("id")
 	p := getPage(c)
 	lang := getLanguage(c)
-	tag := GetTag(lang, id)
+	tag, total := GetTag(p, lang, id)
 	// api service
 	api := c.Query("api")
 	// html render
@@ -351,15 +354,16 @@ func tag(c *gin.Context) {
 		if api != "" {
 			queryAPI(c, tag)
 		} else {
-			renderTag(c, lang, tag)
+			renderTag(c, p, total, lang, tag)
 		}
 	}
 }
 func tagRand(c *gin.Context) {
 	lang := getLanguage(c)
-	tag := GetRandTag(lang)
+	p := getPage(c)
+	tag, total := GetRandTag(p, lang)
 	// html render
-	renderTag(c, lang, tag)
+	renderTag(c, p, total, lang, tag)
 }
 
 func language(c *gin.Context) {
