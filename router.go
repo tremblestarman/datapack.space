@@ -153,13 +153,15 @@ func renderTag(c *gin.Context, page int, total int, language string, tag *Tag) {
 			//domain
 			"Domain": tag.Tag,
 			//style
-			"Style": getStyle(c),
+			"Style":    getStyle(c),
+			"NoResult": len(tag.Datapacks) == 0,
 			//result-related
 			"Tag":             tag,
 			"PageNotEnd":      page*maxDatapackShownInTag < total,
 			"OffsetCount":     (page-1)*maxDatapackShownInTag + 1,
 			"EndCount":        (page-1)*maxDatapackShownInTag + len(tag.Datapacks),
 			"TotalCount":      total,
+			"Page":            page,
 			"Synonymous":      synonymous,
 			"SynonymousCount": len(*synonymous),
 		})

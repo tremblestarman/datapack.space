@@ -47,7 +47,7 @@
                     {{if ne .CoverExists true}}
                         style="background-image: url('/bin/img/css/datapack_default.png');"
                     {{end}}>
-                        <img {{if .CoverExists}}src="bin/img/cover/{{.ID}}.png"{{end}} alt=""/>
+                        <img {{if .CoverExists}}src="/bin/img/cover/{{.ID}}.png"{{end}} alt=""/>
                         <div class="mask closed" onclick="glass_pane_close()"></div>
                         <div class="thumb mask-attach" onclick="thumb('datapacks','{{.ID}}');" title="{{template "en/end_crystal_msg"}} : {{.Thumb}}" style="opacity: 0;"></div>
                         <div class="goto mask-attach" onclick="jump_datapack('{{.ID}}')" style="opacity: 0;"></div>

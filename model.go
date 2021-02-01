@@ -385,11 +385,10 @@ func GetTag(page int, language string, id string) (*Tag, int) {
 		page = 1
 	}
 	var offset, limit = (page - 1) * maxDatapackShownInTag, maxDatapackShownInTag
-	total := 0
 	sql.Model(&Tag{}).
 		Select("distinct tags.*, tags."+tag+" as tag").   // Set Tag in desired language
 		Preload("Datapacks", func(db *gorm.DB) *gorm.DB { // Preload Datapacks
-			return db.Select("*, datapacks." + name + " as name").Count(&total).Order("datapacks.post_time DESC").Offset(offset).Limit(limit) // Set Datapack Name & Set Order
+			return db.Select("*, datapacks." + name + " as name").Order("datapacks.post_time DESC").Offset(offset).Limit(limit) // Set Datapack Name & Set Order
 		}).
 		Preload("Datapacks.Tags", func(db *gorm.DB) *gorm.DB { // Preload Datapacks.Tags
 			return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag DESC") // Set Tag Name & Set Order
@@ -397,9 +396,9 @@ func GetTag(page int, language string, id string) (*Tag, int) {
 		Where("tags.id = '" + id + "'"). // Find Tag Id
 		First(&tags)                     // Find One
 	if len(tags) > 0 {
-		return &(tags[0]), total
+		return &(tags[0]), tags[0].Quotation
 	}
-	return nil, -1
+	return nil, 0
 }
 func ListAuthors(page int, author string) (*[]Author, int) {
 	var authors []Author

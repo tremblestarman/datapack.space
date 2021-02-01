@@ -1,9 +1,10 @@
 {{define "default/tag.html"}}
     {{template "default/header" .}}
     <div id="w_switcher" class="wanderer" onclick="wander_switcher()" title="{{template "default/wander_on_msg"}}"></div>
-    <div class="tag-unique" style="--pillar: rgb(91, 63, 91);--pillar-shadow: rgba(106, 66, 106, 0.74);">
+    <div class="tag-unique" style="--pillar: rgb(91, 63, 91);--pillar-shadow: rgba(106, 66, 106, 0.74);--background: rgb(91,52,91);--arrow-shadow: var(--pillar-shadow);overflow:inherit;">
         <div class="pillar left"></div>
         <div class="pillar right"></div>
+        {{template "default/page_turner_bottom" .}}
         <div class="bottom" style="--pillar: rgb(71, 33, 71);--pillar-shadow: rgba(86, 46, 86, 0.74);">
             <div class="pillar left pin"></div>
             <div class="pillar right pin"></div>

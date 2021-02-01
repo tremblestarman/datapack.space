@@ -1,6 +1,6 @@
 * text=auto
 bin/css/vendored/* linguist-vendored
 bin/css/ender-*.css linguist-vendored
+templates/zh_TW/* linguist-generated
 templates/en/* linguist-generated
 templates/zh_CN/* linguist-generated
-templates/zh_TW/* linguist-generated
