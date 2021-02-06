@@ -76,9 +76,10 @@
                     |___________________________________________________________
                 √ [B] Being banned from google but datapack is also affected.
                 √ [B] async of datapacks_tags
-[B] googletrans broke
-    |   either change a module to translate text, or use a new way translate by offline dictionary manually
-    |______________________________________________________________________________________________________
+                √ [B] googletrans broke
+                    |   either change a module to translate text, or use a new way translate by offline dictionary manually
+                    |   Final Fix: use 'translators'
+                    |______________________________________________________________________________________________________
 - WEB Bugs & Features
                 √ [B] incorrect synonymous tag
                     |   synonymous tags do not show.

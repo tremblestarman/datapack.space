@@ -6,12 +6,12 @@ import pymysql, json, os, uuid, urllib, socket, time, unicodedata
 from datetime import datetime
 from urllib.parse import urlparse
 from warnings import filterwarnings
-from translate import Translator
 from multiprocessing.dummy import Pool as thread_pool
 from func_timeout.exceptions import FunctionTimedOut
 from func_timeout import func_set_timeout
 from emoji import demojize
 from util.err import logger
+import translators
 filterwarnings('ignore',category=pymysql.Warning)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 socket.setdefaulttimeout(30)
@@ -29,8 +29,9 @@ class translator:
     limit = 25
     current_time = 0
     timeout = 90
-    trans = Translator(to_lang="zh")
     LOG = logger()
+    def trans(self, text: str, lang: str):
+        return translators.google(text, from_language='auto', to_language=lang, sleep_seconds=1, if_use_cn_host=True)
     def translate(self, text: str, lang: str):
         global DISABLE_TRANSLATE
         if DISABLE_TRANSLATE:
@@ -41,8 +42,7 @@ class translator:
             self.current_time = 0
         self.current_time += 1 # times add 1
         try:
-            self.trans = Translator(to_lang=lang)
-            result = self.trans.translate(text)
+            result = self.trans(text, lang)
             return result
         except Exception as e: # may be caused by network or format of encoding.
             count = 1
@@ -53,8 +53,7 @@ class translator:
                 print('error might caused by being banned or slow network speed.\n(wait 15s to be unbanned or to fix network problem.')
                 time.sleep(15)
                 try:
-                    self.trans = Translator(to_lang=lang)
-                    result = self.trans.translate(text)
+                    result = self.trans(text, lang)
                     return result
                 except Exception as _e:
                     print(f"- translate '{text}' to '{lang}' error:", _e)
