@@ -8,10 +8,8 @@ sources = []
 CACHE = datapack_cache() # when spider run, clear all cache
 
 for schema in os.listdir(BASE_DIR + '/util/schema'):
-    if not schema == 'mcbbs.json':
-        continue
     # crawl and insert
-    CRAWLER = datapack_collector(BASE_DIR + '/util/schema/' + schema, refill=False)
+    CRAWLER = datapack_collector(BASE_DIR + '/util/schema/' + schema, refill=True)
     while CRAWLER.post_pool.__len__() > 0:
         CRAWLER.analyze_all()
         print('==== start import ====')

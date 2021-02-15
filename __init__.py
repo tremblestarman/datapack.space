@@ -15,19 +15,6 @@ dbs = cur.fetchall()
 if not ('datapack_collection',) in dbs:
     cur.execute('create database datapack_collection;')
 cur.execute('use datapack_collection;')
-# -translate
-
-# 0-0.cache duplicated (done)
-# 0-1.porter insert duplicated (done)
-# 0-2.auth check
-# 0-3.porter log
-
-# 1.data table + relation table (done)
-# 2.cache table (done)
-# 3.auth table (done)
-# 4.related table (done) (manually)
-# 5.port log table (done)
-# 6.ii_queue (done)
 
 ### tables
 # tables of info & relation queried by Web

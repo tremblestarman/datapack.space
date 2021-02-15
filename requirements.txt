@@ -1,5 +1,5 @@
 bs4==0.0.1
-cryptography==3.3.1
+cryptography==3.3.2
 emoji==1.2.0
 func-timeout==4.3.5
 jieba==0.42.1

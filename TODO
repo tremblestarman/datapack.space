@@ -12,6 +12,11 @@
     - router.go
     - model.go
 
+- admin
+    - admin
+    - language(need update)
+    - schema_check
+
 - Crawler Bugs & Features
                 √ [B] selenium page crash on the first page. 
                     |   might caused by unselectable element on load.
