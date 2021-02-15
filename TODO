@@ -1,3 +1,17 @@
+- BACKEND
+    - __init__.py
+        - build database (cache & collection), and update database with new columns
+    - __spider__.py (independent process)
+        - run collector.py (crawler) & database.py (raw information store to cache & check updates)
+    - __porter__.py (independent process)
+        - asynchronously apply updates & translation & index build & download resources
+    - __reset__.py
+        - remove all data in database
+- WEB
+    - main.go
+    - router.go
+    - model.go
+
 - Crawler Bugs & Features
                 √ [B] selenium page crash on the first page. 
                     |   might caused by unselectable element on load.
@@ -78,7 +92,7 @@
                 √ [B] async of datapacks_tags
                 √ [B] googletrans broke
                     |   either change a module to translate text, or use a new way translate by offline dictionary manually
-                    |   Final Fix: use 'translators'
+                    |   Final Fix: use 'translators' & offline translation
                     |______________________________________________________________________________________________________
 - WEB Bugs & Features
                 √ [B] incorrect synonymous tag

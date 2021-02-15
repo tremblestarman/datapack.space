@@ -4,14 +4,15 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/go-ego/gse"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"io/ioutil"
 	"os"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/go-ego/gse"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 var db *gorm.DB
@@ -93,8 +94,8 @@ func updateInvertedIndex(table string, column string, indexQueue string) {
 		_ = db.Raw("select count(id) from " + table + ";").Row().Scan(&sum)
 	} else { // Get From Queue
 		// Get ids and columns to insert
-		rows, err = db.Raw("select id, " + column + " from (select id as i, operate as o from " + indexQueue + ") as q left join datapacks as d on q.i = d.id where q.o = '+';").Rows()
-		_ = db.Raw("select count(id) from (select id as i, operate as o from " + indexQueue + ") as q left join datapacks as d on q.i = d.id where q.o = '+';").Row().Scan(&sum)
+		rows, err = db.Raw("select id, " + column + " from (select id as i, operate as o from " + indexQueue + ") as q left join " + table + " as d on q.i = d.id where q.o = '+';").Rows()
+		_ = db.Raw("select count(id) from (select id as i, operate as o from " + indexQueue + ") as q left join " + table + " as d on q.i = d.id where q.o = '+';").Row().Scan(&sum)
 		// Remove those which needs to be removed from inverted index
 		_ = db.Exec("delete from " + invertedIndexName + " where id in (select id from " + indexQueue + " where operate = '-');")
 	}
@@ -150,40 +151,34 @@ func wordCounter(w []string) map[string]int {
 func main() {
 	//connect to database
 	Connect()
-	defer db.Close()   //close database
-	_ = seg.LoadDict() //load dict
-	db.LogMode(false)  //disable log
+	defer db.Close()            //close database
+	_ = seg.LoadDict()          //load dict
+	db.LogMode(false)           //disable log
+	languages := GetLanguages() // list all languages
 
-	//build b+ index
-	languages := GetLanguages()
-	buildIndex("datapacks", "source", 36)
-	buildIndex("datapacks", "post_time", 0)
-	buildIndex("datapacks", "update_time", 0)
-	buildIndex("authors", "author_name", 36)
-	buildIndex("tags", "default_tag", 36)
+	//build b+ index (for all translated tags)
 	for k, _ := range languages {
 		k = strings.ReplaceAll(k, "-", "_")
 		buildIndex("tags", "tag_"+k, 36)
 	}
-	buildIndex("datapack_tags", "datapack_id", 36)
-	buildIndex("datapack_tags", "tag_id", 36)
 
 	//build inverted index
-	queue := "datapacks_ii_queue"
-	if len(os.Args) > 1 && os.Args[1] == "-a" {
-		queue = ""
-	}
-	updateInvertedIndex("datapacks", "default_name", queue)
-	buildIndex(invertedIndexName, "word", 36)
-	buildIndex(invertedIndexName, "id", 36)
+	datapacksInvertedColumns := make([]string, 0)
+	datapacksInvertedColumns = append(datapacksInvertedColumns, "default_name")
+	datapacksInvertedColumns = append(datapacksInvertedColumns, "default_intro")
 	for k, _ := range languages {
 		k = strings.ReplaceAll(k, "-", "_")
-		updateInvertedIndex("datapacks", "name_"+k, queue)
+		datapacksInvertedColumns = append(datapacksInvertedColumns, "name_"+k)
+		datapacksInvertedColumns = append(datapacksInvertedColumns, "intro_"+k)
+	}
+	for _, col := range datapacksInvertedColumns {
+		queue := "ii_queue_" + col
+		if len(os.Args) > 1 && os.Args[1] == "-a" {
+			queue = ""
+		}
+		updateInvertedIndex("datapacks", col, queue)
 		buildIndex(invertedIndexName, "word", 36)
 		buildIndex(invertedIndexName, "id", 36)
+		_ = db.Exec("delete from " + queue + ";") // Clear queue
 	}
-	updateInvertedIndex("datapacks", "intro", queue)
-	buildIndex(invertedIndexName, "word", 36)
-	buildIndex(invertedIndexName, "id", 36)
-	_ = db.Exec("delete from datapacks_ii_queue;") // Clear queue
 }

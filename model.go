@@ -79,13 +79,14 @@ type Datapack struct {
 	ID               string     `json:"-" gorm:"primary_key:true"`
 	Link             string     `json:"datapack_link"`
 	Name             string     `json:"datapack_name"`
+	Intro            string     `json:"datapack_introduction"`
 	Author           Author     `json:"author"`
 	AuthorID         string     `json:"-"`
 	DefaultLang      string     `json:"datapack_language"`
 	DefaultLangId    string     `json:"-"`
 	DefaultName      string     `json:"datapack_default_name"`
 	Source           string     `json:"source"`
-	Intro            string     `json:"introduction"`
+	DefaultIntro     string     `json:"datapack_default_introduction"`
 	FullContent      string     `json:"-"`
 	PostTime         time.Time  `json:"-"`
 	PostTimeString   string     `json:"post_time"`
@@ -133,14 +134,13 @@ func (d *Datapack) GetRelated(language string) *Datapack {
 		First(&related)
 	if related.Related != "" {
 		// Set language
-		name, tag := "default_name", "default_tag"
+		name, tag, intro := "default_name", "default_tag", "default_intro"
 		if language != "" && language != "default" {
-			name, tag = "name_"+language, "tag_"+language
+			name, tag, intro = "name_"+language, "tag_"+language, "intro_"+language
 		}
-		fmt.Println(related.GetTuple())
 		sql.Model(&Datapack{}).
-			Select("distinct datapacks.*, datapacks."+name+" as name"). // Set Datapack Name
-			Preload("Tags", func(db *gorm.DB) *gorm.DB {                // Preload Tags
+			Select("distinct datapacks.*, datapacks."+name+" as name, datapacks."+intro+" as intro"). // Set Datapack Name
+			Preload("Tags", func(db *gorm.DB) *gorm.DB {                                              // Preload Tags
 				return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag DESC") // Set Tag Name & Set Order
 			}).
 			Preload("Author").                                                       // Preload Author
@@ -157,12 +157,12 @@ func (a *Author) GetRelated(language string) {
 		First(&related)
 	if related.Related != "" {
 		// Set language
-		name, tag := "default_name", "default_tag"
+		name, tag, intro := "default_name", "default_tag", "default_intro"
 		if language != "" && language != "default" {
-			name, tag = "name_"+language, "tag_"+language
+			name, tag, intro = "name_"+language, "tag_"+language, "intro_"+language
 		}
 		sql.Preload("Datapacks", func(db *gorm.DB) *gorm.DB { // Preload Datapacks
-			return db.Select("*, datapacks." + name + " as name").Order("datapacks.post_time DESC") // Set Datapack Name & Set Order
+			return db.Select("*, datapacks." + name + " as name, datapacks." + intro + " as intro").Order("datapacks.post_time DESC") // Set Datapack Name & Set Order
 		}).
 			Preload("Datapacks.Tags", func(db *gorm.DB) *gorm.DB { // Preload Datapacks.Tags
 				return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag DESC") // Set Tag Name & Set Order
@@ -277,15 +277,15 @@ func ListDatapacks(language string, page int, order string, source string, versi
 	var offset, limit = (page - 1) * datapackPageCount, datapackPageCount
 	var sql = db
 	// Set language
-	name, tag := "default_name", "default_tag"
+	name, tag, intro := "default_name", "default_tag", "default_intro"
 	if language != "" && language != "default" {
-		name, tag = "name_"+language, "tag_"+language
+		name, tag, intro = "name_"+language, "tag_"+language, "intro_"+language
 	}
 	// Query
 	total := 0
 	sql = db.Model(&Datapack{}).
-		Select("distinct datapacks.*, datapacks."+name+" as name"). // Set Datapack Name
-		Preload("Tags", func(db *gorm.DB) *gorm.DB {                // Preload Tags
+		Select("distinct datapacks.*, datapacks."+name+" as name, datapacks."+intro+" as intro"). // Set Datapack Name
+		Preload("Tags", func(db *gorm.DB) *gorm.DB {                                              // Preload Tags
 			return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag, tags.default_tag DESC") // Set Tag Name & Set Order
 		}).
 		Preload("Author") // Preload Author
@@ -302,13 +302,13 @@ func GetDatapack(language string, id string) *Datapack {
 	var datapacks []Datapack
 	var sql = db
 	// Set language
-	name, tag := "default_name", "default_tag"
+	name, tag, intro := "default_name", "default_tag", "default_intro"
 	if language != "" && language != "default" {
-		name, tag = "name_"+language, "tag_"+language
+		name, tag, intro = "name_"+language, "tag_"+language, "intro_"+language
 	}
 	sql.Model(&Datapack{}).
-		Select("distinct datapacks.*, datapacks."+name+" as name"). // Set Datapack Name
-		Preload("Tags", func(db *gorm.DB) *gorm.DB {                // Preload Tags
+		Select("distinct datapacks.*, datapacks."+name+" as name, datapacks."+intro+" as intro"). // Set Datapack Name
+		Preload("Tags", func(db *gorm.DB) *gorm.DB {                                              // Preload Tags
 			return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag DESC") // Set Tag Name & Set Order
 		}).
 		Preload("Author"). // Preload Author
@@ -370,9 +370,9 @@ func GetTag(page int, language string, id string) (*Tag, int) {
 	var tags []Tag
 	var sql = db
 	// Set language
-	name, tag := "default_name", "default_tag"
+	name, tag, intro := "default_name", "default_tag", "default_intro"
 	if language != "" && language != "default" {
-		name, tag = "name_"+language, "tag_"+language
+		name, tag, intro = "name_"+language, "tag_"+language, "intro_"+language
 	}
 	sql.Model(&Tag{}).
 		Where("tags.id = '" + id + "'"). // Find Tag Id
@@ -388,7 +388,7 @@ func GetTag(page int, language string, id string) (*Tag, int) {
 	sql.Model(&Tag{}).
 		Select("distinct tags.*, tags."+tag+" as tag").   // Set Tag in desired language
 		Preload("Datapacks", func(db *gorm.DB) *gorm.DB { // Preload Datapacks
-			return db.Select("*, datapacks." + name + " as name").Order("datapacks.post_time DESC").Offset(offset).Limit(limit) // Set Datapack Name & Set Order
+			return db.Select("*, datapacks." + name + " as name, datapacks." + intro + " as intro").Order("datapacks.post_time DESC").Offset(offset).Limit(limit) // Set Datapack Name & Set Order
 		}).
 		Preload("Datapacks.Tags", func(db *gorm.DB) *gorm.DB { // Preload Datapacks.Tags
 			return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag DESC") // Set Tag Name & Set Order
@@ -423,13 +423,13 @@ func GetAuthor(language string, id string) *Author {
 	var authors []Author
 	var sql = db
 	// Set language
-	name, tag := "default_name", "default_tag"
+	name, tag, intro := "default_name", "default_tag", "default_intro"
 	if language != "" && language != "default" {
-		name, tag = "name_"+language, "tag_"+language
+		name, tag, intro = "name_"+language, "tag_"+language, "intro_"+language
 	}
 	// Query
 	sql.Preload("Datapacks", func(db *gorm.DB) *gorm.DB { // Preload Datapacks
-		return db.Select("*, datapacks." + name + " as name").Order("datapacks.post_time DESC") // Set Datapack Name & Set Order
+		return db.Select("*, datapacks." + name + " as name, datapacks." + intro + " as intro").Order("datapacks.post_time DESC") // Set Datapack Name & Set Order
 	}).
 		Preload("Datapacks.Tags", func(db *gorm.DB) *gorm.DB { // Preload Datapacks.Tags
 			return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag DESC") // Set Tag Name & Set Order
@@ -469,15 +469,15 @@ func SearchDatapacks(language string, page int, content string, source string, v
 	var offset, limit = (page - 1) * datapackPageCount, datapackPageCount
 	keywordsReg, keywords := getKeywords(content)
 	// Set language
-	name, tag := "default_name", "default_tag"
+	name, tag, intro := "default_name", "default_tag", "default_intro"
 	if language != "" && language != "default" {
-		name, tag = "name_"+language, "tag_"+language
+		name, tag, intro = "name_"+language, "tag_"+language, "intro_"+language
 	}
 	// Query
 	total := 0
 	sql = db.Model(&Datapack{}).
-		Select("distinct datapacks.*, datapacks."+name+" as name, count as key_word_count"). // Set Datapack Name
-		Preload("Tags", func(db *gorm.DB) *gorm.DB {                                         // Preload Tags
+		Select("distinct datapacks.*, datapacks."+name+" as name, datapacks."+intro+" as intro, count as key_word_count"). // Set Datapack Name
+		Preload("Tags", func(db *gorm.DB) *gorm.DB {                                                                       // Preload Tags
 			return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag DESC") // Set Tag Name & Set Order
 		}).
 		Preload("Author") // Preload Author
@@ -486,7 +486,7 @@ func SearchDatapacks(language string, page int, content string, source string, v
 	table = `(select id, sum(count) as count from (` + unionByWords(keywords, "sum(count)", func(word string) string {
 		return "select id, count as count from datapacks_" + name + "_ii where word like '" + word + "%'"
 	}, "as _name group by id") + ` union all ` + unionByWords(keywords, "sum(count)", func(word string) string {
-		return "select id, count as count from datapacks_intro_ii where word like '" + word + "%'"
+		return "select id, count as count from datapacks_" + intro + "_ii where word like '" + word + "%'"
 	}, "as _intro group by id") + ` union all ` + unionByWords(keywords, "1", func(word string) string {
 		return "select dt.datapack_id as id from tags left join datapack_tags as dt on tags.id = dt.tag_id where tags.default_tag like '" + word + "%' and tags.type >= 2"
 	}, "as _intro group by id") + `) as results group by id 
@@ -516,15 +516,15 @@ func AccurateSearchDatapacks(language string, page int, name string, intro strin
 	var keywordsMatrix [3]*string
 	selects := make([]string, 0)
 	// Set language
-	_name, tag := "default_name", "default_tag"
+	_name, tag, _intro := "default_name", "default_tag", "default_intro"
 	if language != "" && language != "default" {
-		_name, tag = "name_"+language, "tag_"+language
+		_name, tag, _intro = "name_"+language, "tag_"+language, "intro_"+language
 	}
 	// Query
 	total := 0
 	sql = db.Model(&Datapack{}).
-		Select("distinct datapacks.*, datapacks."+_name+" as name, count as key_word_count"). // Set Datapack Name
-		Preload("Tags", func(db *gorm.DB) *gorm.DB {                                          // Preload Tags
+		Select("distinct datapacks.*, datapacks."+_name+" as name, datapacks."+_intro+" as intro, count as key_word_count"). // Set Datapack Name
+		Preload("Tags", func(db *gorm.DB) *gorm.DB {                                                                         // Preload Tags
 			return db.Select("*, tags." + tag + " as tag").Order("tags.type, tags.default_tag DESC") // Set Tag Name & Set Order
 		}).
 		Preload("Author"). // Preload Authors
@@ -542,7 +542,7 @@ func AccurateSearchDatapacks(language string, page int, name string, intro strin
 		var keywords []string
 		keywordsMatrix[1], keywords = getKeywords(intro)
 		selects = append(selects, unionByWords(keywords, "sum(count)", func(word string) string {
-			return "select id, count as count from datapacks_intro_ii where word like '" + word + "%'"
+			return "select id, count as count from datapacks_" + _intro + "_ii where word like '" + word + "%'"
 		}, "as _intro group by id having count(*) >= "+strconv.Itoa(len(keywords))))
 	}
 	// Query Author
