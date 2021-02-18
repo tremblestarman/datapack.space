@@ -1,4 +1,4 @@
-import threading, pymysql, os, urllib, re, json, traceback
+import threading, pymysql, os, urllib, re, json, traceback, socket
 from datetime import datetime
 from pymysql.converters import escape_string
 from urllib.parse import urlparse
@@ -6,6 +6,7 @@ from time import sleep
 from util.translate import translate
 from util.err import logger
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+socket.setdefaulttimeout(30)
 class porter(threading.Thread): # porter base structure
     # when cache of 'cache_table' is not empty, call 'port' function
     LOG = logger() # logger
@@ -68,7 +69,7 @@ class porter(threading.Thread): # porter base structure
         elif type(value) == datetime:
             return f"'{escape_string(value.strftime('%Y-%m-%d %H:%M:%S'))}'"
         else:
-            return f"'{escape_string(value)}'"
+            return f"'{escape_string(str(value))}'"
     def cache_pop(self, cache_dict: dict):
         self.cur.execute(f'''delete from {self.cache_table} where {' and '.join([f"{k}={self.__set_right_exp__(v)}" for k, v in cache_dict.items()])};''')
     def port(self, cache_dict: dict):
@@ -84,6 +85,7 @@ class resource_porter(porter): # resources porter
         self.resource_dir = os.path.dirname(BASE_DIR) + f"/bin" if resource_dir == None else resource_dir # set resource directory
         self.domain_block = domain_block # set blocked domain list
         porter.__init__(self, cache_table, sleep_time, log, interrupt, callback)
+    @func_set_timeout(600) # set timeout for 10 minutes
     def resource_save(self, local_url: str, web_url: str):
         if urlparse(web_url).netloc in self.domain_block: # domain blocked, skip
             print('- porter: \'' + web_url + '\' is in a blocked domain. skipped.')

@@ -23,22 +23,6 @@ class datapack_cache:
     author_removal_list = set() # author removal buffer
     tag_removal_list = set() # author removal buffer
     LOG = logger() # logger
-    # Cache Queues:
-    # - datapacks_cache:
-    #       the structure is the same as 'datapacks' with 'status', but only has 'default' language.
-    #       status: '+'(new), '*'(update), '-'(delete)
-    # - tags_cache:
-    #       the structure is the same as 'tags' with 'status', but only has 'default' language.
-    #       status: '+'(new), '*'(update), '-'(delete)
-    # - authors_cache:
-    #       the structure is the same as 'authors' with 'status'.
-    #       status: '+'(new), '*'(update), '-'(delete)
-    # - datapack_tag_relations_cache:
-    #       the structure is the same as 'datapack_tags' with 'status'.
-    #       status: '+'(new), '-'(delete)
-    # - images_cache:
-    #       a simple pair list with 'local_url' and 'web_url'
-    #       status: '+'(new), '-'(delete)
     def __init__(self):
         '''
         Connect and get cursor.
@@ -202,6 +186,7 @@ class datapack_cache:
                 res_dict['update_time'] = info['update_time']
             elif res_dict['status'] == '*': # if 'update_time' is included after spider crawling, let final update time be 'update_time'; if not, generate new
                 res_dict['update_time'] = info['update_time'] if not info['update_time'] == info['post_time'] else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        intro = escape_string('\n'.join(info['summary'])) # connect all summaries to form introduction
         sql, status = self._cache_insert('datapacks_cache', did, {
             'link': info['link'],
             'source': info['source'],
@@ -210,7 +195,7 @@ class datapack_cache:
             'default_lang': escape_string(lang),
             'default_lang_id': escape_string(lang_id),
             'default_name': info['default_name'],
-            'default_intro': escape_string('\n'.join(info['summary'])),
+            'default_intro': '-' if intro == None or intro == '' else intro,
             'author_id': aid,
             # content is related to authorization
             'full_content': escape_string(info['content_full'] if self._check_datapack_auth(did, aid) else info['content_raw']),

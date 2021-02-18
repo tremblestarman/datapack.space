@@ -3,6 +3,22 @@
         - build database (cache & collection), and update database with new columns
     - __spider__.py (independent process)
         - run collector.py (crawler) & database.py (raw information store to cache & check updates)
+            # Cache Queues:
+            # - datapacks_cache:
+            #       the structure is the same as 'datapacks' with 'status', but only has 'default' language.
+            #       status: '+'(new), '*'(update), '-'(delete)
+            # - tags_cache:
+            #       the structure is the same as 'tags' with 'status', but only has 'default' language.
+            #       status: '+'(new), '*'(update), '-'(delete)
+            # - authors_cache:
+            #       the structure is the same as 'authors' with 'status'.
+            #       status: '+'(new), '*'(update), '-'(delete)
+            # - datapack_tag_relations_cache:
+            #       the structure is the same as 'datapack_tags' with 'status'.
+            #       status: '+'(new), '-'(delete)
+            # - images_cache:
+            #       a simple pair list with 'local_url' and 'web_url'
+            #       status: '+'(new), '-'(delete)
     - __porter__.py (independent process)
         - asynchronously apply updates & translation & index build & download resources
     - __reset__.py

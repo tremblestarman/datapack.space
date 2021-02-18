@@ -27,12 +27,12 @@ def translate(text: str, lang: str):
             current_time = 0
         current_time += 1  # times add 1
     try: # first try: raw translation
-        result = __trans__(text[0:5000], lang) # limit of google translate is 5,000
+        result = __trans__(text[0:2000], lang) # limit of google translate is 5,000, and avoid big charset
         __check_limit()
         return result
     except Exception as e: # second try: convert format of encoding (try to dump uft8mb4)
         print(f"- translate: translate '{text}' to '{lang}' error:", e)
-        text = demojize(text[0:5000])
+        text = demojize(text[0:2000])
         text = normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
         __check_limit()
         # if there is still error, then it would be network connection problem, or being banned from third party API
