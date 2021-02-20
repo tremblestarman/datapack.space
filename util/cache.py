@@ -146,7 +146,7 @@ class datapack_cache:
             'default_lang': escape_string(lang),
             'default_lang_id': escape_string(lang_id),
             'type': tag_type
-        })
+        }, verify_type)
         if not sql == None:
             self.cur.execute(sql) # insert into cache
         return tid
@@ -194,7 +194,7 @@ class datapack_cache:
         }, 'datapacks', {
             'default_lang': escape_string(lang),
             'default_lang_id': escape_string(lang_id),
-            'default_name': info['default_name'],
+            'default_name': escape_string(info['default_name']),
             'default_intro': '-' if intro == None or intro == '' else intro,
             'author_id': aid,
             # content is related to authorization
@@ -205,7 +205,7 @@ class datapack_cache:
         # cache datapack-tag relation
         self.cur.execute(f"select tag_id from datapack_tags where datapack_id = '{did}';")
         res = self.cur.fetchall()
-        tag_id_old = set([i for i in res[0]] if not res == None and len(res) > 0 else [])
+        tag_id_old = set([i[0] for i in res] if not res == None and len(res) > 0 else [])
         for tid in tag_id:
             if tid not in tag_id_old: # new relation
                 self.cur.execute(f'''

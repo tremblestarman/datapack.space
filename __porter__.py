@@ -38,14 +38,17 @@ tag_porter.start()
 def datapack_tag_relation_callback(self, cache_dict: dict):
     # no log
     # update quotation count of the tag
-    self.cur.execute(f"update tags set quotation = quotation + 1 where id = '{cache_dict['tag_id']}';")
+    if cache_dict['status'] == '+':
+        self.cur.execute(f"update tags set quotation = quotation + 1 where id = '{cache_dict['tag_id']}';")
+    elif cache_dict['status'] == '-':
+        self.cur.execute(f"update tags set quotation = quotation - 1 where id = '{cache_dict['tag_id']}';")
 datapack_tag_relation_porter = record_porter('datapack_tag_relations_cache', 'datapack_tags', callback=datapack_tag_relation_callback)
 datapack_tag_relation_porter.start()
 
 # image porter
 RESOURCE_DIR = os.path.dirname(BASE_DIR) + f"/bin/img"
 DOMAIN_BLOCK = ['img.youtube.com']
-image_porter = resource_porter('images_cache', resource_dir=RESOURCE_DIR, domain_block=DOMAIN_BLOCK)
+image_porter = resource_porter('images_cache', resource_dir=RESOURCE_DIR, domain_block=DOMAIN_BLOCK, ignoreFailed=True)
 image_porter.start()
 
 datapack_porter.join()

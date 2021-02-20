@@ -1,252 +1,259 @@
-- BACKEND
-    - __init__.py
-        - build database (cache & collection), and update database with new columns
-    - __spider__.py (independent process)
-        - run collector.py (crawler) & database.py (raw information store to cache & check updates)
-            # Cache Queues:
-            # - datapacks_cache:
-            #       the structure is the same as 'datapacks' with 'status', but only has 'default' language.
-            #       status: '+'(new), '*'(update), '-'(delete)
-            # - tags_cache:
-            #       the structure is the same as 'tags' with 'status', but only has 'default' language.
-            #       status: '+'(new), '*'(update), '-'(delete)
-            # - authors_cache:
-            #       the structure is the same as 'authors' with 'status'.
-            #       status: '+'(new), '*'(update), '-'(delete)
-            # - datapack_tag_relations_cache:
-            #       the structure is the same as 'datapack_tags' with 'status'.
-            #       status: '+'(new), '-'(delete)
-            # - images_cache:
-            #       a simple pair list with 'local_url' and 'web_url'
-            #       status: '+'(new), '-'(delete)
-    - __porter__.py (independent process)
-        - asynchronously apply updates & translation & index build & download resources
-    - __reset__.py
-        - remove all data in database
-- WEB
-    - main.go
-    - router.go
-    - model.go
+File Structure:
+    - BACKEND
+        - __init__.py
+            - build database (cache & collection), and update database with new columns
+        - __spider__.py (independent process)
+            - run collector.py (crawler) & database.py (raw information store to cache & check updates)
+                # Cache Queues:
+                # - datapacks_cache:
+                #       the structure is the same as 'datapacks' with 'status', but only has 'default' language.
+                #       status: '+'(new), '*'(update), '-'(delete)
+                # - tags_cache:
+                #       the structure is the same as 'tags' with 'status', but only has 'default' language.
+                #       status: '+'(new), '*'(update), '-'(delete)
+                # - authors_cache:
+                #       the structure is the same as 'authors' with 'status'.
+                #       status: '+'(new), '*'(update), '-'(delete)
+                # - datapack_tag_relations_cache:
+                #       the structure is the same as 'datapack_tags' with 'status'.
+                #       status: '+'(new), '-'(delete)
+                # - images_cache:
+                #       a simple pair list with 'local_url' and 'web_url'
+                #       status: '+'(new), '-'(delete)
+        - __porter__.py (independent process)
+            - asynchronously apply updates & translation & index build & download resources
+        - __reset__.py
+            - remove all data in database
+    - WEB
+        - main.go
+        - router.go
+        - model.go
+    - ADMIN
+        - admin
+        - language(need update)
+        - schema_check
 
-- admin
-    - admin
-    - language(need update)
-    - schema_check
-
-- Crawler Bugs & Features
-                √ [B] selenium page crash on the first page. 
-                    |   might caused by unselectable element on load.
-                    |   or other settings.
-                    Solution:   Explicit Wait or Other settings.
-                    |________________________________________________
-                    |   Final Fix: len of set() && on url change && on url change time out
-                    |   if element selector timeout, means end. but url change time out, means problem.
-                    |   Added 'display' for selenium : 'headless' via headless, 'virtual' via xvfb, 'window' via windows
-                √ [B] emoji (utf8mb4 characters) translation error.
-                    |   might caused by google or python itself.
-                    Solution: if caused by google, then just preserve it and translate other words
-                    |         if caused by python, then find a way to store or escape emoji to fix this bug.
-                    |_______________________________________________________________________________________
-                    |   Final Fix: just demojize it.
-                √ [F] save 'post_pool'.
-                    |   add update option and save 'post_pool' to a file.
-                    |____________________________________________________    
-                √ [F] APS: antilag-process-system.
-                    |   set a LIMIT time of single-process task (especially the DB operation).
-                    |   when reach the time, just THROW and error and RESTART the DB operation.
-                    |__________________________________________________________________________
-                    |   Installed 'func_timeout'
-                    |   Added retry for DB insert.
-                    |_____________________________
-                √ [B] artistic word (utf8mb4 error)
-                    |   Final Fix: use 'unicodedata' to convert to ascii.
-                    |____________________________________________________
-                √ [B] LOG did not work as excepted
-                    |   Final Fix: rename attributes 'type' to 'err_type'.
-                    |_____________________________________________________
-                √ [F] determine whether the post needs to execute DB operation via its 'update_time'
-                    |   if there's a record in DB & recorded 'update_time' equals the posts analyzed 'update_time.
-                    |   then just skip.
-                    |_____________________________________________________________________________________________
-                √ [F] the process of retry ended and log unhandled error and write in '.err' file.
-                    |   when reach max 'retry' and still have error, just log it.
-                    |   if it's a schema,       log the 'schema' & error.
-                    |   if it's a post / db,    log the 'link' & 'domain' & error.
-                    |   if it's a translation,  log the 'translation' & error.
-                    |   if it's a download,     log the 'url' & 'local url' & error.
-                    |   error in '.err' file should be solved manually.
-                    |__________________________________________________________________________________________
-                √ [B] incorrect datapack-tag relation
-                    |   some datapacks have no tag.
-                    |______________________________
-                    |   Final Fix: relation form technic changes.
-                    |____________________________________________
-                √ [F] img block-list
-                    |   build a block-list to prevent img download. like 'youtube'.
-                    |______________________________________________________________
-                √ [B] time is empty
-                    |   time = ''
-                    |_______________________________________
-                    |   Final Fix: left out empty when tagging time;
-                    |              fixed muti-match in 'regex'.
-                    |_______________________________________________
-                √ [B] datapackcenter.json
-                    |   got datapack name with wrong styles.
-                    |_______________________________________
-                    |   Final Fix: upgraded regex match.
-                    |___________________________________
-                √ [B] hide & hide_a do not coexist with authrization
-                    |   to seperate content_full from content_raw.
-                    |_____________________________________________ 
-                √ [B] content in 'mcbbs.json'
-                    |   in javascript: (undefined function)
-                    |   " Uncaught ReferenceError: img_onmouseoverfunc is not defined.
-                    |   at HTMLImageElement.onmouseover "
-                    |_________________________________________________________________
-                √ [F] To record history.
-                    |   in database.py, add a switcher for 'record'.
-                    |   a new table recording datapacks' status.
-                    |   when new datapack occurs and old one is deleted, record.
-                    |   4 column: 'id', 'link', 'operate' (+ or -), 'date'.
-                    |___________________________________________________________
-                √ [B] Being banned from google but datapack is also affected.
-                √ [B] async of datapacks_tags
-                √ [B] googletrans broke
-                    |   either change a module to translate text, or use a new way translate by offline dictionary manually
-                    |   Final Fix: use 'translators' & offline translation
-                    |______________________________________________________________________________________________________
-- WEB Bugs & Features
-                √ [B] incorrect synonymous tag
-                    |   synonymous tags do not show.
-                    |   source and version should not be distinguished by languages.
-                    Solution: check the source code of this function and test it again.
-                    |         if 'tag_type' = 0 or 1 (source or version), show all datapacks with synonymous tags.
-                    |_____________________________________________________________________________________________
-                    |   Final Fix: not a bug and works well when changing into other languages.
-                    |__________________________________________________________________________
-                √ [F] a schema check
-                    |   Just check whether the schema is legal.
-                    |__________________________________________
-                √ [B] unescape bug occurs in origin content
-                    |   '<' in origin content confuses 'unescape' function to treat it as a tag.
-                    |___________________________________________________________________________
-                    |   Final Fix: replace '<' with '＜'.
-                    |____________________________________
-                √ [B] <html lang='xxx'>
-                    |   In language.exe.
-                    |___________________
-                √ [F] Associate sources and versions with '/search' instead of '/tag'
-                √ [F] Adapt to touch
-                    |   touchmove to turn page
-                    |   when page umber change, turn page means goto page.
-                    |_____________________________________________________
-                X [F] Adapt to mouse wheel  (bad experience)
-                    |   turn page when scrolling down on top.
-                    |________________________________________
-                √ [F] shadeless style
-                    |   Shadeless and modify color collocation.
-                    |   Attach style to cookie.
-                    |__________________________________________
-                √ [F] Optimize search funcion (full text, inverted index)
-                    |   After robot process done, build a new table indexing words. (via gse)
-                    |   build for default_name, name_x, intro. (totally 2 + n tables)
-                    |   (table structure: [word | datapack_id | count])
-                    |   To match word, use 'like xxx = y%'
-                    |   UNION use 'union all' + 'xxx' + 'group by id', INTERSECT use 'union all' + 'xxx' + 'group by id having count(*) >= N'.
-                    |   process: 
-                    |   query word & sum count ([word | id | count])
-                    |   -> 'UNION' or 'INTERSECT' all words & sum count ([id | count]) (relation between words)
-                    |   -> 'UNION' or 'INTERSECT' all ids in name and intro & sum count & order by count & offset & limit ([id]) (relation between name and intro)
-                    |   (-> normal search: 'UNION' (datapack_tags's datapack_id left join tags ... on ... group by...) # union relevant tags' datapack ids
-                    |   -> use left join to query datapacks from the sub set of ids. (select ... left join (subquery) as x on x.id = datapacks.id ...)
-                    |   (-> accurate search: left join authors on datapacks.author_id = authors.id where ...) # intersect authors name
-                    |
-                    |   eg:
-                    |   # normal search '羊羊工艺' and 1.14 version -> '羊' or '工艺'
-                    |   (0.00-0.01 sec) explain
-                        select datapacks.id, datapacks.default_name, count as key_word_count from (
-                            select id, sum(count) as count from (
-                                select id, sum(count) as count from (
-                                    select id, count as count from datapacks_default_name_ii where word like '羊%' 
-                                    union all 
-                                    select id, count as count from datapacks_default_name_ii where word like '工艺%'
-                                ) as _default_name group by id 
-                                union all 
-                                select id, sum(count) as count from (
-                                    select id, count as count from datapacks_intro_ii where word like '羊%' 
-                                    union all 
-                                    select id, count as count from datapacks_intro_ii where word like '工艺%'
-                                ) as _intro group by id 
-                                union all
-                                select id, 1 as count from (
-                                    select dt.datapack_id as id from tags left join datapack_tags as dt on tags.id = dt.tag_id where tags.default_tag like '羊%' and tags.type >= 2
-                                    union all
-                                    select dt.datapack_id as id from tags left join datapack_tags as dt on tags.id = dt.tag_id where tags.default_tag like '工艺%' and tags.type >= 2
-                                ) as _default_tag
-                            ) as results group by id 
-                        ) as ids left join (select dt.datapack_id as id from tags left join datapack_tags as dt on tags.id = dt.tag_id where tags.type = 1 and tags.default_tag = '1.14') as vs left join datapacks on vs.id = datapacks.id on ids.id = datapacks.id
-                        where datapacks.id is not NULL order by count DESC limit 15 offset 0;
-                    |
-                    |   eg:
-                    |   # accurate search '羊羊工艺' in default_name, '剪刀 羊' in intro and 'kong' in author_name -> '羊' and '工艺', '剪刀' and '羊'
-                    |   (0.00-0.01 sec) explain
-                        select datapacks.id, datapacks.default_name, count as key_word_count from (
-                            select id, sum(count) as count from (
-                                select id, sum(count) as count from (
-                                    select id, count as count from datapacks_default_name_ii where word like '羊%' 
-                                    union all 
-                                    select id, count as count from datapacks_default_name_ii where word like '工艺%'
-                                ) as _default_name group by id having count(*) >= 2 
-                                union all 
-                                select id, sum(count) as count from (
-                                    select id, count as count from datapacks_intro_ii where word like '剪刀%' 
-                                    union all 
-                                    select id, count as count from datapacks_intro_ii where word like '羊%'
-                                ) as _intro group by id having count(*) >= 2 
-                            ) as results group by id having count(*) >= 2
-                        ) as ids left join datapacks on ids.id = datapacks.id
-                        left join authors on datapacks.author_id = authors.id where authors.author_name like 'kong%' order by count DESC limit 15 offset 0;
-                    |_____________________________________________________________________________________________________________________________________________
-                √ [F] Optimize query in mysql
-                    |  1. change version, tag from regexp to left join. (left join (datapack_tags's datapack_id left join tags ... where ... group by) ...)
-                    |       if use version or tag, previously add join.
-                    |       (subquery as 'datapacks')
-                    |   eg: (0.01-0.02 sec) explain
-                        select datapacks.* from (
-                            select dt.datapack_id as id from tags left join datapack_tags as dt on tags.id = dt.tag_id where 
-                                tags.type = 1 and tags.default_tag = '1.14'
-                        ) as ids left join datapacks on ids.id = datapacks.id;
-                        select tags.*, tags.default_tag as tag from (select datapack_tags.tag_id as id from datapack_tags where datapack_id = 'e5dd20cc-3f30-3d2e-88fc-bf85c9ade350') as ids left join tags on tags.id = ids.id order by tags.type, tags.default_tag, tags.default_tag DESC;
-                    |  2. build solo-index of each colum to query:
-                    |       datapacks: source, post_time, update_time
-                    |       authors: author_name
-                    |       tags: tag
-                    |       datapack_tags: datapack_id, tag_id
-                    |______________________________________________________________________________________________________________________________________
-                √ [F] Simplified style
-                    |   Based on shadeless, a simplified ui.
-                    |   Attach style to cookie.
-                    |   adapted to mobile
-                    |_____________________________________________________________________________
-                √ [F] An entrance in '/guide' providing access to changing style.
-                √ [F] responsive mode
-                    |   √ Width < 996px
-                    |   √ Mobile (WIP,40%)
-                    |__________________
-                √ [F] a terminal tool based on commandline to do functional DB operation
-                    |   √ basic get of records.
-                    |   √ basic changes of a column in a record. (only translated content)
-                    |   √ combine author, datapack. (via table 'authors_related', table 'datapacks_related')
-                    |   √ mark authorized post.
-                    |   √ raw sql. (only 'select')
-                    |_______________________________________________________________________________________
-                √ [F] Wandering (a datapack-seeking function)
-                    |   3d flexibly link tag with other tags and showing the most relevant datapack.
-                    |_______________________________________________________________________________
-                √ [F] Database Backup
-[F] Paged datapacks shown in /tag
+Crawler Bugs & Features:
+    √ [B] selenium page crash on the first page.
+        |   might caused by unselectable element on load.
+        |   or other settings.
+        Solution:   Explicit Wait or Other settings.
+        |________________________________________________
+        |   Final Fix: len of set() && on url change && on url change time out
+        |   if element selector timeout, means end. but url change time out, means problem.
+        |   Added 'display' for selenium : 'headless' via headless, 'virtual' via xvfb, 'window' via windows
+    √ [B] emoji (utf8mb4 characters) translation error.
+        |   might caused by google or python itself.
+        Solution: if caused by google, then just preserve it and translate other words
+        |         if caused by python, then find a way to store or escape emoji to fix this bug.
+        |_______________________________________________________________________________________
+        |   Final Fix: just demojize it.
+    √ [F] save 'post_pool'.
+        |   add update option and save 'post_pool' to a file.
+        |____________________________________________________
+    √ [F] APS: antilag-process-system.
+        |   set a LIMIT time of single-process task (especially the DB operation).
+        |   when reach the time, just THROW and error and RESTART the DB operation.
+        |__________________________________________________________________________
+        |   Installed 'func_timeout'
+        |   Added retry for DB insert.
+        |_____________________________
+    √ [B] artistic word (utf8mb4 error)
+        |   Final Fix: use 'unicodedata' to convert to ascii.
+        |____________________________________________________
+    √ [B] LOG did not work as excepted
+        |   Final Fix: rename attributes 'type' to 'err_type'.
+        |_____________________________________________________
+    √ [F] determine whether the post needs to execute DB operation via its 'update_time'
+        |   if there's a record in DB & recorded 'update_time' equals the posts analyzed 'update_time.
+        |   then just skip.
+        |_____________________________________________________________________________________________
+    √ [F] the process of retry ended and log unhandled error and write in '.err' file.
+        |   when reach max 'retry' and still have error, just log it.
+        |   if it's a schema,       log the 'schema' & error.
+        |   if it's a post / db,    log the 'link' & 'domain' & error.
+        |   if it's a translation,  log the 'translation' & error.
+        |   if it's a download,     log the 'url' & 'local url' & error.
+        |   error in '.err' file should be solved manually.
+        |__________________________________________________________________________________________
+    √ [B] incorrect datapack-tag relation
+        |   some datapacks have no tag.
+        |______________________________
+        |   Final Fix: relation form technic changes.
+        |____________________________________________
+    √ [F] img block-list
+        |   build a block-list to prevent img download. like 'youtube'.
+        |______________________________________________________________
+    √ [B] time is empty
+        |   time = ''
+        |_______________________________________
+        |   Final Fix: left out empty when tagging time;
+        |              fixed muti-match in 'regex'.
+        |_______________________________________________
+    √ [B] datapackcenter.json
+        |   got datapack name with wrong styles.
+        |_______________________________________
+        |   Final Fix: upgraded regex match.
+        |___________________________________
+    √ [B] hide & hide_a do not coexist with authrization
+        |   to seperate content_full from content_raw.
+        |_____________________________________________
+    √ [B] content in 'mcbbs.json'
+        |   in javascript: (undefined function)
+        |   " Uncaught ReferenceError: img_onmouseoverfunc is not defined.
+        |   at HTMLImageElement.onmouseover "
+        |_________________________________________________________________
+    √ [F] To record history.
+        |   in database.py, add a switcher for 'record'.
+        |   a new table recording datapacks' status.
+        |   when new datapack occurs and old one is deleted, record.
+        |   4 column: 'id', 'link', 'operate' (+ or -), 'date'.
+        |___________________________________________________________
+    √ [B] Being banned from google but datapack is also affected.
+    √ [B] async of datapacks_tags
+    √ [B] googletrans broke
+        |   either change a module to translate text, or use a new way translate by offline dictionary manually
+        |   Final Fix: use 'translators' & offline translation
+        |______________________________________________________________________________________________________
+WEB Bugs & Features:
+    √ [B] incorrect synonymous tag
+        |   synonymous tags do not show.
+        |   source and version should not be distinguished by languages.
+        Solution: check the source code of this function and test it again.
+        |         if 'tag_type' = 0 or 1 (source or version), show all datapacks with synonymous tags.
+        |_____________________________________________________________________________________________
+        |   Final Fix: not a bug and works well when changing into other languages.
+        |__________________________________________________________________________
+    √ [F] a schema check
+        |   Just check whether the schema is legal.
+        |__________________________________________
+    √ [B] unescape bug occurs in origin content
+        |   '<' in origin content confuses 'unescape' function to treat it as a tag.
+        |___________________________________________________________________________
+        |   Final Fix: replace '<' with '＜'.
+        |____________________________________
+    √ [B] <html lang='xxx'>
+        |   In language.exe.
+        |___________________
+    √ [B] Redirect of tag when type = 0 or 1 not keep language
+    √ [F] Associate sources and versions with '/search' instead of '/tag'
+    √ [F] Adapt to touch
+        |   touchmove to turn page
+        |   when page umber change, turn page means goto page.
+        |_____________________________________________________
+    X [F] Adapt to mouse wheel  (bad experience)
+        |   turn page when scrolling down on top.
+        |________________________________________
+    √ [F] shadeless style
+        |   Shadeless and modify color collocation.
+        |   Attach style to cookie.
+        |__________________________________________
+    √ [F] Optimize search funcion (full text, inverted index)
+        |   After robot process done, build a new table indexing words. (via gse)
+        |   build for default_name, name_x, intro. (totally 2 + n tables)
+        |   (table structure: [word | datapack_id | count])
+        |   To match word, use 'like xxx = y%'
+        |   UNION use 'union all' + 'xxx' + 'group by id', INTERSECT use 'union all' + 'xxx' + 'group by id having count(*) >= N'.
+        |   process:
+        |   query word & sum count ([word | id | count])
+        |   -> 'UNION' or 'INTERSECT' all words & sum count ([id | count]) (relation between words)
+        |   -> 'UNION' or 'INTERSECT' all ids in name and intro & sum count & order by count & offset & limit ([id]) (relation between name and intro)
+        |   (-> normal search: 'UNION' (datapack_tags's datapack_id left join tags ... on ... group by...) # union relevant tags' datapack ids
+        |   -> use left join to query datapacks from the sub set of ids. (select ... left join (subquery) as x on x.id = datapacks.id ...)
+        |   (-> accurate search: left join authors on datapacks.author_id = authors.id where ...) # intersect authors name
+        |
+        |   eg:
+        |   # normal search '羊羊工艺' and 1.14 version -> '羊' or '工艺'
+        |   (0.00-0.01 sec) explain
+            select datapacks.id, datapacks.default_name, count as key_word_count from (
+                select id, sum(count) as count from (
+                    select id, sum(count) as count from (
+                        select id, count as count from datapacks_default_name_ii where word like '羊%'
+                        union all
+                        select id, count as count from datapacks_default_name_ii where word like '工艺%'
+                    ) as _default_name group by id
+                    union all
+                    select id, sum(count) as count from (
+                        select id, count as count from datapacks_intro_ii where word like '羊%'
+                        union all
+                        select id, count as count from datapacks_intro_ii where word like '工艺%'
+                    ) as _intro group by id
+                    union all
+                    select id, 1 as count from (
+                        select dt.datapack_id as id from tags left join datapack_tags as dt on tags.id = dt.tag_id where tags.default_tag like '羊%' and tags.type >= 2
+                        union all
+                        select dt.datapack_id as id from tags left join datapack_tags as dt on tags.id = dt.tag_id where tags.default_tag like '工艺%' and tags.type >= 2
+                    ) as _default_tag
+                ) as results group by id
+            ) as ids left join (select dt.datapack_id as id from tags left join datapack_tags as dt on tags.id = dt.tag_id where tags.type = 1 and tags.default_tag = '1.14') as vs left join datapacks on vs.id = datapacks.id on ids.id = datapacks.id
+            where datapacks.id is not NULL order by count DESC limit 15 offset 0;
+        |
+        |   eg:
+        |   # accurate search '羊羊工艺' in default_name, '剪刀 羊' in intro and 'kong' in author_name -> '羊' and '工艺', '剪刀' and '羊'
+        |   (0.00-0.01 sec) explain
+            select datapacks.id, datapacks.default_name, count as key_word_count from (
+                select id, sum(count) as count from (
+                    select id, sum(count) as count from (
+                        select id, count as count from datapacks_default_name_ii where word like '羊%'
+                        union all
+                        select id, count as count from datapacks_default_name_ii where word like '工艺%'
+                    ) as _default_name group by id having count(*) >= 2
+                    union all
+                    select id, sum(count) as count from (
+                        select id, count as count from datapacks_intro_ii where word like '剪刀%'
+                        union all
+                        select id, count as count from datapacks_intro_ii where word like '羊%'
+                    ) as _intro group by id having count(*) >= 2
+                ) as results group by id having count(*) >= 2
+            ) as ids left join datapacks on ids.id = datapacks.id
+            left join authors on datapacks.author_id = authors.id where authors.author_name like 'kong%' order by count DESC limit 15 offset 0;
+        |_____________________________________________________________________________________________________________________________________________
+    √ [F] Optimize query in mysql
+        |  1. change version, tag from regexp to left join. (left join (datapack_tags's datapack_id left join tags ... where ... group by) ...)
+        |       if use version or tag, previously add join.
+        |       (subquery as 'datapacks')
+        |   eg: (0.01-0.02 sec) explain
+            select datapacks.* from (
+                select dt.datapack_id as id from tags left join datapack_tags as dt on tags.id = dt.tag_id where
+                    tags.type = 1 and tags.default_tag = '1.14'
+            ) as ids left join datapacks on ids.id = datapacks.id;
+            select tags.*, tags.default_tag as tag from (select datapack_tags.tag_id as id from datapack_tags where datapack_id = 'e5dd20cc-3f30-3d2e-88fc-bf85c9ade350') as ids left join tags on tags.id = ids.id order by tags.type, tags.default_tag, tags.default_tag DESC;
+        |  2. build solo-index of each colum to query:
+        |       datapacks: source, post_time, update_time
+        |       authors: author_name
+        |       tags: tag
+        |       datapack_tags: datapack_id, tag_id
+        |______________________________________________________________________________________________________________________________________
+    √ [F] Simplified style
+        |   Based on shadeless, a simplified ui.
+        |   Attach style to cookie.
+        |   adapted to mobile
+        |_____________________________________________________________________________
+    √ [F] An entrance in '/guide' providing access to changing style.
+    √ [F] responsive mode
+        |   √ Width < 996px
+        |   √ Mobile (WIP,40%)
+        |__________________
+    √ [F] a terminal tool based on commandline to do functional DB operation
+        |   √ basic get of records.
+        |   √ basic changes of a column in a record. (only translated content)
+        |   √ combine author, datapack. (via table 'authors_related', table 'datapacks_related')
+        |   √ mark authorized post.
+        |   √ raw sql. (only 'select')
+        |_______________________________________________________________________________________
+    √ [F] Wandering (a datapack-seeking function)
+        |   flexibly link tag with other tags and showing the most relevant datapack.
+        |_______________________________________________________________________________
+    √ [F] Database Backup
+    √ [F] Paged datapacks shown in /tag
 [F] Docs (development and protocol)
-[F] Translation
+    - api.md            # for api standard
+    - build.md          # run locally
+    - translation.md    # create new language
+    - administer.md     # admin operation
+    - spider.md         # spider related
+[F] Translation of website
+[F] Update admin language tool
 [F] A secure way to authorize, combine and correct
     |   additional related tool: email, discord, accounts in other websites.
     |

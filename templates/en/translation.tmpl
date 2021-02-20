@@ -1,30 +1,30 @@
-{{define "en/website_intro_msg"}}The End of Datapack (全球数据包索引库){{end}}
-{{define "en/datapacks_msg"}}数据包{{end}}
-{{define "en/authors_msg"}}作者{{end}}
-{{define "en/tags_msg"}}标签{{end}}
-{{define "en/languages_msg"}}语言{{end}}
-{{define "en/guide_msg"}}向导{{end}}
-{{define "en/about_msg"}}关于{{end}}
+{{define "default/website_intro_msg"}}datapack.space-全球数据包索引库{{end}}
+{{define "default/datapacks_msg"}}数据包{{end}}
+{{define "default/authors_msg"}}作者{{end}}
+{{define "default/tags_msg"}}标签{{end}}
+{{define "default/languages_msg"}}语言{{end}}
+{{define "default/guide_msg"}}向导{{end}}
+{{define "default/about_msg"}}关于{{end}}
 
-{{define "en/end_crystal_msg"}}末影水晶{{end}}
-{{define "en/default"}}默认{{end}}
-{{define "en/wander_on_msg"}}开启末地漫步者{{end}}
-{{define "en/wander_off_msg"}}关闭末地漫步者{{end}}
+{{define "default/end_crystal_msg"}}末影水晶{{end}}
+{{define "default/default"}}默认{{end}}
+{{define "default/wander_on_msg"}}开启末地漫步者{{end}}
+{{define "default/wander_off_msg"}}关闭末地漫步者{{end}}
 
-{{define "en/post_at_msg"}}发表于{{end}}
-{{define "en/update_at_msg"}}更新于{{end}}
-{{define "en/goto_link_msg"}}前往原帖{{end}}
-{{define "en/to_top_msg"}}回到顶部{{end}}
-{{define "en/related_datapacks_msg"}}相同数据包{{end}}
-{{define "en/hide_msg"}}内容被隐藏，请前往原贴查看{{end}}
-{{define "en/hide_a_msg"}}链接被隐藏，请前往原贴查看{{end}}
-{{define "en/counter_msg"}}收录署名数据包数目{{end}}
-{{define "en/last_update_msg"}}最后更新时间{{end}}
-{{define "en/counter_tag_msg"}}拥有该标签的数据包数目{{end}}
-{{define "en/language_tag"}}标签默认语言{{end}}
-{{define "en/synonymous_tag"}}同义标签{{end}}
+{{define "default/post_at_msg"}}发表于{{end}}
+{{define "default/update_at_msg"}}更新于{{end}}
+{{define "default/goto_link_msg"}}前往原帖{{end}}
+{{define "default/to_top_msg"}}回到顶部{{end}}
+{{define "default/related_datapacks_msg"}}相同数据包{{end}}
+{{define "default/hide_msg"}}内容被隐藏，请前往原贴查看{{end}}
+{{define "default/hide_a_msg"}}链接被隐藏，请前往原贴查看{{end}}
+{{define "default/counter_msg"}}收录署名数据包数目{{end}}
+{{define "default/last_update_msg"}}最后更新时间{{end}}
+{{define "default/counter_tag_msg"}}拥有该标签的数据包数目{{end}}
+{{define "default/language_tag"}}标签默认语言{{end}}
+{{define "default/synonymous_tag"}}同义标签{{end}}
 
-{{define "en/combo-order"}}
+{{define "default/combo-order"}}
 <select class="select-menu" id="order" data-menu>
     <option value="0">最近发布</option>
     <option value="1">发布时间倒序</option>
@@ -33,7 +33,7 @@
     <option value="4">按名称排序</option>
 </select>
 {{end}}
-{{define "en/combo-filter-post-time"}}
+{{define "default/combo-filter-post-time"}}
 <select id="filter-post-time" data-menu>
     <option value="0">-</option>
     <option value="1">今天发布</option>
@@ -44,7 +44,7 @@
     <option value="6">今年发布</option>
 </select>
 {{end}}
-{{define "en/combo-filter-update-time"}}
+{{define "default/combo-filter-update-time"}}
 <select id="filter-update-time" data-menu>
     <option value="0">-</option>
     <option value="1">今天更新</option>
@@ -56,74 +56,72 @@
 </select>
 {{end}}
 
-{{define "en/guide"}}
+{{define "default/guide"}}
 <h1 id="0">向导</h1>
-<p class="welcome">欢迎来到数据包的终末之地！</p>
-<p>这里几乎汇集了全球的Minecraft数据包作品。你可以把这里视作数据包的数据库，也可以当做数据包的搜索引擎，一切都是为玩家便捷寻找数据包而服务。</p>
-<h2 id="1">末地岛屿</h2>
-    <p>末地有诸多岛屿，这里也是如此。接下来为你介绍各个岛屿的要素。</p>
+<p class="welcome">欢迎来到datapack.space。这里几乎汇集了全球所有的Minecraft数据包作品，并且作为一个搜索网站提供数据包搜索服务。</p>
+<p>网站采用末路之地风格，旨在将用户的交互过程形象化地与对末地的探索过程相结合，从而提高用户的浏览与交互体验。</p>
+<h2 id="1">基本板块</h2>
+    <p>众所周知，末地有诸多岛屿，这里也是如此。接下来为您介绍本网站的基本板块。</p>
     <li id="1.0">数据包</li>
-        <p>这是末地中最大末地岛屿。这里拥有上千个数据包，它们都分布在"末地城"里。"末地城"中所有数据包都被存放在"潜影盒"中，但它们只包含介绍与原帖链接。</p>
-        <p>"末地城"("数据包"页面)罗列了所有数据包，如果想要查看某个数据包的具体内容，可以点击"标题"或者"末影水晶"打开"潜影盒"(前往该数据包的主页)。</p>
-        <p>只有被授权的数据包的介绍是完整的，否则链接、视频等交互内容将被隐藏，下载数据包也需要前往原贴下载。</p>
-        <p>想要快速地搜索数据包而不是漫无目的地翻找？现在赋予"潜影盒"末影箱的能力，借助"普通搜索"、"精确搜索"和"过滤"的功能，你肯定能找到你想要的。</p>
+        <p>这是本网站的主体部分，为数据包相关内容提供展示、搜索服务。</p>
+        <p>"末地城"——"数据包"主页面罗列了所有数据包，并且只显示数据包的基本信息和简介。如果您想要查看某个数据包的具体内容，可以点击它的"标题"或者封面上的"末影珍珠"前往该数据包的主页。</p>
+        <p>只有被授权的数据包的具体内容是完整的，<strong>否则其中的链接、视频等交互内容将被隐藏，下载数据包也需要前往原贴下载。</strong></p>
+        <p>想要快速地搜索数据包而不是漫无目的地翻找？借助<strong>"普通搜索"、"精确搜索"和"过滤"的功能</strong>，您肯定能找到您想要的。</p>
     <li id="1.1">作者</li>
-        <p>每一位作者都化身为屠龙者，其名字被篆刻在"末地主岛"的黑曜石柱上。</p>
-        <p>"末地主岛"("作者"页面)罗列了所有作者，如果想要查看某位作者的信息，可以点击其头像或名字进入其主页。</p>
-        <p>作者主页除了包含作者的详细信息外，还有所有以其署名的数据包。</p>
+        <p>这是本网站的辅助内容，只是展示作者的昵称、头像与其创作的数据包，不涉及作者其他信息。</p>
+        <p>"末地主岛"——"作者"页面罗列了所有作者。如果您想要查看某位作者的相关内容，可以点击其头像或名字进入他/她的主页。</p>
     <li id="1.2">标签</li>
-        <p>所有数据包都包含四类标签：来源、版本、分类、关键词。这四类标签以不同颜色展示</p>
+        <p>所有数据包都包含四类标签：来源、版本、分类、关键词。这四类标签以不同颜色展示。</p>
         <p>蓝色的"来源"和绿色的"版本"为数据包的基本信息，青色的"分类"是数据包作者自己定义的分类，紫色的"关键词"由数据包的介绍总结。</p>
-        <p>"紫颂藤"("标签"页面)罗列了所有标签，按照标签被引用的次数排序，如果想要查看某个标签的信息，可以点击标签进入其主页。</p>
-        <p>标签主页包含了标签的统计信息、所有该标签下的的数据包。如果设置了网站语言，可能还会呈现该语言下的同义标签。</p>
+        <p>"紫颂藤"——"标签"页面罗列了所有标签，按照标签被引用的次数排序。如果您想要查看某个标签的相关内容，可以点击标签进入其主页。</p>
+        <p>标签主页包含了标签的统计信息、所有该标签下的的数据包。如果您设置了网站语言，主页还可能将呈现该语言下的同义标签。</p>
 <h2 id="2">搜索与过滤</h2>
-    <div style="--background: rgba(72,48,72,0.5); transform: scale(0.75); float: left">{{template "icon/option"}}</div><p>点击后将展开"搜索与过滤"选项。</p>
+    <div style="--background: rgba(72,48,72,0.5); transform: scale(0.75); float: left">{{template "icon/option"}}</div><p>点击如左图所示的按钮后展开"搜索与过滤"选项。</p>
     <li id="2.0">普通搜索</li>
-        <p>基于关键词的查全搜索。可以输入一个关键词或者一句话，搜索结果按照关键词出现次数排序。</p>
-        <p>在搜索"数据包"时，搜索范围为数据包的名称、数据包的介绍、数据包的标签；在搜索"作者"或"标签"，搜索范围仅为其名称，且为向后无线截词。</p>
+        <p>基于关键词的查全搜索。可以输入一个关键词或者一句话，搜索结果将按照其中关键词出现的次数降序排列。</p>
+        <p>搜索范围为网站语言下(如果您没设置网站语言，则以数据包的原始信息为准)数据包的名称、数据包的简介、数据包的标签；在搜索"作者"或"标签"，搜索范围仅为其名称，且为向后无限截词。</p>
     <li id="2.1">精确搜索</li>
         <p>基于关键词的查准搜索，搜索结果保证输入内容一定在字段内。</p>
-        <p>只适用于数据包搜索。搜索范围可以是数据包的名称、数据包的作者名字、数据包的介绍。其中作者名字为向后无线截词。</p>
+        <p>只适用于数据包搜索。搜索范围可以是数据包的名称、数据包的作者名字、数据包的介绍。其中作者名字为向后无限截词。</p>
     <li id="2.2">过滤</li>
         <p>包含五个下拉框。只适用于数据包过滤。</p>
-        <p>第一个下拉框用于选择结果的排列顺序，默认按发布时间排序（从新到旧）。随后的四个下拉框分别用于筛选来源、版本、发布时间、更新时间。</p>
+        <p>第一个下拉框用于选择结果的排列顺序，默认为最近发布（从最近发布到最早发布）。随后的四个下拉框分别用于筛选来源、版本、发布时间、更新时间。</p>
 <h2 id="3">切换语言</h2>
-    <p>在"语言"页面切换语言。其中翻译仅适用于网站提示、数据包名、标签等。</p>
-    <p>在"默认语言"下，除了网站提示是简体中文的，其他内容将直接显示原始信息。</p>
-    <p>而在某种语言下，数据包名、标签等则显示的是经过翻译后的名称。(需要注意，第一次翻译为机翻，不一定准确。如需修改，查看 <span>贡献 - 纠错</span>)</p>
+    <p>在"语言"页面切换语言。翻译仅适用于网站提示、数据包名、数据包简介、标签等。</p>
+    <p>在"默认语言"下，除了网站提示是简体中文的，其他内容将直接显示数据包原始信息。</p>
+    <p>(需要注意，翻译默认为机翻，不一定准确。如需修改，查看 <span>贡献 - 纠错</span>)</p>
 <h2 id="4">切换样式</h2>
-    <p>末地为你提供了以下几种样式。（点击按钮切换风格）</p>
+    <p>末地为您提供了以下几种样式。（点击按钮切换风格）</p>
     <button onclick="change_style('normal')">普通</button><button onclick="change_style('shadeless')">无阴影</button><button onclick="change_style('simplified')">精简</button>
     <ul>
-        <li><p>普通：默认的样式，通过阴影和滤镜，提供良好的视觉体验。</p></li>
+        <li><p>普通：默认样式，通过阴影和滤镜，提供良好的视觉体验。</p></li>
         <li><p>无阴影：删减了滤镜和阴影，提供流畅的交互体验。</p></li>
         <li><p>精简：在无阴影的基础上，缩减了信息界面，干净简单。</p></li>
     </ul>
 <h2 id="5">随机浏览</h2>
-    <p>厌倦了耗时费力的翻页，想要来点刺激的？</p>
-    <p>你可以点击下方按钮，遁入折跃门，说不定能找到让你眼前一亮的。</p>
+    <p>您可以点击下方按钮，遁入折跃门，说不定能找到让您眼前一亮的。</p>
     <button onclick="randomize('datapack')">折跃门 - 数据包</button><button onclick="randomize('author')">折跃门 - 作者</button><button onclick="randomize('tag')">折跃门 - 标签</button>
 <h2 id="6">API接口</h2>
-    <p>想要将数据库内容衔接到你的项目中？没问题，末地开放了API接口。</p>
+    <p>想要将数据库内容衔接到您的项目中？没问题，末地开放了API接口。</p>
     <li id="6.0">接口规范</li>
-    <p>在数据包、作者、标签的页面url上添加GET参数：api=1，以请求api接口。api接口将返回一段json，其中包含了所有在该页面下的信息。</p>
-    <p>json格式，详见：<span>Github - docs/API.md</span></p>
+    <p>在数据包、作者、标签的页面url上添加GET参数"api=1"以请求api接口。api接口将返回一段json，包含了在该页面下的全部信息。</p>
+    <p>json格式，详见：<span>Github - docs/api.md</span></p>
 <h2 id="7">贡献</h2>
     <li id="7.0">翻译</li>
         <p>想要把网站提示或开发文档翻译到另外一种语言？详见：<span>Github - docs/translation.md</span></p>
     <li id="7.1">纠错</li>
         <p>所有内容的第一次翻译都是由谷歌翻译完成的，因此存在不准确的情况。如需纠错，参考：<span>Github - docs/administer.md#correction</span></p>
     <li id="7.2">合并</li>
-        <p>如果来源不同，即使是同名的作者或数据包也是被单独呈现的，所以可能会存在多个相同数据包以及多个相同作者的尴尬情形。如需合并您在不同网站上的相同项目，参考：<span>Github - docs/administer.md#combine</span></p>
+        <p>如果来源不同，即使是同名的作者或数据包也是被单独呈现的，所以可能会存在多个相同数据包以及多个相同作者的尴尬情形。如需合并您在不同网站上的相同数据包，参考：<span>Github - docs/administer.md#combine</span></p>
     <li id="7.3">授权</li>
         <p>所有数据包默认都是未授权的，因此将会隐藏原介绍中的视频、链接等交互功能。将您的数据包授权给末地，上述功能将会开放，但您也许会损失一部分点击量。授权操作参考：<span>Github - docs/administer.md#authorize</span></p>
     <li id="7.4">添加网站来源</li>
-        <p>希望您的个人集合被末地收录？或者想要引用一个新的数据包库？参考：<span>Github - docs/robot.md</span></p>
+        <p>希望您的个人集合被末地收录？或者想要引用一个新的数据包库？参考：<span>Github - docs/spider.md</span></p>
     <li id="7.5">反馈</li>
         <p>无论是想到了很棒的点子，还是遇到了棘手的难题，您都可以在<span>Github - Issues</span>下告知我。</p>
 {{end}}
-{{define "en/guide-link"}}
-<li><a href="#1">末地岛屿</a></li>
+{{define "default/guide-link"}}
+<li><a href="#1">基本板块</a></li>
 <ul>
     <li><a href="#1.0">数据包</a></li>
     <li><a href="#1.1">作者</a></li>
@@ -153,34 +151,22 @@
 </ul>
 {{end}}
 
-{{define "en/about"}}
+{{define "default/about"}}
 <h1>关于</h1>
-<h2>用户协议</h2>
-    <li>总则</li>
-    <li>版权</li>
-    <li>使用</li>
-    <li>服务</li>
-    <li>隐私</li>
-<h2>版权声明</h2>
-    <li>开源证书</li>
-    <li>第三方项目</li>
-    <li>内容</li>
-<h2>更多</h2>
+<li id="1">免责声明</li>
+<ul style="font-size: 0.5em">
+    <li>datapack.space是一个公益非盈利搜索网站，不出于任何商业目的。</li>
+    <li>网站不包含用户系统，仅供访客匿名访问。</li>
+    <li>网站使用了1个cookie，仅与网站样式相关，不涉及访客隐私或个人信息。</li>
+    <li>网站所收集的作品仅含基本信息(已授权的作品除外)，且信息仅作传播使用，不侵犯作品本身的版权。</li>
+    <li>爬虫以游客权限，遵循数据来源站点的访问协议，合法爬取站点内的公开内容，与用户隐私及版权无关。</li>
+    <li>若访客行为违反访客当地法律并引起纷和纠造成的一切后果，访客自行承担，本站概不负责。</li>
+</ul>
+<li id="2">开源证书</li>
+<p>项目采用<a href="https://github.com/tremblestarman/datapack.space/blob/master/LICENSE">GNU General Public License v3.0</a>开源协议，已在<a href="https://github.com/tremblestarman/datapack.space">Github</a>开源。
+</p>
 {{end}}
-{{define "en/about-link"}}
-<li>用户协议</li>
-<ul>
-    <li>总则</li>
-    <li>版权</li>
-    <li>使用</li>
-    <li>服务</li>
-    <li>隐私</li>
-</ul>
-<li>版权声明</li>
-<ul>
-    <li>开源证书</li>
-    <li>第三方项目</li>
-    <li>内容</li>
-</ul>
-<li>更多</li>
+{{define "default/about-link"}}
+<li><a href="#1">免责声明</a></li>
+<li><a href="#2">开源证书</a></li>
 {{end}}

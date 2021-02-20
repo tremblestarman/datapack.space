@@ -81,9 +81,10 @@ class resource_porter(porter): # resources porter
     '''
     Download cache to local file system.
     '''
-    def __init__(self, cache_table: str, sleep_time=60, log=True, interrupt=False, callback=None, resource_dir='', domain_block=[]):
+    def __init__(self, cache_table: str, sleep_time=60, log=True, interrupt=False, callback=None, resource_dir='', domain_block=[], ignoreFailed=False):
         self.resource_dir = os.path.dirname(BASE_DIR) + f"/bin" if resource_dir == None else resource_dir # set resource directory
         self.domain_block = domain_block # set blocked domain list
+        self.ignoreFailed = ignoreFailed # ignore failed record
         porter.__init__(self, cache_table, sleep_time, log, interrupt, callback)
     @func_set_timeout(600) # set timeout for 10 minutes
     def resource_save(self, local_url: str, web_url: str):
@@ -113,6 +114,8 @@ class resource_porter(porter): # resources porter
                       f"- porter: resource download failed! please check \'/util/err/port_{self.cache_table}.err\'")
                 if self.log:
                     self.LOG.log(f'port_{self.cache_table}', traceback.format_exc(), process='resource_save', local_url=local_url, web_url=web_url)
+        if self.ignoreFailed:
+            return True
         return False
     def resource_delete(self, local_url: str):
         # delete process
@@ -188,7 +191,7 @@ class record_porter(porter):
         self.cur.execute(f'''update {self.target_table} set {','.join([f"{k}={self.__set_right_exp__(v)}" for k, v in cache_dict.items()])} where id = '{cache_dict['id']}';''')
         return True
     def record_delete(self, cache_dict: dict):
-        self.cur.execute(f'''delete from {self.target_table} where {','.join([f"{k}={self.__set_right_exp__(v)}" for k, v in cache_dict.items()])};''')
+        self.cur.execute(f'''delete from {self.target_table} where {' and '.join([f"{k}={self.__set_right_exp__(v)}" for k, v in cache_dict.items()])};''')
         return True
     def port(self, cache_dict: dict):
         # get columns that need to be translated
