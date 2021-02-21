@@ -249,11 +249,10 @@ WEB Bugs & Features:
 [F] Docs (development and protocol)
     - api.md            # for api standard
     - build.md          # run locally
-    - translation.md    # create new language
-    - administer.md     # admin operation
-    - spider.md         # spider related
+    - translation.md    # create new language (language.json, translation.tmpl, language.go)
+    - administer.md     # admin operation (administer.go)
+    - spider.md         # spider related (add new source)
 [F] Translation of website
-[F] Update admin language tool
 [F] A secure way to authorize, combine and correct
     |   additional related tool: email, discord, accounts in other websites.
     |

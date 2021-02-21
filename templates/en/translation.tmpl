@@ -1,172 +1,175 @@
-{{define "default/website_intro_msg"}}datapack.space-全球数据包索引库{{end}}
-{{define "default/datapacks_msg"}}数据包{{end}}
-{{define "default/authors_msg"}}作者{{end}}
-{{define "default/tags_msg"}}标签{{end}}
-{{define "default/languages_msg"}}语言{{end}}
-{{define "default/guide_msg"}}向导{{end}}
-{{define "default/about_msg"}}关于{{end}}
+{{define "en/website_intro_msg"}}datapack.space (global datapack database){{end}}
+{{define "en/datapacks_msg"}}Datapacks{{end}}
+{{define "en/authors_msg"}}Authors{{end}}
+{{define "en/tags_msg"}}Tags{{end}}
+{{define "en/languages_msg"}}Language{{end}}
+{{define "en/guide_msg"}}Guide{{end}}
+{{define "en/about_msg"}}About{{end}}
 
-{{define "default/end_crystal_msg"}}末影水晶{{end}}
-{{define "default/default"}}默认{{end}}
-{{define "default/wander_on_msg"}}开启末地漫步者{{end}}
-{{define "default/wander_off_msg"}}关闭末地漫步者{{end}}
+{{define "en/end_crystal_msg"}}End Crystal{{end}}
+{{define "en/default"}}Default{{end}}
+{{define "en/wander_on_msg"}}enable Ender Wanderer{{end}}
+{{define "en/wander_off_msg"}}disable Ender Wanderer{{end}}
 
-{{define "default/post_at_msg"}}发表于{{end}}
-{{define "default/update_at_msg"}}更新于{{end}}
-{{define "default/goto_link_msg"}}前往原帖{{end}}
-{{define "default/to_top_msg"}}回到顶部{{end}}
-{{define "default/related_datapacks_msg"}}相同数据包{{end}}
-{{define "default/hide_msg"}}内容被隐藏，请前往原贴查看{{end}}
-{{define "default/hide_a_msg"}}链接被隐藏，请前往原贴查看{{end}}
-{{define "default/counter_msg"}}收录署名数据包数目{{end}}
-{{define "default/last_update_msg"}}最后更新时间{{end}}
-{{define "default/counter_tag_msg"}}拥有该标签的数据包数目{{end}}
-{{define "default/language_tag"}}标签默认语言{{end}}
-{{define "default/synonymous_tag"}}同义标签{{end}}
+{{define "en/post_at_msg"}}posted at{{end}}
+{{define "en/update_at_msg"}}updated at{{end}}
+{{define "en/goto_link_msg"}}Head to the original post{{end}}
+{{define "en/to_top_msg"}}Back to top{{end}}
+{{define "en/related_datapacks_msg"}}Same datapacks{{end}}
+{{define "en/hide_msg"}}Content is hidden, please head to the original post to view.{{end}}
+{{define "en/hide_a_msg"}}Link is hidden, please head to the original post to view.{{end}}
+{{define "en/counter_msg"}}Amount of signed datapacks{{end}}
+{{define "en/last_update_msg"}}Last update time{{end}}
+{{define "en/counter_tag_msg"}}Amount of datapacks with this tag{{end}}
+{{define "en/language_tag"}}Default language of this tag{{end}}
+{{define "en/synonymous_tag"}}Synonymous tags{{end}}
 
-{{define "default/combo-order"}}
+{{define "en/datapack_name_msg"}}datapack{{end}}
+{{define "en/author_name_msg"}}author{{end}}
+{{define "en/introduction_msg"}}intro{{end}}
+{{define "en/combo-order"}}
 <select class="select-menu" id="order" data-menu>
-    <option value="0">最近发布</option>
-    <option value="1">发布时间倒序</option>
-    <option value="2">最近更新</option>
-    <option value="3">更新时间倒序</option>
-    <option value="4">按名称排序</option>
+    <option value="0">Latest posted</option>
+    <option value="1">Earliest posted</option>
+    <option value="2">Latest updated</option>
+    <option value="3">Earliest updated</option>
+    <option value="4">Alphabet</option>
 </select>
 {{end}}
-{{define "default/combo-filter-post-time"}}
+{{define "en/combo-filter-post-time"}}
 <select id="filter-post-time" data-menu>
     <option value="0">-</option>
-    <option value="1">今天发布</option>
-    <option value="2">三日内发布</option>
-    <option value="3">一周内发布</option>
-    <option value="4">一月内发布</option>
-    <option value="5">这个月发布</option>
-    <option value="6">今年发布</option>
+    <option value="1">Posted today</option>
+    <option value="2">Posted last 3 days</option>
+    <option value="3">Posted last 1 week</option>
+    <option value="4">Posted last 1 month</option>
+    <option value="5">Posted this month</option>
+    <option value="6">Posted this year</option>
 </select>
 {{end}}
-{{define "default/combo-filter-update-time"}}
+{{define "en/combo-filter-update-time"}}
 <select id="filter-update-time" data-menu>
     <option value="0">-</option>
-    <option value="1">今天更新</option>
-    <option value="2">三日内更新</option>
-    <option value="3">一周内更新</option>
-    <option value="4">一月内更新</option>
-    <option value="5">这个月更新</option>
-    <option value="6">今年更新</option>
+    <option value="1">Updated today</option>
+    <option value="2">Updated last 3 days</option>
+    <option value="3">Updated last 1 week</option>
+    <option value="4">Updated last 1 month</option>
+    <option value="5">Updated this month</option>
+    <option value="6">Updated this year</option>
 </select>
 {{end}}
 
-{{define "default/guide"}}
-<h1 id="0">向导</h1>
-<p class="welcome">欢迎来到datapack.space。这里几乎汇集了全球所有的Minecraft数据包作品，并且作为一个搜索网站提供数据包搜索服务。</p>
-<p>网站采用末路之地风格，旨在将用户的交互过程形象化地与对末地的探索过程相结合，从而提高用户的浏览与交互体验。</p>
-<h2 id="1">基本板块</h2>
-    <p>众所周知，末地有诸多岛屿，这里也是如此。接下来为您介绍本网站的基本板块。</p>
-    <li id="1.0">数据包</li>
-        <p>这是本网站的主体部分，为数据包相关内容提供展示、搜索服务。</p>
-        <p>"末地城"——"数据包"主页面罗列了所有数据包，并且只显示数据包的基本信息和简介。如果您想要查看某个数据包的具体内容，可以点击它的"标题"或者封面上的"末影珍珠"前往该数据包的主页。</p>
-        <p>只有被授权的数据包的具体内容是完整的，<strong>否则其中的链接、视频等交互内容将被隐藏，下载数据包也需要前往原贴下载。</strong></p>
-        <p>想要快速地搜索数据包而不是漫无目的地翻找？借助<strong>"普通搜索"、"精确搜索"和"过滤"的功能</strong>，您肯定能找到您想要的。</p>
-    <li id="1.1">作者</li>
-        <p>这是本网站的辅助内容，只是展示作者的昵称、头像与其创作的数据包，不涉及作者其他信息。</p>
-        <p>"末地主岛"——"作者"页面罗列了所有作者。如果您想要查看某位作者的相关内容，可以点击其头像或名字进入他/她的主页。</p>
-    <li id="1.2">标签</li>
-        <p>所有数据包都包含四类标签：来源、版本、分类、关键词。这四类标签以不同颜色展示。</p>
-        <p>蓝色的"来源"和绿色的"版本"为数据包的基本信息，青色的"分类"是数据包作者自己定义的分类，紫色的"关键词"由数据包的介绍总结。</p>
-        <p>"紫颂藤"——"标签"页面罗列了所有标签，按照标签被引用的次数排序。如果您想要查看某个标签的相关内容，可以点击标签进入其主页。</p>
-        <p>标签主页包含了标签的统计信息、所有该标签下的的数据包。如果您设置了网站语言，主页还可能将呈现该语言下的同义标签。</p>
-<h2 id="2">搜索与过滤</h2>
-    <div style="--background: rgba(72,48,72,0.5); transform: scale(0.75); float: left">{{template "icon/option"}}</div><p>点击如左图所示的按钮后展开"搜索与过滤"选项。</p>
-    <li id="2.0">普通搜索</li>
-        <p>基于关键词的查全搜索。可以输入一个关键词或者一句话，搜索结果将按照其中关键词出现的次数降序排列。</p>
-        <p>搜索范围为网站语言下(如果您没设置网站语言，则以数据包的原始信息为准)数据包的名称、数据包的简介、数据包的标签；在搜索"作者"或"标签"，搜索范围仅为其名称，且为向后无限截词。</p>
-    <li id="2.1">精确搜索</li>
-        <p>基于关键词的查准搜索，搜索结果保证输入内容一定在字段内。</p>
-        <p>只适用于数据包搜索。搜索范围可以是数据包的名称、数据包的作者名字、数据包的介绍。其中作者名字为向后无限截词。</p>
-    <li id="2.2">过滤</li>
-        <p>包含五个下拉框。只适用于数据包过滤。</p>
-        <p>第一个下拉框用于选择结果的排列顺序，默认为最近发布（从最近发布到最早发布）。随后的四个下拉框分别用于筛选来源、版本、发布时间、更新时间。</p>
-<h2 id="3">切换语言</h2>
-    <p>在"语言"页面切换语言。翻译仅适用于网站提示、数据包名、数据包简介、标签等。</p>
-    <p>在"默认语言"下，除了网站提示是简体中文的，其他内容将直接显示数据包原始信息。</p>
-    <p>(需要注意，翻译默认为机翻，不一定准确。如需修改，查看 <span>贡献 - 纠错</span>)</p>
-<h2 id="4">切换样式</h2>
-    <p>末地为您提供了以下几种样式。（点击按钮切换风格）</p>
-    <button onclick="change_style('normal')">普通</button><button onclick="change_style('shadeless')">无阴影</button><button onclick="change_style('simplified')">精简</button>
+{{define "en/guide"}}
+<h1 id="0">Guide</h1>
+<p class="welcome">Welcome to datapack.space. Almost all the Minecraft datapack works are collected here. And as a search site, it provides datapack search service.</p>
+<p>Website adopts Ender style, to combine user interface with exploration to The End visually, promoting performance of viewing and interacting.</p>
+<h2 id="1">Basic Plate</h2>
+    <p>As is known for all, there are a lot of islands in The End, so are Here. The following are some basic plates of this website.</p>
+    <li id="1.0">Datapacks</li>
+        <p>This is the main part of this website, which provides display and search services for datapack related content.</p>
+        <p>END CITY —— main page of datapacks shows all datapacks with basic information and brief introduction. If you want to view details of a datapack, please click its title or End Crystal on its cover to head to its page.</p>
+        <p>Only the detailed content of an authorized datapack is complete, <strong>or all links, videos and other interactive contents inside it are hidden, as well as the download link. So if you want to download, the only way is to head to the original post.</strong></p>
+        <p>Want to find datapacks quickly? By using <strong>Normal Search, Accurate Search and Filter</strong>, you will find what you want.</p>
+    <li id="1.1">Authors</li>
+        <p>This is a supplementary part of this website, which only shows author's nickname, avatar. It does not involve other information of authors.</p>
+        <p>CENTRAL ISLAND —— author page shows all authors. If you want to see more, please click his/her avatar or nickname to head to the detailed page.</p>
+    <li id="1.2">Tags</li>
+        <p>All datapack has 4 kinds of tags: source, version, class, keyword, which are shown in different colors.</p>
+        <p>Source in blue and Version in green are basic information of datapacks. Class in cyan is defined by author, while Keyword in purple is summarized by the website.</p>
+        <p>Chorus Plant —— tag page displays all tags, ordered by its quotation. If you want to see more, please click it to head to the detailed page.</p>
+        <p>The detailed page contains statistic of tag, and all datapacks which has this tag. If you set your language, there may be its synonymous tags.</p>
+<h2 id="2">Search & Filter</h2>
+    <div style="--background: rgba(72,48,72,0.5); transform: scale(0.75); float: left">{{template "icon/option"}}</div><p>Click button like the left icon to unfold panel of Search & Filter.</p>
+    <li id="2.0">Normal Search</li>
+        <p>Full search based on keywords. You can enter a keyword or a sentence, and the search results will be sorted in descending order of the number of times the keyword appears.</p>
+        <p>The range of search is name, brief introduction and tag of datapack in your language (if you haven't set your language, it will search on default things); When searching author or tag, the search scope is only their name, and it is unlimited backward truncation.</p>
+    <li id="2.1">Accurate Search</li>
+        <p>Keyword-based accurate search. The search results ensure that the input content must be in the field.</p>
+        <p>Only applies for datapack. The scope can be name, author's nickname and brief introduction. it is unlimited backward truncation for author's nickname.</p>
+    <li id="2.2">Filter</li>
+        <p>Contains 5 filters. Only applies for datapack.</p>
+        <p>The first determines order of the result. The following 4 are filters for source, version, post time and update time.</p>
+<h2 id="3">Language Switch</h2>
+    <p>You can switch to your language in Language page. The translation is only on website tips, name & introduction of datapacks, tags.</p>
+    <p>In default language, only website tips is in chinese. Other contents is in default language of datapacks respectively.</p>
+    <p>(Note: translation is done by machine, may not be accurate. If you want to modifty, see <span>Github - docs/administer.md#correction</span>)</p>
+<h2 id="4">Style Switch</h2>
+    <p>There are some styles provided for you. (Click button to switch)</p>
+    <button onclick="change_style('normal')">Normal</button><button onclick="change_style('shadeless')">Shadeless</button><button onclick="change_style('simplified')">Simplified</button>
     <ul>
-        <li><p>普通：默认样式，通过阴影和滤镜，提供良好的视觉体验。</p></li>
-        <li><p>无阴影：删减了滤镜和阴影，提供流畅的交互体验。</p></li>
-        <li><p>精简：在无阴影的基础上，缩减了信息界面，干净简单。</p></li>
+        <li><p>Normal：Default style, with good visual performance using shaders.</p></li>
+        <li><p>Shadeless：Removes shaders and filters to reduce lags.</p></li>
+        <li><p>Simplified：Based on Shadeless, simplified some information in UI, clean and simple.</p></li>
     </ul>
-<h2 id="5">随机浏览</h2>
-    <p>您可以点击下方按钮，遁入折跃门，说不定能找到让您眼前一亮的。</p>
-    <button onclick="randomize('datapack')">折跃门 - 数据包</button><button onclick="randomize('author')">折跃门 - 作者</button><button onclick="randomize('tag')">折跃门 - 标签</button>
-<h2 id="6">API接口</h2>
-    <p>想要将数据库内容衔接到您的项目中？没问题，末地开放了API接口。</p>
-    <li id="6.0">接口规范</li>
-    <p>在数据包、作者、标签的页面url上添加GET参数"api=1"以请求api接口。api接口将返回一段json，包含了在该页面下的全部信息。</p>
-    <p>json格式，详见：<span>Github - docs/api.md</span></p>
-<h2 id="7">贡献</h2>
-    <li id="7.0">翻译</li>
-        <p>想要把网站提示或开发文档翻译到另外一种语言？详见：<span>Github - docs/translation.md</span></p>
-    <li id="7.1">纠错</li>
-        <p>所有内容的第一次翻译都是由谷歌翻译完成的，因此存在不准确的情况。如需纠错，参考：<span>Github - docs/administer.md#correction</span></p>
-    <li id="7.2">合并</li>
-        <p>如果来源不同，即使是同名的作者或数据包也是被单独呈现的，所以可能会存在多个相同数据包以及多个相同作者的尴尬情形。如需合并您在不同网站上的相同数据包，参考：<span>Github - docs/administer.md#combine</span></p>
-    <li id="7.3">授权</li>
-        <p>所有数据包默认都是未授权的，因此将会隐藏原介绍中的视频、链接等交互功能。将您的数据包授权给末地，上述功能将会开放，但您也许会损失一部分点击量。授权操作参考：<span>Github - docs/administer.md#authorize</span></p>
-    <li id="7.4">添加网站来源</li>
-        <p>希望您的个人集合被末地收录？或者想要引用一个新的数据包库？参考：<span>Github - docs/spider.md</span></p>
-    <li id="7.5">反馈</li>
-        <p>无论是想到了很棒的点子，还是遇到了棘手的难题，您都可以在<span>Github - Issues</span>下告知我。</p>
+<h2 id="5">Randomize</h2>
+    <p>You can click portal beneath to view content randomly.</p>
+    <button onclick="randomize('datapack')">Portal - Datapack</button><button onclick="randomize('author')">Portal - Author</button><button onclick="randomize('tag')">Portal - Tag</button>
+<h2 id="6">API</h2>
+    <p>The website opens an API interface to let you access it in you project.</p>
+    <li id="6.0">API Standard</li>
+    <p>Add GET parameter "api=1" to url to request API. It will respond a json string, which contains all information you need.</p>
+    <p>more detailed json format, see: <span>Github - docs/api.md</span></p>
+<h2 id="7">Contribution</h2>
+    <li id="7.0">Translation</li>
+        <p>Want to add language to this website, or translate development manual? See: <span>Github - docs/translation.md</span></p>
+    <li id="7.1">Correction</li>
+        <p>translation is done by google translate, where many may not accurate. If you want to correct，See: <span>Github - docs/administer.md#correction</span></p>
+    <li id="7.2">Combine</li>
+        <p>If the source is different, even if the names of datapacks or authors are the same, it will be seen as different individuals. Want to combine, See:<span>Github - docs/administer.md#combine</span></p>
+    <li id="7.3">Authorization</li>
+        <p>All datapack is unauthorized initially, so it will hides links, videos and other interactive contents. If you want to authorize you datapack to the website, they will be open, but might be a loss to you. See: <span>Github - docs/administer.md#authorize</span></p>
+    <li id="7.4">Add New Source</li>
+        <p>Want this website to collect your personal datapack collection? Or just want to add a new source website? See: <span>Github - docs/spider.md</span></p>
+    <li id="7.5">Feedback</li>
+        <p>Whether it comes to a great idea or a difficult problem, you can tell me in <span>Github - Issues</span>.</p>
 {{end}}
-{{define "default/guide-link"}}
-<li><a href="#1">基本板块</a></li>
+{{define "en/guide-link"}}
+<li><a href="#1">Basic</a></li>
 <ul>
-    <li><a href="#1.0">数据包</a></li>
-    <li><a href="#1.1">作者</a></li>
-    <li><a href="#1.2">标签</a></li>
+    <li><a href="#1.0">Datapack</a></li>
+    <li><a href="#1.1">Author</a></li>
+    <li><a href="#1.2">Tag</a></li>
 </ul>
-<li><a href="#2">搜索与过滤</a></li>
+<li><a href="#2">Search & Filter</a></li>
 <ul>
-    <li><a href="#2.0">普通搜索</a></li>
-    <li><a href="#2.1">精确搜索</a></li>
-    <li><a href="#2.2">过滤</a></li>
+    <li><a href="#2.0">Normal Search</a></li>
+    <li><a href="#2.1">Accurate Search</a></li>
+    <li><a href="#2.2">Filter</a></li>
 </ul>
-<li><a href="#3">切换语言</a></li>
-<li><a href="#4">切换样式</a></li>
-<li><a href="#5">随机浏览</a></li>
-<li><a href="#6">API接口</a></li>
+<li><a href="#3">Language Switch</a></li>
+<li><a href="#4">Style Switch</a></li>
+<li><a href="#5">Randomize</a></li>
+<li><a href="#6">API</a></li>
 <ul>
-    <li><a href="#6.0">接口规范</a></li>
+    <li><a href="#6.0">API Stantard</a></li>
 </ul>
-<li><a href="#7">贡献</a></li>
+<li><a href="#7">Contribution</a></li>
 <ul>
-    <li><a href="#7.0">翻译</a></li>
-    <li><a href="#7.1">纠错</a></li>
-    <li><a href="#7.2">合并</a></li>
-    <li><a href="#7.3">授权</a></li>
-    <li><a href="#7.4">添加网站来源</a></li>
-    <li><a href="#7.5">反馈</a></li>
+    <li><a href="#7.0">Translation</a></li>
+    <li><a href="#7.1">Correction</a></li>
+    <li><a href="#7.2">Combine</a></li>
+    <li><a href="#7.3">Authorization</a></li>
+    <li><a href="#7.4">Add New Source</a></li>
+    <li><a href="#7.5">Feedback</a></li>
 </ul>
 {{end}}
 
-{{define "default/about"}}
-<h1>关于</h1>
-<li id="1">免责声明</li>
+{{define "en/about"}}
+<h1>About</h1>
+<li id="1">Disclaimer</li>
 <ul style="font-size: 0.5em">
-    <li>datapack.space是一个公益非盈利搜索网站，不出于任何商业目的。</li>
-    <li>网站不包含用户系统，仅供访客匿名访问。</li>
-    <li>网站使用了1个cookie，仅与网站样式相关，不涉及访客隐私或个人信息。</li>
-    <li>网站所收集的作品仅含基本信息(已授权的作品除外)，且信息仅作传播使用，不侵犯作品本身的版权。</li>
-    <li>爬虫以游客权限，遵循数据来源站点的访问协议，合法爬取站点内的公开内容，与用户隐私及版权无关。</li>
-    <li>若访客行为违反访客当地法律并引起纷和纠造成的一切后果，访客自行承担，本站概不负责。</li>
+     <li>datapack.space is a non-profit search site for nonprofits, not for any commercial purpose. </li>
+     <li>The website does not contain user systems and is only accessible to visitors anonymously. </li>
+     <li>The website uses 1 cookie, which is only related to the style of the website and does not involve visitor privacy or personal information. </li>
+     <li>The works collected on the website only contain basic information (except for authorized works), and the information is only used for dissemination and does not infringe the copyright of the work itself. </li>
+     <li>The crawler legally crawls the public content of the site with the visitor's authority, following the access agreement of the data source site, and has nothing to do with user privacy and copyright. </li>
+     <li>If the visitor’s behavior violates the visitor’s local laws and causes disputes and disputes, the visitor shall bear the responsibility and this site will not be responsible. </li>
 </ul>
-<li id="2">开源证书</li>
-<p>项目采用<a href="https://github.com/tremblestarman/datapack.space/blob/master/LICENSE">GNU General Public License v3.0</a>开源协议，已在<a href="https://github.com/tremblestarman/datapack.space">Github</a>开源。
+<li id="2">Open Source Certificate</li>
+<p>This project adopts <a href="https://github.com/tremblestarman/datapack.space/blob/master/LICENSE">GNU General Public License v3.0</a>, and has opened in <a href="https://github.com/tremblestarman/datapack.space">Github</a>.
 </p>
 {{end}}
-{{define "default/about-link"}}
-<li><a href="#1">免责声明</a></li>
-<li><a href="#2">开源证书</a></li>
+{{define "en/about-link"}}
+<li><a href="#1">Disclaimer</a></li>
+<li><a href="#2">Open Source Certificate</a></li>
 {{end}}

@@ -10,11 +10,11 @@
             {{template "icon/triangle-arrow"}}
             </div>
             <div class="line hide" style="margin-left: 62px; width: 720px; height:28px;">
-                <label class="lab">数据包名</label><input class="search accurate" id="datapack-name" type="text" value="" onkeypress="search_datapacks_keyboard()"/>
-                <label class="lab">作者名</label><input class="search accurate" id="datapack-author" type="text" value="" onkeypress="search_datapacks_keyboard()"/>
+                <label class="lab">{{template "default/datapack_name_msg"}}</label><input class="search accurate" id="datapack-name" type="text" value="" onkeypress="search_datapacks_keyboard()"/>
+                <label class="lab">{{template "default/author_name_msg"}}</label><input class="search accurate" id="datapack-author" type="text" value="" onkeypress="search_datapacks_keyboard()"/>
             </div>
             <div class="line hide" style="margin-left: 62px; width: 720px; height:28px;">
-                <label class="lab">介绍内容</label><input class="search accurate double" id="datapack-intro" type="text" value="" onkeypress="search_datapacks_keyboard()"/>
+                <label class="lab">{{template "default/introduction_msg"}}</label><input class="search accurate double" id="datapack-intro" type="text" value="" onkeypress="search_datapacks_keyboard()"/>
             </div>
         </div>
         <link rel="stylesheet" href="/bin/css/ender-dropdown.css" type="text/css"/>

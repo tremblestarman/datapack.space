@@ -1,172 +1,175 @@
-{{define "default/website_intro_msg"}}datapack.space-全球数据包索引库{{end}}
-{{define "default/datapacks_msg"}}数据包{{end}}
-{{define "default/authors_msg"}}作者{{end}}
-{{define "default/tags_msg"}}标签{{end}}
-{{define "default/languages_msg"}}语言{{end}}
-{{define "default/guide_msg"}}向导{{end}}
-{{define "default/about_msg"}}关于{{end}}
+{{define "zh_TW/website_intro_msg"}}datapack.space (全球數據包數據庫){{end}}
+{{define "zh_TW/datapacks_msg"}}數據包{{end}}
+{{define "zh_TW/authors_msg"}}作者{{end}}
+{{define "zh_TW/tags_msg"}}標簽{{end}}
+{{define "zh_TW/languages_msg"}}語言{{end}}
+{{define "zh_TW/guide_msg"}}向導{{end}}
+{{define "zh_TW/about_msg"}}關於{{end}}
 
-{{define "default/end_crystal_msg"}}末影水晶{{end}}
-{{define "default/default"}}默认{{end}}
-{{define "default/wander_on_msg"}}开启末地漫步者{{end}}
-{{define "default/wander_off_msg"}}关闭末地漫步者{{end}}
+{{define "zh_TW/end_crystal_msg"}}末影水晶{{end}}
+{{define "zh_TW/default"}}默認{{end}}
+{{define "zh_TW/wander_on_msg"}}開啟末地漫步者{{end}}
+{{define "zh_TW/wander_off_msg"}}關閉末地漫步者{{end}}
 
-{{define "default/post_at_msg"}}发表于{{end}}
-{{define "default/update_at_msg"}}更新于{{end}}
-{{define "default/goto_link_msg"}}前往原帖{{end}}
-{{define "default/to_top_msg"}}回到顶部{{end}}
-{{define "default/related_datapacks_msg"}}相同数据包{{end}}
-{{define "default/hide_msg"}}内容被隐藏，请前往原贴查看{{end}}
-{{define "default/hide_a_msg"}}链接被隐藏，请前往原贴查看{{end}}
-{{define "default/counter_msg"}}收录署名数据包数目{{end}}
-{{define "default/last_update_msg"}}最后更新时间{{end}}
-{{define "default/counter_tag_msg"}}拥有该标签的数据包数目{{end}}
-{{define "default/language_tag"}}标签默认语言{{end}}
-{{define "default/synonymous_tag"}}同义标签{{end}}
+{{define "zh_TW/post_at_msg"}}發表於{{end}}
+{{define "zh_TW/update_at_msg"}}更新於{{end}}
+{{define "zh_TW/goto_link_msg"}}前往原帖{{end}}
+{{define "zh_TW/to_top_msg"}}回到頂部{{end}}
+{{define "zh_TW/related_datapacks_msg"}}相同數據包{{end}}
+{{define "zh_TW/hide_msg"}}內容被隱藏，請前往原貼查看{{end}}
+{{define "zh_TW/hide_a_msg"}}鏈接被隱藏，請前往原貼查看{{end}}
+{{define "zh_TW/counter_msg"}}收錄署名數據包數目{{end}}
+{{define "zh_TW/last_update_msg"}}最後更新時間{{end}}
+{{define "zh_TW/counter_tag_msg"}}擁有該標簽的數據包數目{{end}}
+{{define "zh_TW/language_tag"}}標簽默認語言{{end}}
+{{define "zh_TW/synonymous_tag"}}同義標簽{{end}}
 
-{{define "default/combo-order"}}
+{{define "zh_TW/datapack_name_msg"}}數據包名{{end}}
+{{define "zh_TW/author_name_msg"}}作者名{{end}}
+{{define "zh_TW//introduction_msg"}}介紹內容{{end}}
+{{define "zh_TW/combo-order"}}
 <select class="select-menu" id="order" data-menu>
-    <option value="0">最近发布</option>
-    <option value="1">发布时间倒序</option>
+    <option value="0">最近發布</option>
+    <option value="1">發布時間倒序</option>
     <option value="2">最近更新</option>
-    <option value="3">更新时间倒序</option>
-    <option value="4">按名称排序</option>
+    <option value="3">更新時間倒序</option>
+    <option value="4">按名稱排序</option>
 </select>
 {{end}}
-{{define "default/combo-filter-post-time"}}
+{{define "zh_TW/combo-filter-post-time"}}
 <select id="filter-post-time" data-menu>
     <option value="0">-</option>
-    <option value="1">今天发布</option>
-    <option value="2">三日内发布</option>
-    <option value="3">一周内发布</option>
-    <option value="4">一月内发布</option>
-    <option value="5">这个月发布</option>
-    <option value="6">今年发布</option>
+    <option value="1">今天發布</option>
+    <option value="2">三日內發布</option>
+    <option value="3">壹周內發布</option>
+    <option value="4">壹月內發布</option>
+    <option value="5">這個月發布</option>
+    <option value="6">今年發布</option>
 </select>
 {{end}}
-{{define "default/combo-filter-update-time"}}
+{{define "zh_TW/combo-filter-update-time"}}
 <select id="filter-update-time" data-menu>
     <option value="0">-</option>
     <option value="1">今天更新</option>
-    <option value="2">三日内更新</option>
-    <option value="3">一周内更新</option>
-    <option value="4">一月内更新</option>
-    <option value="5">这个月更新</option>
+    <option value="2">三日內更新</option>
+    <option value="3">壹周內更新</option>
+    <option value="4">壹月內更新</option>
+    <option value="5">這個月更新</option>
     <option value="6">今年更新</option>
 </select>
 {{end}}
 
-{{define "default/guide"}}
-<h1 id="0">向导</h1>
-<p class="welcome">欢迎来到datapack.space。这里几乎汇集了全球所有的Minecraft数据包作品，并且作为一个搜索网站提供数据包搜索服务。</p>
-<p>网站采用末路之地风格，旨在将用户的交互过程形象化地与对末地的探索过程相结合，从而提高用户的浏览与交互体验。</p>
-<h2 id="1">基本板块</h2>
-    <p>众所周知，末地有诸多岛屿，这里也是如此。接下来为您介绍本网站的基本板块。</p>
-    <li id="1.0">数据包</li>
-        <p>这是本网站的主体部分，为数据包相关内容提供展示、搜索服务。</p>
-        <p>"末地城"——"数据包"主页面罗列了所有数据包，并且只显示数据包的基本信息和简介。如果您想要查看某个数据包的具体内容，可以点击它的"标题"或者封面上的"末影珍珠"前往该数据包的主页。</p>
-        <p>只有被授权的数据包的具体内容是完整的，<strong>否则其中的链接、视频等交互内容将被隐藏，下载数据包也需要前往原贴下载。</strong></p>
-        <p>想要快速地搜索数据包而不是漫无目的地翻找？借助<strong>"普通搜索"、"精确搜索"和"过滤"的功能</strong>，您肯定能找到您想要的。</p>
+{{define "zh_TW/guide"}}
+<h1 id="0">向導</h1>
+<p class="welcome">歡迎來到datapack.space。這裏幾乎匯集了全球所有的Minecraft數據包作品，並且作為壹個搜索網站提供數據包搜索服務。</p>
+<p>網站采用末路之地風格，旨在將用戶的交互過程形象化地與對末地的探索過程相結合，從而提高用戶的瀏覽與交互體驗。</p>
+<h2 id="1">基本板塊</h2>
+    <p>眾所周知，末地有諸多島嶼，這裏也是如此。接下來為您介紹本網站的基本板塊。</p>
+    <li id="1.0">數據包</li>
+        <p>這是本網站的主體部分，為數據包相關內容提供展示、搜索服務。</p>
+        <p>"末地城"——"數據包"主頁面羅列了所有數據包，並且只顯示數據包的基本信息和簡介。如果您想要查看某個數據包的具體內容，可以點擊它的"標題"或者封面上的"末影珍珠"前往該數據包的主頁。</p>
+        <p>只有被授權的數據包的具體內容是完整的，<strong>否則其中的鏈接、視頻等交互內容將被隱藏，下載數據包也需要前往原貼下載。</strong></p>
+        <p>想要快速地搜索數據包而不是漫無目的地翻找？借助<strong>"普通搜索"、"精確搜索"和"過濾"的功能</strong>，您肯定能找到您想要的。</p>
     <li id="1.1">作者</li>
-        <p>这是本网站的辅助内容，只是展示作者的昵称、头像与其创作的数据包，不涉及作者其他信息。</p>
-        <p>"末地主岛"——"作者"页面罗列了所有作者。如果您想要查看某位作者的相关内容，可以点击其头像或名字进入他/她的主页。</p>
-    <li id="1.2">标签</li>
-        <p>所有数据包都包含四类标签：来源、版本、分类、关键词。这四类标签以不同颜色展示。</p>
-        <p>蓝色的"来源"和绿色的"版本"为数据包的基本信息，青色的"分类"是数据包作者自己定义的分类，紫色的"关键词"由数据包的介绍总结。</p>
-        <p>"紫颂藤"——"标签"页面罗列了所有标签，按照标签被引用的次数排序。如果您想要查看某个标签的相关内容，可以点击标签进入其主页。</p>
-        <p>标签主页包含了标签的统计信息、所有该标签下的的数据包。如果您设置了网站语言，主页还可能将呈现该语言下的同义标签。</p>
-<h2 id="2">搜索与过滤</h2>
-    <div style="--background: rgba(72,48,72,0.5); transform: scale(0.75); float: left">{{template "icon/option"}}</div><p>点击如左图所示的按钮后展开"搜索与过滤"选项。</p>
+        <p>這是本網站的輔助內容，只是展示作者的昵稱、頭像與其創作的數據包，不涉及作者其他信息。</p>
+        <p>"末地主島"——"作者"頁面羅列了所有作者。如果您想要查看某位作者的相關內容，可以點擊其頭像或名字進入他/她的主頁。</p>
+    <li id="1.2">標簽</li>
+        <p>所有數據包都包含四類標簽：來源、版本、分類、關鍵詞。這四類標簽以不同顏色展示。</p>
+        <p>藍色的"來源"和綠色的"版本"為數據包的基本信息，青色的"分類"是數據包作者自己定義的分類，紫色的"關鍵詞"由數據包的介紹總結。</p>
+        <p>"紫頌藤"——"標簽"頁面羅列了所有標簽，按照標簽被引用的次數排序。如果您想要查看某個標簽的相關內容，可以點擊標簽進入其主頁。</p>
+        <p>標簽主頁包含了標簽的統計信息、所有該標簽下的的數據包。如果您設置了網站語言，主頁還可能將呈現該語言下的同義標簽。</p>
+<h2 id="2">搜索與過濾</h2>
+    <div style="--background: rgba(72,48,72,0.5); transform: scale(0.75); float: left">{{template "icon/option"}}</div><p>點擊如左圖所示的按鈕後展開"搜索與過濾"選項。</p>
     <li id="2.0">普通搜索</li>
-        <p>基于关键词的查全搜索。可以输入一个关键词或者一句话，搜索结果将按照其中关键词出现的次数降序排列。</p>
-        <p>搜索范围为网站语言下(如果您没设置网站语言，则以数据包的原始信息为准)数据包的名称、数据包的简介、数据包的标签；在搜索"作者"或"标签"，搜索范围仅为其名称，且为向后无限截词。</p>
-    <li id="2.1">精确搜索</li>
-        <p>基于关键词的查准搜索，搜索结果保证输入内容一定在字段内。</p>
-        <p>只适用于数据包搜索。搜索范围可以是数据包的名称、数据包的作者名字、数据包的介绍。其中作者名字为向后无限截词。</p>
-    <li id="2.2">过滤</li>
-        <p>包含五个下拉框。只适用于数据包过滤。</p>
-        <p>第一个下拉框用于选择结果的排列顺序，默认为最近发布（从最近发布到最早发布）。随后的四个下拉框分别用于筛选来源、版本、发布时间、更新时间。</p>
-<h2 id="3">切换语言</h2>
-    <p>在"语言"页面切换语言。翻译仅适用于网站提示、数据包名、数据包简介、标签等。</p>
-    <p>在"默认语言"下，除了网站提示是简体中文的，其他内容将直接显示数据包原始信息。</p>
-    <p>(需要注意，翻译默认为机翻，不一定准确。如需修改，查看 <span>贡献 - 纠错</span>)</p>
-<h2 id="4">切换样式</h2>
-    <p>末地为您提供了以下几种样式。（点击按钮切换风格）</p>
-    <button onclick="change_style('normal')">普通</button><button onclick="change_style('shadeless')">无阴影</button><button onclick="change_style('simplified')">精简</button>
+        <p>基於關鍵詞的查全搜索。可以輸入壹個關鍵詞或者壹句話，搜索結果將按照其中關鍵詞出現的次數降序排列。</p>
+        <p>搜索範圍為網站語言下(如果您沒設置網站語言，則以數據包的原始信息為準)數據包的名稱、數據包的簡介、數據包的標簽；在搜索"作者"或"標簽"，搜索範圍僅為其名稱，且為向後無限截詞。</p>
+    <li id="2.1">精確搜索</li>
+        <p>基於關鍵詞的查準搜索，搜索結果保證輸入內容壹定在字段內。</p>
+        <p>只適用於數據包搜索。搜索範圍可以是數據包的名稱、數據包的作者名字、數據包的介紹。其中作者名字為向後無限截詞。</p>
+    <li id="2.2">過濾</li>
+        <p>包含五個下拉框。只適用於數據包過濾。</p>
+        <p>第壹個下拉框用於選擇結果的排列順序，默認為最近發布（從最近發布到最早發布）。隨後的四個下拉框分別用於篩選來源、版本、發布時間、更新時間。</p>
+<h2 id="3">切換語言</h2>
+    <p>在"語言"頁面切換語言。翻譯僅適用於網站提示、數據包名、數據包簡介、標簽等。</p>
+    <p>在"默認語言"下，除了網站提示是簡體中文的，其他內容將直接顯示數據包原始信息。</p>
+    <p>(需要註意，翻譯默認為機翻，不壹定準確。如需修改，查看 <span>貢獻 - 糾錯</span>)</p>
+<h2 id="4">切換樣式</h2>
+    <p>末地為您提供了以下幾種樣式。（點擊按鈕切換風格）</p>
+    <button onclick="change_style('normal')">普通</button><button onclick="change_style('shadeless')">無陰影</button><button onclick="change_style('simplified')">精簡</button>
     <ul>
-        <li><p>普通：默认样式，通过阴影和滤镜，提供良好的视觉体验。</p></li>
-        <li><p>无阴影：删减了滤镜和阴影，提供流畅的交互体验。</p></li>
-        <li><p>精简：在无阴影的基础上，缩减了信息界面，干净简单。</p></li>
+        <li><p>普通：默認樣式，通過陰影和濾鏡，提供良好的視覺體驗。</p></li>
+        <li><p>無陰影：刪減了濾鏡和陰影，提供流暢的交互體驗。</p></li>
+        <li><p>精簡：在無陰影的基礎上，縮減了信息界面，幹凈簡單。</p></li>
     </ul>
-<h2 id="5">随机浏览</h2>
-    <p>您可以点击下方按钮，遁入折跃门，说不定能找到让您眼前一亮的。</p>
-    <button onclick="randomize('datapack')">折跃门 - 数据包</button><button onclick="randomize('author')">折跃门 - 作者</button><button onclick="randomize('tag')">折跃门 - 标签</button>
+<h2 id="5">隨機瀏覽</h2>
+    <p>您可以點擊下方按鈕，遁入折躍門，說不定能找到讓您眼前壹亮的。</p>
+    <button onclick="randomize('datapack')">折躍門 - 數據包</button><button onclick="randomize('author')">折躍門 - 作者</button><button onclick="randomize('tag')">折躍門 - 標簽</button>
 <h2 id="6">API接口</h2>
-    <p>想要将数据库内容衔接到您的项目中？没问题，末地开放了API接口。</p>
-    <li id="6.0">接口规范</li>
-    <p>在数据包、作者、标签的页面url上添加GET参数"api=1"以请求api接口。api接口将返回一段json，包含了在该页面下的全部信息。</p>
-    <p>json格式，详见：<span>Github - docs/api.md</span></p>
-<h2 id="7">贡献</h2>
-    <li id="7.0">翻译</li>
-        <p>想要把网站提示或开发文档翻译到另外一种语言？详见：<span>Github - docs/translation.md</span></p>
-    <li id="7.1">纠错</li>
-        <p>所有内容的第一次翻译都是由谷歌翻译完成的，因此存在不准确的情况。如需纠错，参考：<span>Github - docs/administer.md#correction</span></p>
-    <li id="7.2">合并</li>
-        <p>如果来源不同，即使是同名的作者或数据包也是被单独呈现的，所以可能会存在多个相同数据包以及多个相同作者的尴尬情形。如需合并您在不同网站上的相同数据包，参考：<span>Github - docs/administer.md#combine</span></p>
-    <li id="7.3">授权</li>
-        <p>所有数据包默认都是未授权的，因此将会隐藏原介绍中的视频、链接等交互功能。将您的数据包授权给末地，上述功能将会开放，但您也许会损失一部分点击量。授权操作参考：<span>Github - docs/administer.md#authorize</span></p>
-    <li id="7.4">添加网站来源</li>
-        <p>希望您的个人集合被末地收录？或者想要引用一个新的数据包库？参考：<span>Github - docs/spider.md</span></p>
-    <li id="7.5">反馈</li>
-        <p>无论是想到了很棒的点子，还是遇到了棘手的难题，您都可以在<span>Github - Issues</span>下告知我。</p>
+    <p>想要將數據庫內容銜接到您的項目中？沒問題，末地開放了API接口。</p>
+    <li id="6.0">接口規範</li>
+    <p>在數據包、作者、標簽的頁面url上添加GET參數"api=1"以請求api接口。api接口將返回壹段json，包含了在該頁面下的全部信息。</p>
+    <p>json格式，詳見：<span>Github - docs/api.md</span></p>
+<h2 id="7">貢獻</h2>
+    <li id="7.0">翻譯</li>
+        <p>想要把網站提示或開發文檔翻譯到另外壹種語言？詳見：<span>Github - docs/translation.md</span></p>
+    <li id="7.1">糾錯</li>
+        <p>所有內容的第壹次翻譯都是由谷歌翻譯完成的，因此存在不準確的情況。如需糾錯，參考：<span>Github - docs/administer.md#correction</span></p>
+    <li id="7.2">合並</li>
+        <p>如果來源不同，即使是同名的作者或數據包也是被單獨呈現的，所以可能會存在多個相同數據包以及多個相同作者的尷尬情形。如需合並您在不同網站上的相同數據包，參考：<span>Github - docs/administer.md#combine</span></p>
+    <li id="7.3">授權</li>
+        <p>所有數據包默認都是未授權的，因此將會隱藏原介紹中的視頻、鏈接等交互功能。將您的數據包授權給末地，上述功能將會開放，但您也許會損失壹部分點擊量。授權操作參考：<span>Github - docs/administer.md#authorize</span></p>
+    <li id="7.4">添加網站來源</li>
+        <p>希望您的個人集合被末地收錄？或者想要引用壹個新的數據包庫？參考：<span>Github - docs/spider.md</span></p>
+    <li id="7.5">反饋</li>
+        <p>無論是想到了很棒的點子，還是遇到了棘手的難題，您都可以在<span>Github - Issues</span>下告知我。</p>
 {{end}}
-{{define "default/guide-link"}}
-<li><a href="#1">基本板块</a></li>
+{{define "zh_TW/guide-link"}}
+<li><a href="#1">基本板塊</a></li>
 <ul>
-    <li><a href="#1.0">数据包</a></li>
+    <li><a href="#1.0">數據包</a></li>
     <li><a href="#1.1">作者</a></li>
-    <li><a href="#1.2">标签</a></li>
+    <li><a href="#1.2">標簽</a></li>
 </ul>
-<li><a href="#2">搜索与过滤</a></li>
+<li><a href="#2">搜索與過濾</a></li>
 <ul>
     <li><a href="#2.0">普通搜索</a></li>
-    <li><a href="#2.1">精确搜索</a></li>
-    <li><a href="#2.2">过滤</a></li>
+    <li><a href="#2.1">精確搜索</a></li>
+    <li><a href="#2.2">過濾</a></li>
 </ul>
-<li><a href="#3">切换语言</a></li>
-<li><a href="#4">切换样式</a></li>
-<li><a href="#5">随机浏览</a></li>
+<li><a href="#3">切換語言</a></li>
+<li><a href="#4">切換樣式</a></li>
+<li><a href="#5">隨機瀏覽</a></li>
 <li><a href="#6">API接口</a></li>
 <ul>
-    <li><a href="#6.0">接口规范</a></li>
+    <li><a href="#6.0">接口規範</a></li>
 </ul>
-<li><a href="#7">贡献</a></li>
+<li><a href="#7">貢獻</a></li>
 <ul>
-    <li><a href="#7.0">翻译</a></li>
-    <li><a href="#7.1">纠错</a></li>
-    <li><a href="#7.2">合并</a></li>
-    <li><a href="#7.3">授权</a></li>
-    <li><a href="#7.4">添加网站来源</a></li>
-    <li><a href="#7.5">反馈</a></li>
+    <li><a href="#7.0">翻譯</a></li>
+    <li><a href="#7.1">糾錯</a></li>
+    <li><a href="#7.2">合並</a></li>
+    <li><a href="#7.3">授權</a></li>
+    <li><a href="#7.4">添加網站來源</a></li>
+    <li><a href="#7.5">反饋</a></li>
 </ul>
 {{end}}
 
-{{define "default/about"}}
-<h1>关于</h1>
-<li id="1">免责声明</li>
+{{define "zh_TW/about"}}
+<h1>關於</h1>
+<li id="1">免責聲明</li>
 <ul style="font-size: 0.5em">
-    <li>datapack.space是一个公益非盈利搜索网站，不出于任何商业目的。</li>
-    <li>网站不包含用户系统，仅供访客匿名访问。</li>
-    <li>网站使用了1个cookie，仅与网站样式相关，不涉及访客隐私或个人信息。</li>
-    <li>网站所收集的作品仅含基本信息(已授权的作品除外)，且信息仅作传播使用，不侵犯作品本身的版权。</li>
-    <li>爬虫以游客权限，遵循数据来源站点的访问协议，合法爬取站点内的公开内容，与用户隐私及版权无关。</li>
-    <li>若访客行为违反访客当地法律并引起纷和纠造成的一切后果，访客自行承担，本站概不负责。</li>
+    <li>datapack.space是壹個公益非盈利搜索網站，不出於任何商業目的。</li>
+    <li>網站不包含用戶系統，僅供訪客匿名訪問。</li>
+    <li>網站使用了1個cookie，僅與網站樣式相關，不涉及訪客隱私或個人信息。</li>
+    <li>網站所收集的作品僅含基本信息(已授權的作品除外)，且信息僅作傳播使用，不侵犯作品本身的版權。</li>
+    <li>爬蟲以遊客權限，遵循數據來源站點的訪問協議，合法爬取站點內的公開內容，與用戶隱私及版權無關。</li>
+    <li>若訪客行為違反訪客當地法律並引起紛和糾造成的壹切後果，訪客自行承擔，本站概不負責。</li>
 </ul>
-<li id="2">开源证书</li>
-<p>项目采用<a href="https://github.com/tremblestarman/datapack.space/blob/master/LICENSE">GNU General Public License v3.0</a>开源协议，已在<a href="https://github.com/tremblestarman/datapack.space">Github</a>开源。
+<li id="2">開源證書</li>
+<p>項目采用<a href="https://github.com/tremblestarman/datapack.space/blob/master/LICENSE">GNU General Public License v3.0</a>開源協議，已在<a href="https://github.com/tremblestarman/datapack.space">Github</a>開源。
 </p>
 {{end}}
-{{define "default/about-link"}}
-<li><a href="#1">免责声明</a></li>
-<li><a href="#2">开源证书</a></li>
+{{define "zh_TW/about-link"}}
+<li><a href="#1">免責聲明</a></li>
+<li><a href="#2">開源證書</a></li>
 {{end}}

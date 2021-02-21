@@ -1,3 +1,3 @@
-# The-End-of-Datapack
+# datapack.space
 
 `Working in progress` `Publish soon`
