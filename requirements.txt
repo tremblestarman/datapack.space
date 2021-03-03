@@ -1,8 +1,9 @@
-bs4==0.0.1
+bs4
 cryptography==3.3.2
-emoji==1.2.0
+emoji
 func-timeout==4.3.5
-jieba==0.42.1
+jieba
+textrank4zh
 lxml==4.6.2
 PyMySQL==1.0.2
 PyVirtualDisplay==2.0

@@ -6,7 +6,7 @@ do
 
   # run spider
   echo porter run at $(date +"%Y-%m-%d %T").
-  /usr/local/bin/python3 -u "$parent_path"/__porter__.py >"$parent_path"/porter.log 2>&1
+  python3 -u "$parent_path"/__porter__.py >"$parent_path"/porter.log 2>&1
 
   # quit & kill all related process
   echo quit at $(date +"%Y-%m-%d %T").

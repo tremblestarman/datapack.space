@@ -6,7 +6,7 @@ do
 
   # run spider
   echo spider run at $(date +"%Y-%m-%d %T").
-  xvfb-run /usr/local/bin/python3 -u "$parent_path"/__spider__.py >"$parent_path"/spider.log 2>&1
+  xvfb-run python3 -u "$parent_path"/__spider__.py >"$parent_path"/spider.log 2>&1
 
   # quit & kill all related process
   echo quit at $(date +"%Y-%m-%d %T").

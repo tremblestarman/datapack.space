@@ -5,6 +5,8 @@ from urllib.parse import urlparse
 from time import sleep
 from util.translate import translate
 from util.err import logger
+from func_timeout.exceptions import FunctionTimedOut
+from func_timeout import func_set_timeout
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 socket.setdefaulttimeout(30)
 class porter(threading.Thread): # porter base structure
