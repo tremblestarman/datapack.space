@@ -217,7 +217,7 @@ class datapack_collector:
                 - dict is the schema to be followed. (html-structure-like dict)
                 - int is the index to be selected.
         '''
-        if target == None:
+        if target is None:
             return None
         _attrs = {}
         _loc = ''
@@ -228,12 +228,12 @@ class datapack_collector:
                 _loc = v
             else:
                 _attrs[k] = re.compile(str(v))
-        if not _loc == '': # found
+        if _loc != '': # found
             def result(t):
-                if t == None:
+                if t is None:
                     return ''
                 elif _loc == '.':
-                    if t.string == None:
+                    if t.string is None:
                         return str(t)
                     else:
                         return str(t.string)
@@ -268,6 +268,7 @@ class datapack_collector:
                     elif type(_) == list:
                         back += _
                 return back
+        return []
     def __trim(self, post: dict):
         '''
         Use schema to trim results.
@@ -283,7 +284,7 @@ class datapack_collector:
                 continue
             if not type(v) == dict:
                 continue
-            if post[k] == None:
+            if post[k] is None:
                 post[k] = ''
             for n, p in v.items():
                 if 'replace' in n: # replace fields
@@ -342,12 +343,11 @@ class datapack_collector:
                 break
             _next = self.__setnext__(_schem[0], _schem[1])
             target_pool = [i for i in self.__search(bs, _next) if not i in ['', None]]
-            if not target_pool == None and not target_pool.__len__() == 0 and not (self.post_pool.__len__() > 0 and set(target_pool) <= set(self.post_pool)):
+            if not target_pool is None and not target_pool.__len__() == 0 and not (self.post_pool.__len__() > 0 and set(target_pool) <= set(self.post_pool)):
                 self.post_pool = list(set(self.post_pool) | set(target_pool))
                 print(page, ':', 'done.', 'got', target_pool.__len__(), 'elements.')
                 return True
-            else:
-                return False
+            return False
         if 'type' not in self.schema['scan'] or self.schema['scan']['type'] == 'normal':
             def normal_start():
                 page = 0 if 'page_start' not in self.schema['scan'] else self.schema['scan']['page_start']
@@ -472,7 +472,7 @@ class datapack_collector:
                 domain url. None if content is a html string.
         '''
         post = {}
-        if domain == None:
+        if domain is None:
             post['link'] = domain + '#' + post['name'].replace(' ', '_')
             bs = BeautifulSoup(content, 'lxml')
         else:
@@ -622,7 +622,7 @@ class datapack_collector:
             if len(k) > 2 and k[:2] == '$.':
                 li.append(k)
         for k, v in post.items():
-            if v == None:
+            if v is None:
                 pass
             elif type(v) == str:
                 post[k] = v.strip()

@@ -39,21 +39,21 @@ class datapack_cache:
         # preload
         self.cur.execute('select id from datapacks;')
         res = self.cur.fetchall()
-        self.datapack_removal_list = set([j for i in res for j in i] if not res == None else [])
+        self.datapack_removal_list = set([j for i in res for j in i] if not res is None else [])
         self.cur.execute('select id from authors;')
         res = self.cur.fetchall()
-        self.author_removal_list = set([j for i in res for j in i] if not res == None else [])
+        self.author_removal_list = set([j for i in res for j in i] if not res is None else [])
         self.cur.execute('select id from tags;')
         res = self.cur.fetchall()
-        self.tag_removal_list = set([j for i in res for j in i] if not res == None else [])
+        self.tag_removal_list = set([j for i in res for j in i] if not res is None else [])
     def _exist_id(self, table: str, id: str):
-        self.cur.execute(f"select id from {table} where id = '{id}';")
+        self.cur.execute(escape_string(f"select id from {table} where id = '{id}';"))
         res = self.cur.fetchall()
-        return not res == None and not res == ()
+        return not res is None and not res == ()
     def _changed(self, table: str, id: str, column: str, compare):
-        self.cur.execute(f"select {column} from {table} where id = '{id}' and {column} = {self.__set_right_exp__(compare)};")
+        self.cur.execute(escape_string(f"select {column} from {table} where id = '{id}' and {column} = {self.__set_right_exp__(compare)};"))
         res = self.cur.fetchall()
-        return res == None or res == ()
+        return res is None or res == ()
     def __set_right_exp__(self, value):
         if type(value) == int or type(value) == float:
             return str(value)
@@ -95,9 +95,9 @@ class datapack_cache:
             res_dict['status'] = '*'
         else:
             return None, '' # no operation
-        if not callback == None:
+        if not callback is None:
             callback(res_dict)
-        if res_dict == None or len(res_dict.items()) == 0: # after callback, becomes empty
+        if res_dict is None or len(res_dict.items()) == 0: # after callback, becomes empty
             return None, '' # no operation
         return f'''
         insert into {table}({','.join([i for i, _ in res_dict.items()])}) values({','.join([self.__set_right_exp__(i) for _, i in res_dict.items()])}) 
@@ -105,9 +105,9 @@ class datapack_cache:
         update {','.join([f"{k} = {self.__set_right_exp__(v)}" for k, v in res_dict.items()])};
         ''', res_dict['status']
     def _check_datapack_auth(self, did: str, aid: str):
-        self.cur.execute(f"select id from authorizations where id = '{did}' and type = 'datapack' union select id from authorizations where id = '{aid}' and type = 'author';")
+        self.cur.execute(escape_string(f"select id from authorizations where id = '{did}' and type = 'datapack' union select id from authorizations where id = '{aid}' and type = 'author';"))
         res = self.cur.fetchall()
-        return not res == None and not res == ()
+        return not res is None and not res == ()
 
     def cache_author(self, uid: str, name: str, avatar: str):
         '''
@@ -122,8 +122,8 @@ class datapack_cache:
             'author_name': escape_string(name),
             'avatar': escape_string(avatar)
         })
-        if not sql == None:
-            self.cur.execute(sql) # insert into cache
+        if not sql is None:
+            self.cur.execute(escape_string(sql)) # insert into cache
         return aid
     def cache_tag(self, tag: str, lang: str, lang_id: str, tag_type: str):
         '''
@@ -136,9 +136,9 @@ class datapack_cache:
             if not 'type' in res_dict:
                 return
             # if type is changed but is greater than the previous, then keep the previous
-            self.cur.execute(f"select type from tags where id = '{tid}' and type < {res_dict['type']};")
+            self.cur.execute(escape_string(f"select type from tags where id = '{tid}' and type < {res_dict['type']};"))
             res = self.cur.fetchall()
-            if not res == None and not res == ():
+            if not res is None and not res == ():
                 del res_dict['type']
         sql, _ = self._cache_insert('tags_cache', tid, {
             'default_tag': escape_string(tag)
@@ -147,8 +147,8 @@ class datapack_cache:
             'default_lang_id': escape_string(lang_id),
             'type': tag_type
         }, verify_type)
-        if not sql == None:
-            self.cur.execute(sql) # insert into cache
+        if not sql is None:
+            self.cur.execute(escape_string(sql)) # insert into cache
         return tid
     def cache_img(self, local_url: str, web_url: str, status: str):
         '''
@@ -195,32 +195,32 @@ class datapack_cache:
             'default_lang': escape_string(lang),
             'default_lang_id': escape_string(lang_id),
             'default_name': escape_string(info['default_name']),
-            'default_intro': '-' if intro == None or intro == '' else intro,
+            'default_intro': '-' if intro is None or intro == '' else intro,
             'author_id': aid,
             # content is related to authorization
             'full_content': escape_string(info['content_full'] if self._check_datapack_auth(did, aid) else info['content_raw']),
         }, set_update_time)
-        if not sql == None:
-            self.cur.execute(sql) # insert into cache
+        if not sql is None:
+            self.cur.execute(escape_string(sql)) # insert into cache
         # cache datapack-tag relation
-        self.cur.execute(f"select tag_id from datapack_tags where datapack_id = '{did}';")
+        self.cur.execute(escape_string(f"select tag_id from datapack_tags where datapack_id = '{did}';"))
         res = self.cur.fetchall()
-        tag_id_old = set([i[0] for i in res] if not res == None and len(res) > 0 else [])
+        tag_id_old = set([i[0] for i in res] if not res is None and len(res) > 0 else [])
         for tid in tag_id:
             if tid not in tag_id_old: # new relation
-                self.cur.execute(f'''
+                self.cur.execute(escape_string(f'''
                 insert into datapack_tag_relations_cache (datapack_id, tag_id, status) values ('{did}', '{tid}', '+') 
                 on duplicate key 
                 update datapack_id = '{did}', tag_id = '{tid}', status = '+';
-                ''')
+                '''))
             if tid in tag_id_old:
                 tag_id_old.remove(tid)
         for tid in tag_id_old: # delete relation
-            self.cur.execute(f'''
+            self.cur.execute(escape_string(f'''
             insert into datapack_tag_relations_cache (datapack_id, tag_id, status) values ('{did}', '{tid}', '-') 
             on duplicate key 
             update datapack_id = '{did}', tag_id = '{tid}', status = '-';
-            ''')
+            '''))
         # cache image
         if not info['author_avatar'] in [None, 'auto', 'none', '']:
             self.cache_img(f"author/{aid}.png", info['author_avatar'], '+')
@@ -253,17 +253,17 @@ class datapack_cache:
         def delete_process():
             # delete tag
             for tid in self.tag_removal_list:
-                self.cur.execute(f"insert into tags_cache(id, status) values('{tid}', '-') on duplicate key update status = '-';") # remove tag
-                self.cur.execute(f"insert into datapack_tag_relations_cache(tag_id, status) values('{tid}', '-') on duplicate key update status = '-';") # remove tag relation
+                self.cur.execute(escape_string(f"insert into tags_cache(id, status) values('{tid}', '-') on duplicate key update status = '-';")) # remove tag
+                self.cur.execute(escape_string(f"insert into datapack_tag_relations_cache(tag_id, status) values('{tid}', '-') on duplicate key update status = '-';")) # remove tag relation
             # delete author
             for aid in self.author_removal_list:
-                self.cur.execute(f"insert into authors_cache(id, status) values('{aid}', '-') on duplicate key update status = '-';") # remove author
-                self.cur.execute(f"insert into images_cache(local_url, status) values('{f'author/{aid}.png'}', '-') on duplicate key update status = '-';") # remove author's avatar
+                self.cur.execute(escape_string(f"insert into authors_cache(id, status) values('{aid}', '-') on duplicate key update status = '-';"))# remove author
+                self.cur.execute(escape_string(f"insert into images_cache(local_url, status) values('{f'author/{aid}.png'}', '-') on duplicate key update status = '-';")) # remove author's avatar
             # delete datapack
             for did in self.datapack_removal_list:
-                self.cur.execute(f"insert into datapacks_cache(id, status) values('{did}', '-') on duplicate key update status = '-';") # remove datapack
-                self.cur.execute(f"insert into datapack_tag_relations_cache(datapack_id, status) values('{did}', '-') on duplicate key update status = '-';") # remove datapack relation
-                self.cur.execute(f"insert into images_cache(local_url, status) values('{f'cover/{did}.png'}', '-') on duplicate key update status = '-';") # remove datapack's cover
+                self.cur.execute(escape_string(f"insert into datapacks_cache(id, status) values('{did}', '-') on duplicate key update status = '-';")) # remove datapack
+                self.cur.execute(escape_string(f"insert into datapack_tag_relations_cache(datapack_id, status) values('{did}', '-') on duplicate key update status = '-';")) # remove datapack relation
+                self.cur.execute(escape_string(f"insert into images_cache(local_url, status) values('{f'cover/{did}.png'}', '-') on duplicate key update status = '-';")) # remove datapack's cover
         if interrupt: # the process will quit immediately when error occurs
             delete_process()
         else: # the process won't quit when error occurs, but retry or log the error.

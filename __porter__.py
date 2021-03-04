@@ -1,4 +1,4 @@
-import os, json
+import os, json, time
 from util.porters import resource_porter, record_porter
 BASE_DIR = os.path.dirname(os.path.abspath(__file__)) + '/util'
 with open(BASE_DIR + '/languages.json', 'r', encoding="utf-8") as f:
@@ -56,3 +56,4 @@ author_porter.join()
 tag_porter.join()
 datapack_tag_relation_porter.join()
 image_porter.join()
+time.sleep(60)

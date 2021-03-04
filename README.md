@@ -1,3 +1,5 @@
 # datapack.space
 
-`Working in progress` `Publish soon`
+A databse and search engine for all datapacks in included website globally.
+
+`Working on documents`

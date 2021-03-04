@@ -43,7 +43,7 @@ class porter(threading.Thread): # porter base structure
         def port_process(cache: dict):
             # delete all columns where value is NULL or empty
             for k in list(cache.keys()):
-                if cache[k] == None or cache[k] == '':
+                if cache[k] is None or cache[k] == '':
                     del cache[k]
             if self.interrupt: # the process will quit immediately when error occurs
                 self.port(cache)
@@ -56,10 +56,10 @@ class porter(threading.Thread): # porter base structure
                     if self.log:
                         print(f"cannot handle this problem. please check \'/util/err/port_{self.cache_table}.err\'")
                         self.LOG.log(f'port_{self.cache_table}', traceback.format_exc(), process='port')
-        self.cur.execute(f"select count(*) as cnt from {self.cache_table};")
+        self.cur.execute(escape_string(f"select count(*) as cnt from {self.cache_table};"))
         cnt = self.cur.fetchall()[0]['cnt']
         if cnt > 0: # cache table is not empty
-            self.cur.execute(f"select * from {self.cache_table};")
+            self.cur.execute(escape_string(f"select * from {self.cache_table};"))
             cache_list = self.cur.fetchall()                
             print('totally got', len(cache_list), 'caches in', self.cache_table)
             for i in range(0, len(cache_list)): # port each cache
@@ -70,13 +70,12 @@ class porter(threading.Thread): # porter base structure
             return str(value)
         elif type(value) == datetime:
             return f"'{escape_string(value.strftime('%Y-%m-%d %H:%M:%S'))}'"
-        else:
-            return f"'{escape_string(str(value))}'"
+        return f"'{escape_string(str(value))}'"
     def cache_pop(self, cache_dict: dict):
-        self.cur.execute(f'''delete from {self.cache_table} where {' and '.join([f"{k}={self.__set_right_exp__(v)}" for k, v in cache_dict.items()])};''')
+        self.cur.execute(escape_string(f'''delete from {self.cache_table} where {' and '.join([f"{k}={self.__set_right_exp__(v)}" for k, v in cache_dict.items()])};'''))
     def port(self, cache_dict: dict):
         # callback function
-        if not self.callback == None:
+        if not self.callback is None:
             self.callback(self, cache_dict)
 
 class resource_porter(porter): # resources porter
@@ -84,7 +83,7 @@ class resource_porter(porter): # resources porter
     Download cache to local file system.
     '''
     def __init__(self, cache_table: str, sleep_time=60, log=True, interrupt=False, callback=None, resource_dir='', domain_block=[], ignoreFailed=False):
-        self.resource_dir = os.path.dirname(BASE_DIR) + f"/bin" if resource_dir == None else resource_dir # set resource directory
+        self.resource_dir = os.path.dirname(BASE_DIR) + f"/bin" if resource_dir is None else resource_dir # set resource directory
         self.domain_block = domain_block # set blocked domain list
         self.ignoreFailed = ignoreFailed # ignore failed record
         porter.__init__(self, cache_table, sleep_time, log, interrupt, callback)
@@ -107,15 +106,14 @@ class resource_porter(porter): # resources porter
         if self.interrupt: # the process will quit immediately when error occurs
             download_img()
             return True
-        else: # the process won't quit when error occurs, but retry or log the error.
-            try:
-                download_img()
-                return True
-            except Exception as e:
-                print(
-                      f"- porter: resource download failed! please check \'/util/err/port_{self.cache_table}.err\'")
-                if self.log:
-                    self.LOG.log(f'port_{self.cache_table}', traceback.format_exc(), process='resource_save', local_url=local_url, web_url=web_url)
+        try:
+            download_img()
+            return True
+        except Exception as e:
+            print(
+                  f"- porter: resource download failed! please check \'/util/err/port_{self.cache_table}.err\'")
+            if self.log:
+                self.LOG.log(f'port_{self.cache_table}', traceback.format_exc(), process='resource_save', local_url=local_url, web_url=web_url)
         if self.ignoreFailed:
             return True
         return False
@@ -129,15 +127,13 @@ class resource_porter(porter): # resources porter
         if self.interrupt:
             delete_img()
             return True
-        else:
-            try:
-                delete_img()
-                return True
-            except Exception as e:
-                print(f"- porter: resource delete failed! please check \'/util/err/port_{self.cache_table}.err\'")
-                if self.log:
-                    self.LOG.log(f'port_{self.cache_table}', traceback.format_exc(
-            ), process='resource_delete', local_url=local_url)
+        try:
+            delete_img()
+            return True
+        except Exception as e:
+            print(f"- porter: resource delete failed! please check \'/util/err/port_{self.cache_table}.err\'")
+            if self.log:
+                self.LOG.log(f'port_{self.cache_table}', traceback.format_exc(), process='resource_delete', local_url=local_url)
         return False
     def port(self, cache_dict: dict):
         # do port operation
@@ -149,7 +145,7 @@ class resource_porter(porter): # resources porter
         if success: # if operation succeed, then pop it from cache queue
             self.cache_pop(cache_dict)
         # callback function
-        if not self.callback == None:
+        if not self.callback is None:
             self.callback(self, cache_dict)
 
 class record_porter(porter):
@@ -177,11 +173,11 @@ class record_porter(porter):
         if not self.__translated_cache_dict__(cache_dict, translate_cols): # translate unsuccessfully
             return False
         # insert
-        self.cur.execute(f'''
+        self.cur.execute(escape_string(f'''
         insert into {self.target_table}({','.join([i for i, _ in cache_dict.items()])}) values({','.join([f"{self.__set_right_exp__(i)}" for _, i in cache_dict.items()])}) 
         on duplicate key 
         update {','.join([f"{k} = {self.__set_right_exp__(v)}" for k, v in cache_dict.items()])};
-        ''')
+        '''))
         return True
     def record_update(self, cache_dict: dict, translate_cols: list):
         # translate value of columns in 'translate_cols' into every language
@@ -190,17 +186,17 @@ class record_porter(porter):
         # update
         if not 'id' in cache_dict:
             return False
-        self.cur.execute(f'''update {self.target_table} set {','.join([f"{k}={self.__set_right_exp__(v)}" for k, v in cache_dict.items()])} where id = '{cache_dict['id']}';''')
+        self.cur.execute(escape_string(f'''update {self.target_table} set {','.join([f"{k}={self.__set_right_exp__(v)}" for k, v in cache_dict.items()])} where id = '{cache_dict['id']}';'''))
         return True
     def record_delete(self, cache_dict: dict):
-        self.cur.execute(f'''delete from {self.target_table} where {' and '.join([f"{k}={self.__set_right_exp__(v)}" for k, v in cache_dict.items()])};''')
+        self.cur.execute(escape_string(f'''delete from {self.target_table} where {' and '.join([f"{k}={self.__set_right_exp__(v)}" for k, v in cache_dict.items()])};'''))
         return True
     def port(self, cache_dict: dict):
         # get columns that need to be translated
         translate_cols = []
         for k in cache_dict.keys():
             reg = re.search('^default_(.*)$', k)
-            if not reg == None and not reg.groups()[0] in ['lang', 'lang_id']:
+            if not reg is None and not reg.groups()[0] in ['lang', 'lang_id']:
                 translate_cols.append(reg.groups()[0])
         # do port operation
         tmp_dict = cache_dict.copy() # to remove from cache
@@ -217,7 +213,7 @@ class record_porter(porter):
             self.cache_pop(tmp_dict)
         cache_dict['status'] = status # for callback function, recover status
         # callback function
-        if not self.callback == None:
+        if not self.callback is None:
             self.callback(self, tmp_dict)
         del tmp_dict
         del cache_dict
