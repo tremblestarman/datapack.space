@@ -56,11 +56,11 @@ class porter(threading.Thread): # porter base structure
                     if self.log:
                         print(f"cannot handle this problem. please check \'/util/err/port_{self.cache_table}.err\'")
                         self.LOG.log(f'port_{self.cache_table}', traceback.format_exc(), process='port')
-        self.cur.execute(escape_string(f"select count(*) as cnt from {self.cache_table};"))
+        self.cur.execute(f"select count(*) as cnt from {self.cache_table};")
         cnt = self.cur.fetchall()[0]['cnt']
         if cnt > 0: # cache table is not empty
-            self.cur.execute(escape_string(f"select * from {self.cache_table};"))
-            cache_list = self.cur.fetchall()                
+            self.cur.execute(f"select * from {self.cache_table};")
+            cache_list = self.cur.fetchall()
             print('totally got', len(cache_list), 'caches in', self.cache_table)
             for i in range(0, len(cache_list)): # port each cache
                 print('porting', i + 1, '/', len(cache_list), 'caches in', self.cache_table)
@@ -72,7 +72,7 @@ class porter(threading.Thread): # porter base structure
             return f"'{escape_string(value.strftime('%Y-%m-%d %H:%M:%S'))}'"
         return f"'{escape_string(str(value))}'"
     def cache_pop(self, cache_dict: dict):
-        self.cur.execute(escape_string(f'''delete from {self.cache_table} where {' and '.join([f"{k}={self.__set_right_exp__(v)}" for k, v in cache_dict.items()])};'''))
+        self.cur.execute(f'''delete from {self.cache_table} where {' and '.join([f"{k}={self.__set_right_exp__(v)}" for k, v in cache_dict.items()])};''')
     def port(self, cache_dict: dict):
         # callback function
         if not self.callback is None:
@@ -173,11 +173,11 @@ class record_porter(porter):
         if not self.__translated_cache_dict__(cache_dict, translate_cols): # translate unsuccessfully
             return False
         # insert
-        self.cur.execute(escape_string(f'''
-        insert into {self.target_table}({','.join([i for i, _ in cache_dict.items()])}) values({','.join([f"{self.__set_right_exp__(i)}" for _, i in cache_dict.items()])}) 
-        on duplicate key 
+        self.cur.execute(f'''
+        insert into {self.target_table}({','.join([i for i, _ in cache_dict.items()])}) values({','.join([f"{self.__set_right_exp__(i)}" for _, i in cache_dict.items()])})
+        on duplicate key
         update {','.join([f"{k} = {self.__set_right_exp__(v)}" for k, v in cache_dict.items()])};
-        '''))
+        ''')
         return True
     def record_update(self, cache_dict: dict, translate_cols: list):
         # translate value of columns in 'translate_cols' into every language
@@ -186,10 +186,10 @@ class record_porter(porter):
         # update
         if not 'id' in cache_dict:
             return False
-        self.cur.execute(escape_string(f'''update {self.target_table} set {','.join([f"{k}={self.__set_right_exp__(v)}" for k, v in cache_dict.items()])} where id = '{cache_dict['id']}';'''))
+        self.cur.execute(f'''update {self.target_table} set {','.join([f"{k}={self.__set_right_exp__(v)}" for k, v in cache_dict.items()])} where id = '{cache_dict['id']}';''')
         return True
     def record_delete(self, cache_dict: dict):
-        self.cur.execute(escape_string(f'''delete from {self.target_table} where {' and '.join([f"{k}={self.__set_right_exp__(v)}" for k, v in cache_dict.items()])};'''))
+        self.cur.execute(f'''delete from {self.target_table} where {' and '.join([f"{k}={self.__set_right_exp__(v)}" for k, v in cache_dict.items()])};''')
         return True
     def port(self, cache_dict: dict):
         # get columns that need to be translated
