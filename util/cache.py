@@ -113,6 +113,7 @@ class datapack_cache:
         '''
         Cache author info.
         '''
+        uid = '-' if uid == '' or uid is None else uid
         aid = str(uuid.uuid3(uuid.NAMESPACE_DNS, uid)) # generate id for author
         if aid in self.author_removal_list: # author exists, so remove it from removal_list
             self.author_removal_list.remove(aid)
@@ -229,6 +230,7 @@ class datapack_cache:
         return did
 
     def insert(self, info: dict, log=True, interrupt=False):
+        self.connection.ping(reconnect=True)
         def insert_process(info: dict):
             did = self.cache(info)
             self.connection.commit()
@@ -248,6 +250,7 @@ class datapack_cache:
                     print('cannot handle this problem. please check \'/util/err/cache.err\'')
                     self.LOG.log('cache', traceback.format_exc(), process='insert', link=info['link'])
     def delete_unexisted(self, log=True, interrupt=False):
+        self.connection.ping(reconnect=True)
         if len(self.retrying_list) > 0: # then there are datapacks to be retried, so we cannot call remove function
             print('there\'s info in retry_list has not been retried. delete function will run only when retrying list is empty.')
         def delete_process():

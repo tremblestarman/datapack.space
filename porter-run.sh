@@ -17,12 +17,16 @@ do
   cd util || exit
   ./indexer > indexer.log 2>&1
 
+  # update stats
+  python3 -u "$parent_path"/__stats__.py >/dev/null 2>&1
+
   # backup database
   cd "$parent_path"
   MYSQLPASSWORD=#PASSWORD
   mysqldump -uroot -p$MYSQLPASSWORD datapack_collection -P 3306 >"$parent_path"/datapack_collection.sql
 
   # restart
+  sleep 60
   echo restart prccess at $(date +"%Y-%m-%d %T").
   echo --------
 done

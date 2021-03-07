@@ -252,18 +252,7 @@ WEB Bugs & Features:
     - translation.md    # create new language (language.json, translation.tmpl, language.go)
     - administer.md     # admin operation (administer.go)
     - spider.md         # spider related (add new source)
-[F] Translation of website
+    √ [F] Translation of website
 [F] A secure way to authorize, combine and correct
-    |   additional related tool: email, discord, accounts in other websites.
-    |
-    |   # how to identify the author's application:
-    |   if source is a comprehensive website with functions to make a post, (like 'planetminecraft')
-    |       then firstly ask for website permission, secondly post a thread (to release),
-    |       reply in a certain format to apply for operation.
-    |   if source is a personal website,
-    |       then use discord / email to send a picture showing the website's terminal.
-    |   if source is a 3rd website (like '9minecraft')
-    |       the original author in original website has authority to operate it.
-    |       apply according to the above two situation.
-    |   to correct mistranslated content, reply in oppropriate thread, send discord message or email are all available.
+    |   provide a post channel.
     |__________________________________________________________________________________________________________________
