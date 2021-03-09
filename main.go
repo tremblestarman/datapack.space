@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"html/template"
+	"net/http"
 )
 
 func SetCookie() gin.HandlerFunc {
@@ -16,6 +17,23 @@ func SetCookie() gin.HandlerFunc {
 		c.Next()
 	}
 }
+func Cors() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		method := c.Request.Method
+		path := c.FullPath()
+		if len(path) >= 11 && path[:11] == "/bin/stats/" { // allow cors
+			c.Header("Access-Control-Allow-Origin", "*")
+			c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+			c.Header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization")
+			c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Cache-Control, Content-Language, Content-Type")
+			c.Header("Access-Control-Allow-Credentials", "true")
+		}
+		if method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusNoContent)
+		}
+		c.Next()
+	}
+}
 func main() {
 	//connect to database
 	Connect()
@@ -23,11 +41,13 @@ func main() {
 	_ = seg.LoadDict() //load dict
 	r := gin.Default()
 	r.Use(SetCookie())
+	r.Use(Cors())
 	r.SetFuncMap(template.FuncMap{
 		"unescaped": unescaped,
 	})
 	// Load Resources
 	r.Static("/bin", "./bin")
+	r.StaticFile("/favicon.ico", "./bin/icon/datapackspace.ico")
 	r.LoadHTMLGlob("templates/**/*")
 	// Router
 	r.GET("/", index)

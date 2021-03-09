@@ -11,4 +11,5 @@
 # resource
 /bin/img/author/*
 /bin/img/cover/*
+/bin/stats
 /bin/playground/

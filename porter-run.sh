@@ -18,6 +18,7 @@ do
   ./indexer > indexer.log 2>&1
 
   # update stats
+  echo updating stats at $(date +"%Y-%m-%d %T").
   python3 -u "$parent_path"/__stats__.py >/dev/null 2>&1
 
   # backup database
