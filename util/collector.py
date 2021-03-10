@@ -164,10 +164,15 @@ class datapack_collector:
     def __async_analyze(self, target_list: list, interrupt = False):
         def analyze(post):
             def _anl_():
+                post_i = {}
                 if self.schema['post_type'] == 'url':
-                    self.info_list.append(self.__post_analyze(post, self.schema['domain']))
+                    post_i = self.__post_analyze(post, self.schema['domain'])
                 else:
-                    self.info_list.append(self.__post_analyze(post))
+                    post_i = self.__post_analyze(post)
+                if not 'name' in post_i or post_i['name'] in [None, '']:  # invalid datapack
+                    print('error: datapack name cannot be null (may be 404)')
+                    return
+                self.info_list.append(post_i)
             if interrupt:
                 _anl_()
             else:

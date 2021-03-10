@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"html/template"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func SetCookie() gin.HandlerFunc {
@@ -48,6 +49,8 @@ func main() {
 	// Load Resources
 	r.Static("/bin", "./bin")
 	r.StaticFile("/favicon.ico", "./bin/icon/datapackspace.ico")
+	r.StaticFile("/sitemap.xml", "./bin/sitemap.xml")
+	r.StaticFile("/robots.txt", "./bin/robots.txt")
 	r.LoadHTMLGlob("templates/**/*")
 	// Router
 	r.GET("/", index)

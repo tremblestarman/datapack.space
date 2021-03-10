@@ -212,15 +212,15 @@ class datapack_cache:
                 self.cur.execute(f'''
                 insert into datapack_tag_relations_cache (datapack_id, tag_id, status) values ('{did}', '{tid}', '+')
                 on duplicate key
-                update datapack_id = '{did}', tag_id = '{tid}', status = '+';
+                update status = '+';
                 ''')
-            if tid in tag_id_old:
+            else:
                 tag_id_old.remove(tid)
         for tid in tag_id_old: # delete relation
             self.cur.execute(f'''
             insert into datapack_tag_relations_cache (datapack_id, tag_id, status) values ('{did}', '{tid}', '-')
             on duplicate key
-            update datapack_id = '{did}', tag_id = '{tid}', status = '-';
+            update status = '-';
             ''')
         # cache image
         if not info['author_avatar'] in [None, 'auto', 'none', '']:
@@ -235,7 +235,6 @@ class datapack_cache:
             did = self.cache(info)
             self.connection.commit()
             print(did, ':', info['link'], 'has been imported into cache successfully.')
-
         if interrupt: # the process will quit immediately when error occurs
             insert_process(info)
         else: # the process won't quit when error occurs, but retry or log the error.

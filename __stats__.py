@@ -142,7 +142,9 @@ def banner_source(info: dict):
         add_img(img, (700 - 0 - 32 + 2, y + 2), (28, 28), BASE_DIR + '/bin/img/css/datapack_default.png')
         add_text(img, (700 - 0 - 32, y), wb['datapacks'], num_color, font, align='right')
         add_text(img, (64, y + 28), 'Latest:', website_color, small_font)
+        add_text(img, (110, y + 28), wb['last_post_time'].strftime("%Y-%m-%d %H:%M:%S"), website_color, small_font)
         add_text(img, (384, y + 28), 'Updated:', website_color, small_font)
+        add_text(img, (430, y + 28), wb['last_update_time'].strftime("%Y-%m-%d %H:%M:%S"), website_color, small_font)
         def set_cover(pos, size, key):
             tmp = Image.open(BASE_DIR + '/bin/img/css/datapack_default.png')
             if os.path.exists(BASE_DIR + '/bin/img/cover/' + wb[key] + '.png'):

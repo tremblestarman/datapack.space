@@ -1,5 +1,6 @@
 # cache
 /.idea/
+/.vscode/
 /util/__pycache__/
 
 # test
@@ -11,5 +12,5 @@
 # resource
 /bin/img/author/*
 /bin/img/cover/*
-/bin/stats
+/bin/stats/
 /bin/playground/

@@ -38,10 +38,7 @@ tag_porter.start()
 def datapack_tag_relation_callback(self, cache_dict: dict):
     # no log
     # update quotation count of the tag
-    if cache_dict['status'] == '+':
-        self.cur.execute(f"update tags set quotation = quotation + 1 where id = '{cache_dict['tag_id']}';")
-    elif cache_dict['status'] == '-':
-        self.cur.execute(f"update tags set quotation = quotation - 1 where id = '{cache_dict['tag_id']}';")
+    self.cur.execute(f"update tags set tags.quotation = (select count(*) from datapack_tags where tag_id = id) where id = '{cache_dict['tag_id']}';")
 datapack_tag_relation_porter = record_porter('datapack_tag_relations_cache', 'datapack_tags', callback=datapack_tag_relation_callback)
 datapack_tag_relation_porter.start()
 
