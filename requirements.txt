@@ -10,5 +10,5 @@ PyVirtualDisplay==2.0
 requests==2.25.1
 selenium==3.141.0
 translators==4.7.13
-urllib3==1.26.3
+urllib3==1.26.4
 virtualenv==20.4.0
